@@ -12,56 +12,48 @@
     ::-webkit-scrollbar-thumb { background: #1a1b1e; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #3f4147; }
     
-    .loader {
-        border: 3px solid #f3f3f3;
-        border-top: 3px solid #5865F2;
-        border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        animation: spin 1s linear infinite;
-    }
+    .loader { border: 3px solid #f3f3f3; border-top: 3px solid #5865F2; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    .game-card:hover { transform: translateY(-5px); }
+    .game-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px -10px rgba(88, 101, 242, 0.3); }
     
-    .toast-enter { animation: toastIn 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
-    .toast-exit { animation: toastOut 0.3s ease-in forwards; }
-
-    @keyframes toastIn {
-        from { transform: translate(-50%, 50px); opacity: 0; }
-        to { transform: translate(-50%, 0); opacity: 1; }
-    }
-    @keyframes toastOut {
-        from { transform: translate(-50%, 0); opacity: 1; }
-        to { transform: translate(-50%, 50px); opacity: 0; }
-    }
-
     .arcade-bg {
         background-color: #313338;
         background-image: radial-gradient(#3f4147 1px, transparent 1px);
         background-size: 20px 20px;
     }
+    
+    /* Game Specific Styles */
+    .memory-card { perspective: 1000px; cursor: pointer; }
+    .memory-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; }
+    .memory-card.flipped .memory-inner { transform: rotateY(180deg); }
+    .memory-front, .memory-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; border-radius: 0.5rem; font-size: 1.5rem; }
+    .memory-front { background-color: #2b2d31; border: 2px solid #5865F2; }
+    .memory-back { background-color: #5865F2; transform: rotateY(180deg); color: white; }
+
+    .whack-tile { transition: background 0.1s; }
+    .whack-active { background-color: #ef4444 !important; }
 </style>
 </head>
 <body class="arcade-bg text-gray-100 font-sans antialiased h-screen flex flex-col overflow-hidden">
 
     <!-- Header -->
-    <header class="bg-[#2b2d31]/90 backdrop-blur border-b border-[#1e1f22] p-4 shadow-lg z-20 flex justify-between items-center">
+    <header class="bg-[#2b2d31]/90 backdrop-blur border-b border-[#1e1f22] p-4 shadow-lg z-20 flex justify-between items-center shrink-0">
         <div class="flex items-center gap-4">
             <button onclick="window.location.href='index.html'" class="bg-[#1e1f22] hover:bg-[#35373c] text-gray-300 px-4 py-2 rounded-lg font-bold text-sm transition flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Back to Chat
+                Exit Arcade
             </button>
-            <h1 class="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500 uppercase tracking-wider italic">Orbitly Arcade</h1>
+            <h1 class="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 uppercase tracking-wider italic hidden sm:block">Orbitly Arcade</h1>
         </div>
         
         <!-- Wallet Display -->
         <div class="flex items-center gap-4 bg-[#111214] px-4 py-2 rounded-lg border border-[#3f4147]">
             <div class="flex flex-col items-end leading-none">
-                <span class="text-[10px] text-gray-500 font-bold uppercase">Balance</span>
+                <span class="text-[10px] text-gray-500 font-bold uppercase">Insert Coin (20c)</span>
                 <div class="flex gap-3">
-                    <span class="text-yellow-500 font-mono font-bold" id="arcade-coins">0 🪙</span>
-                    <span class="text-purple-400 font-mono font-bold" id="arcade-gems">0 💎</span>
+                    <span class="text-yellow-500 font-mono font-bold" id="arcade-coins">Loading...</span>
+                    <span class="text-purple-400 font-mono font-bold" id="arcade-gems">...</span>
                 </div>
             </div>
             <img id="user-pfp" src="" class="w-8 h-8 rounded-full border border-gray-600 bg-gray-700 object-cover">
@@ -71,166 +63,153 @@
     <!-- Game Grid -->
     <div class="flex-1 overflow-y-auto p-6">
         <div class="max-w-7xl mx-auto">
-            <h2 class="text-gray-400 font-bold uppercase tracking-widest text-sm mb-4">Featured Games</h2>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 
-                <!-- Coin Flip -->
-                <div onclick="arcade.openGame('flip')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition shadow-xl hover:shadow-purple-500/20 group relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
-                    <div class="text-4xl mb-3">🪙</div>
-                    <h3 class="text-xl font-bold text-white mb-1">Coin Flip</h3>
-                    <p class="text-gray-400 text-xs mb-3">Double your money instantly. 50/50 chance.</p>
-                    <span class="bg-yellow-500/20 text-yellow-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Win 2x</span>
+                <!-- 1. Snake -->
+                <div onclick="arcade.launch('snake')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
+                    <div class="text-4xl mb-3">🐍</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Neon Snake</h3>
+                    <p class="text-gray-400 text-xs mb-3">Eat bits, get long. Don't hit the wall.</p>
+                    <span class="bg-green-500/20 text-green-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+2 Coins / Bit</span>
                 </div>
 
-                <!-- Dice Roll -->
-                <div onclick="arcade.openGame('roll')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition shadow-xl hover:shadow-blue-500/20 group relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
-                    <div class="text-4xl mb-3">🎲</div>
-                    <h3 class="text-xl font-bold text-white mb-1">Dice Roll</h3>
-                    <p class="text-gray-400 text-xs mb-3">Roll 4+ to win. Roll a 6 for big rewards.</p>
-                    <span class="bg-blue-500/20 text-blue-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Win up to 3x</span>
+                <!-- 2. Pong -->
+                <div onclick="arcade.launch('pong')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
+                    <div class="text-4xl mb-3">🏓</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Cyber Pong</h3>
+                    <p class="text-gray-400 text-xs mb-3">Defeat the AI paddle.</p>
+                    <span class="bg-blue-500/20 text-blue-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Win = 50 Coins</span>
                 </div>
 
-                <!-- Slots -->
-                <div onclick="arcade.openGame('slots')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition shadow-xl hover:shadow-pink-500/20 group relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
-                    <div class="text-4xl mb-3">🎰</div>
-                    <h3 class="text-xl font-bold text-white mb-1">Slots</h3>
-                    <p class="text-gray-400 text-xs mb-3">Spin the wheels. Match symbols to hit the jackpot.</p>
-                    <span class="bg-pink-500/20 text-pink-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Win up to 10x</span>
+                <!-- 3. Breakout -->
+                <div onclick="arcade.launch('breakout')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
+                    <div class="text-4xl mb-3">🧱</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Breakout</h3>
+                    <p class="text-gray-400 text-xs mb-3">Smash all bricks to win.</p>
+                    <span class="bg-red-500/20 text-red-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+1 Coin / Brick</span>
                 </div>
 
-                <!-- RPS -->
-                <div onclick="arcade.openGame('rps')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition shadow-xl hover:shadow-green-500/20 group relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
-                    <div class="text-4xl mb-3">✂️</div>
-                    <h3 class="text-xl font-bold text-white mb-1">Rock Paper Scissors</h3>
-                    <p class="text-gray-400 text-xs mb-3">Classic duel against the bot.</p>
-                    <span class="bg-green-500/20 text-green-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Win 2x</span>
+                <!-- 4. Space Dodge -->
+                <div onclick="arcade.launch('dodge')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
+                    <div class="text-4xl mb-3">🚀</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Space Dodge</h3>
+                    <p class="text-gray-400 text-xs mb-3">Avoid falling asteroids.</p>
+                    <span class="bg-purple-500/20 text-purple-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+1 Coin / Sec</span>
                 </div>
 
-                <!-- Guess -->
-                <div onclick="arcade.openGame('guess')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition shadow-xl hover:shadow-indigo-500/20 group relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
-                    <div class="text-4xl mb-3">🔢</div>
-                    <h3 class="text-xl font-bold text-white mb-1">Number Guess</h3>
-                    <p class="text-gray-400 text-xs mb-3">Guess the secret number between 1-10.</p>
-                    <span class="bg-indigo-500/20 text-indigo-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Win 5x</span>
+                <!-- 5. Dino Jump -->
+                <div onclick="arcade.launch('jump')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
+                    <div class="text-4xl mb-3">🦖</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Dino Jump</h3>
+                    <p class="text-gray-400 text-xs mb-3">Jump over the cacti.</p>
+                    <span class="bg-yellow-500/20 text-yellow-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+5 Coins / Jump</span>
                 </div>
 
-                <!-- All In -->
-                <div onclick="arcade.openGame('allin')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition shadow-xl hover:shadow-red-500/20 group relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
-                    <div class="text-4xl mb-3">🔥</div>
-                    <h3 class="text-xl font-bold text-white mb-1">All In</h3>
-                    <p class="text-gray-400 text-xs mb-3">Risk it all for glory. Only for the brave.</p>
-                    <span class="bg-red-500/20 text-red-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Win up to 10x</span>
+                <!-- 6. Whack -->
+                <div onclick="arcade.launch('whack')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
+                    <div class="text-4xl mb-3">🔨</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Whack-a-Tile</h3>
+                    <p class="text-gray-400 text-xs mb-3">Click red tiles fast!</p>
+                    <span class="bg-orange-500/20 text-orange-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+2 Coins / Hit</span>
+                </div>
+
+                <!-- 7. Math -->
+                <div onclick="arcade.launch('math')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
+                    <div class="text-4xl mb-3">➗</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Math Sprint</h3>
+                    <p class="text-gray-400 text-xs mb-3">Solve 10 problems ASAP.</p>
+                    <span class="bg-indigo-500/20 text-indigo-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+5 Coins / Right</span>
+                </div>
+
+                <!-- 8. Memory -->
+                <div onclick="arcade.launch('memory')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
+                    <div class="text-4xl mb-3">🧠</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Memory Matrix</h3>
+                    <p class="text-gray-400 text-xs mb-3">Match pairs of symbols.</p>
+                    <span class="bg-pink-500/20 text-pink-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Win = 40 Coins</span>
+                </div>
+
+                <!-- 9. Reaction -->
+                <div onclick="arcade.launch('reaction')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
+                    <div class="text-4xl mb-3">⚡</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Reaction Test</h3>
+                    <p class="text-gray-400 text-xs mb-3">Click when it turns GREEN.</p>
+                    <span class="bg-cyan-500/20 text-cyan-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Fast = 30 Coins</span>
+                </div>
+
+                <!-- 10. Typing -->
+                <div onclick="arcade.launch('typing')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
+                    <div class="text-4xl mb-3">⌨️</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Speed Typer</h3>
+                    <p class="text-gray-400 text-xs mb-3">Type the words quickly.</p>
+                    <span class="bg-emerald-500/20 text-emerald-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+3 Coins / Word</span>
+                </div>
+
+                <!-- 11. Color -->
+                <div onclick="arcade.launch('color')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
+                    <div class="text-4xl mb-3">🎨</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Color Hunter</h3>
+                    <p class="text-gray-400 text-xs mb-3">Find the different shade.</p>
+                    <span class="bg-teal-500/20 text-teal-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+5 Coins / Level</span>
+                </div>
+
+                <!-- 12. Simon -->
+                <div onclick="arcade.launch('simon')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
+                    <div class="text-4xl mb-3">🔔</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Simon Says</h3>
+                    <p class="text-gray-400 text-xs mb-3">Repeat the sequence.</p>
+                    <span class="bg-rose-500/20 text-rose-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+5 Coins / Round</span>
                 </div>
             </div>
-
-            <h2 class="text-gray-400 font-bold uppercase tracking-widest text-sm mb-4 mt-8">Utilities & More</h2>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                <!-- Daily -->
-                <div onclick="arcade.runUtility('daily')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition shadow-xl group hover:border-yellow-500/50">
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="text-3xl">🎁</div>
-                        <span class="bg-yellow-500/10 text-yellow-500 text-[10px] font-bold px-2 py-1 rounded">FREE</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-white">Daily Reward</h3>
-                    <p class="text-gray-400 text-xs">Claim your daily 500 Coins & 5 Gems.</p>
-                </div>
-
-                <!-- Bank -->
-                <div onclick="arcade.runUtility('bank')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition shadow-xl group hover:border-blue-500/50">
-                    <div class="text-3xl mb-2">🏦</div>
-                    <h3 class="text-lg font-bold text-white">Bank Statement</h3>
-                    <p class="text-gray-400 text-xs">Publish your wealth to the public chat.</p>
-                </div>
-
-                <!-- Leaderboard -->
-                <div onclick="arcade.runUtility('top')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition shadow-xl group hover:border-purple-500/50">
-                    <div class="text-3xl mb-2">🏆</div>
-                    <h3 class="text-lg font-bold text-white">Leaderboard</h3>
-                    <p class="text-gray-400 text-xs">See who runs the economy.</p>
-                </div>
+            <div class="mt-8 text-center text-gray-500 text-xs italic">
+                * Each game costs 20 Coins to start. Rewards are added to your wallet automatically after Game Over.
             </div>
 
-            <h2 class="text-gray-400 font-bold uppercase tracking-widest text-sm mb-4 mt-8">Coming Soon</h2>
-             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-                <div class="bg-[#1e1f22] rounded-xl p-5 border border-[#111214] border-dashed">
-                    <div class="text-3xl mb-2">💣</div>
-                    <h3 class="text-lg font-bold text-gray-400">Mines</h3>
-                    <p class="text-gray-500 text-xs">Avoid the bombs to multiply your wins.</p>
-                </div>
-                <div class="bg-[#1e1f22] rounded-xl p-5 border border-[#111214] border-dashed">
-                    <div class="text-3xl mb-2">🃏</div>
-                    <h3 class="text-lg font-bold text-gray-400">Blackjack</h3>
-                    <p class="text-gray-500 text-xs">Race to 21 against the dealer.</p>
-                </div>
-                <div class="bg-[#1e1f22] rounded-xl p-5 border border-[#111214] border-dashed">
-                    <div class="text-3xl mb-2">🎡</div>
-                    <h3 class="text-lg font-bold text-gray-400">Roulette</h3>
-                    <p class="text-gray-500 text-xs">Spin the wheel of fortune.</p>
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- Betting Modal -->
-    <div id="bet-modal" class="absolute inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-[#2b2d31] rounded-2xl shadow-2xl w-full max-w-sm border border-[#3f4147] transform transition-all scale-100">
-            <!-- Modal Header -->
-            <div class="bg-[#1e1f22] p-4 rounded-t-2xl border-b border-[#111214] flex justify-between items-center">
-                <h3 id="modal-title" class="text-xl font-black text-white uppercase italic tracking-wider">GAME TITLE</h3>
-                <button onclick="arcade.closeModal()" class="text-gray-500 hover:text-white transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+    <!-- Universal Game Modal -->
+    <div id="game-modal" class="absolute inset-0 z-50 hidden bg-black/90 flex flex-col items-center justify-center p-4">
+        
+        <!-- Game Header -->
+        <div class="w-full max-w-2xl flex justify-between items-center mb-4 text-white">
+            <div>
+                <h2 id="game-title" class="text-2xl font-black uppercase italic text-[#5865F2]">GAME TITLE</h2>
+                <div class="text-sm font-mono text-gray-400">Score: <span id="game-score" class="text-white font-bold">0</span> | Reward: <span id="game-reward" class="text-yellow-400 font-bold">0</span></div>
+            </div>
+            <button onclick="arcade.stop()" class="bg-red-500/20 hover:bg-red-500 text-red-500 hover:text-white px-4 py-2 rounded font-bold transition">QUIT</button>
+        </div>
+
+        <!-- Canvas Container -->
+        <div id="canvas-container" class="relative w-full max-w-2xl aspect-video bg-[#111214] border-2 border-[#2b2d31] rounded-xl overflow-hidden shadow-2xl">
+            <canvas id="game-canvas" class="w-full h-full hidden"></canvas>
+            
+            <!-- DOM Game Container -->
+            <div id="dom-game-container" class="w-full h-full absolute inset-0 hidden flex items-center justify-center p-4">
+                <!-- Injected via JS -->
             </div>
 
-            <!-- Modal Body -->
-            <div class="p-6 space-y-5">
-                
-                <!-- Currency Toggle -->
-                <div class="flex bg-[#111214] p-1 rounded-lg">
-                    <button id="btn-coins" onclick="arcade.setCurrency('coins')" class="flex-1 py-2 rounded-md text-sm font-bold bg-[#5865F2] text-white transition flex items-center justify-center gap-2">
-                        <span>🪙</span> Coins
-                    </button>
-                    <button id="btn-gems" onclick="arcade.setCurrency('gems')" class="flex-1 py-2 rounded-md text-sm font-bold text-gray-400 hover:text-white transition flex items-center justify-center gap-2">
-                        <span>💎</span> Gems
-                    </button>
+            <!-- Start Overlay -->
+            <div id="start-overlay" class="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-10">
+                <h3 class="text-3xl font-bold text-white mb-2">Ready?</h3>
+                <p class="text-gray-400 mb-6">Entry Fee: <span class="text-yellow-500 font-bold">20 Coins</span></p>
+                <button onclick="arcade.play()" class="bg-[#5865F2] hover:bg-[#4752c4] text-white font-black py-3 px-8 rounded-full text-xl shadow-lg transform hover:scale-105 transition">START GAME</button>
+            </div>
+
+            <!-- Game Over Overlay -->
+            <div id="end-overlay" class="hidden absolute inset-0 bg-black/90 flex flex-col items-center justify-center z-20">
+                <h3 class="text-4xl font-black text-white mb-2">GAME OVER</h3>
+                <p class="text-gray-300 mb-2">Final Score: <span id="final-score" class="text-white font-bold">0</span></p>
+                <div class="bg-[#1e1f22] px-6 py-3 rounded-lg border border-yellow-500/30 mb-6 flex flex-col items-center">
+                    <span class="text-xs text-gray-500 uppercase font-bold">Total Earnings</span>
+                    <span id="final-reward" class="text-3xl font-mono text-yellow-400 font-bold">+0</span>
                 </div>
-
-                <!-- Input: Amount -->
-                <div id="input-amount-container">
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Bet Amount</label>
-                    <div class="relative">
-                        <input type="text" id="bet-amount" placeholder="e.g. 100, 1k, all" class="w-full bg-[#1e1f22] border border-[#111214] text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#5865F2] transition font-mono">
-                    </div>
+                <div class="flex gap-3">
+                    <button onclick="arcade.closeModal()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded transition">EXIT</button>
+                    <button onclick="arcade.play()" class="bg-[#5865F2] hover:bg-[#4752c4] text-white font-bold py-2 px-6 rounded transition">PLAY AGAIN (20c)</button>
                 </div>
-
-                <!-- Input: RPS Specific -->
-                <div id="input-rps-container" class="hidden">
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Select Move</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button onclick="arcade.setRps('r')" class="rps-btn bg-[#1e1f22] hover:bg-[#35373c] border border-[#111214] rounded-lg py-3 text-2xl transition focus:ring-2 focus:ring-[#5865F2]" data-move="r">🪨</button>
-                        <button onclick="arcade.setRps('p')" class="rps-btn bg-[#1e1f22] hover:bg-[#35373c] border border-[#111214] rounded-lg py-3 text-2xl transition focus:ring-2 focus:ring-[#5865F2]" data-move="p">📄</button>
-                        <button onclick="arcade.setRps('s')" class="rps-btn bg-[#1e1f22] hover:bg-[#35373c] border border-[#111214] rounded-lg py-3 text-2xl transition focus:ring-2 focus:ring-[#5865F2]" data-move="s">✂️</button>
-                    </div>
-                </div>
-
-                <!-- Input: Guess Specific -->
-                <div id="input-guess-container" class="hidden">
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Pick Number (1-10)</label>
-                    <input type="number" id="guess-number" min="1" max="10" placeholder="?" class="w-full bg-[#1e1f22] border border-[#111214] text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#5865F2] transition text-center font-bold text-xl">
-                </div>
-
-                <button onclick="arcade.submitBet()" class="w-full bg-gradient-to-r from-[#5865F2] to-purple-600 hover:opacity-90 text-white font-black uppercase py-4 rounded-xl shadow-lg transform active:scale-95 transition">
-                    PLAY NOW
-                </button>
-
             </div>
         </div>
     </div>
@@ -238,11 +217,11 @@
     <!-- Toast Container -->
     <div id="toast-container" class="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none w-full max-w-sm flex flex-col items-center"></div>
 
-    <!-- Firebase & Logic -->
+    <!-- Firebase & Game Engine -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, doc, updateDoc, onSnapshot, serverTimestamp, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, updateDoc, onSnapshot, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBz9yOlQFZQZE-GtGcRbJ2sWUYQTb0kBi4",
@@ -258,327 +237,656 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Abbreviation System (Same as index.html)
-        const SUFFIXES = {
-            'k': 1e3, 'm': 1e6, 'b': 1e9, 't': 1e12, 'qa': 1e15, 'qi': 1e18, 'sx': 1e21, 'sp': 1e24, 'oc': 1e27, 'no': 1e30,
-            'dc': 1e33, 'ud': 1e36, 'dd': 1e39, 'td': 1e42, 'qad': 1e45, 'qid': 1e48, 'sxd': 1e51, 'spd': 1e54, 'ocd': 1e57, 'nod': 1e60,
-            'vg': 1e63, 'uvg': 1e66, 'dvg': 1e69, 'tvg': 1e72, 'qavg': 1e75, 'qivg': 1e78, 'sxvg': 1e81, 'spvg': 1e84, 'ocvg': 1e87, 'novg': 1e90,
-            'tg': 1e93, 'utg': 1e96, 'dtg': 1e99, 'ttg': 1e102, 'qatg': 1e105, 'qitg': 1e108, 'sxtg': 1e111, 'sptg': 1e114, 'octg': 1e117, 'notg': 1e120,
-            'qg': 1e123, 'uqg': 1e126, 'dqg': 1e129, 'tqg': 1e132, 'qaqg': 1e135, 'qiqg': 1e138, 'sxqg': 1e141, 'spqg': 1e144, 'ocqg': 1e147, 'noqg': 1e150
-        };
-
-        function parseAbbreviatedNumber(input) {
-            if (!input) return NaN;
-            input = input.toLowerCase().replace(/,/g, ''); 
-            if (input === 'all') return 'all';
-            const sortedSuffixes = Object.keys(SUFFIXES).sort((a, b) => b.length - a.length);
-            for (const suffix of sortedSuffixes) {
-                if (input.endsWith(suffix)) {
-                    const numPart = input.slice(0, -suffix.length);
-                    const val = parseFloat(numPart);
-                    if (isNaN(val)) return NaN;
-                    return Math.floor(val * SUFFIXES[suffix]);
-                }
-            }
-            return Math.floor(parseFloat(input));
-        }
-
         // State
         let currentUser = null;
         let currentUserProfile = null;
-        let currentGame = null;
-        let selectedCurrency = 'coins';
-        let selectedRps = null;
+        const ENTRY_FEE = 20;
 
         // Elements
         const els = {
             walletCoins: document.getElementById('arcade-coins'),
             walletGems: document.getElementById('arcade-gems'),
             userPfp: document.getElementById('user-pfp'),
-            modal: document.getElementById('bet-modal'),
-            modalTitle: document.getElementById('modal-title'),
-            inputAmountContainer: document.getElementById('input-amount-container'),
-            inputRpsContainer: document.getElementById('input-rps-container'),
-            inputGuessContainer: document.getElementById('input-guess-container'),
-            inputAmount: document.getElementById('bet-amount'),
-            inputGuess: document.getElementById('guess-number'),
-            btnCoins: document.getElementById('btn-coins'),
-            btnGems: document.getElementById('btn-gems'),
+            modal: document.getElementById('game-modal'),
+            gameTitle: document.getElementById('game-title'),
+            gameScore: document.getElementById('game-score'),
+            gameReward: document.getElementById('game-reward'),
+            canvas: document.getElementById('game-canvas'),
+            domContainer: document.getElementById('dom-game-container'),
+            startOverlay: document.getElementById('start-overlay'),
+            endOverlay: document.getElementById('end-overlay'),
+            finalScore: document.getElementById('final-score'),
+            finalReward: document.getElementById('final-reward'),
             toastContainer: document.getElementById('toast-container')
         };
 
-        // --- Core Arcade Logic ---
+        // --- GAME ENGINE ---
+        
+        let gameLoopId = null;
+        let activeGame = null;
+        let score = 0;
+        let reward = 0;
+        let isPlaying = false;
+        
+        // Canvas Context
+        const ctx = els.canvas.getContext('2d');
+        
+        // Resize Canvas helper
+        function fitCanvas() {
+            els.canvas.width = els.canvas.parentElement.clientWidth;
+            els.canvas.height = els.canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', fitCanvas);
 
         window.arcade = {
-            openGame: (gameId) => {
-                if (!currentUser) return showToast("Please login first", "error");
-                currentGame = gameId;
-                selectedRps = null;
-                els.inputAmount.value = '';
-                els.inputGuess.value = '';
-
-                // Reset UI
-                els.inputAmountContainer.classList.remove('hidden');
-                els.inputRpsContainer.classList.add('hidden');
-                els.inputGuessContainer.classList.add('hidden');
-                document.querySelectorAll('.rps-btn').forEach(b => b.classList.remove('ring-2', 'ring-[#5865F2]', 'bg-[#35373c]'));
-
-                // Custom UI per game
-                if (gameId === 'flip') els.modalTitle.textContent = "COIN FLIP";
-                if (gameId === 'roll') els.modalTitle.textContent = "DICE ROLL";
-                if (gameId === 'slots') els.modalTitle.textContent = "SLOT MACHINE";
-                if (gameId === 'allin') {
-                    els.modalTitle.textContent = "ALL IN";
-                    els.inputAmount.value = "all";
-                    els.inputAmountContainer.classList.add('hidden');
-                }
-                if (gameId === 'rps') {
-                    els.modalTitle.textContent = "ROCK PAPER SCISSORS";
-                    els.inputRpsContainer.classList.remove('hidden');
-                }
-                if (gameId === 'guess') {
-                    els.modalTitle.textContent = "NUMBER GUESS (1-10)";
-                    els.inputGuessContainer.classList.remove('hidden');
-                }
-
+            launch: (gameId) => {
+                if (!currentUser) return showToast("Login required", "error");
+                
+                // Set Game Meta
+                activeGame = gameId;
+                score = 0;
+                reward = 0;
+                updateHUD();
+                
+                // UI Reset
                 els.modal.classList.remove('hidden');
+                els.startOverlay.classList.remove('hidden');
+                els.endOverlay.classList.add('hidden');
+                els.canvas.classList.add('hidden');
+                els.domContainer.classList.add('hidden');
+                
+                // Titles
+                const titles = {
+                    snake: 'Neon Snake', pong: 'Cyber Pong', breakout: 'Breakout', dodge: 'Space Dodge',
+                    jump: 'Dino Jump', whack: 'Whack-a-Tile', math: 'Math Sprint', memory: 'Memory Matrix',
+                    reaction: 'Reaction Test', typing: 'Speed Typer', color: 'Color Hunter', simon: 'Simon Says'
+                };
+                els.gameTitle.textContent = titles[gameId] || 'Game';
+
+                // Initial Canvas Fit
+                fitCanvas();
             },
-            closeModal: () => {
+            play: async () => {
+                if ((currentUserProfile.coins || 0) < ENTRY_FEE) {
+                    return showToast("Not enough coins! Need 20.", "error");
+                }
+
+                // Deduct Fee via simplified optimistic update (Server validation happens on secure apps, this is a demo)
+                try {
+                    await updateDoc(doc(db, "users", currentUser.uid), {
+                        coins: (currentUserProfile.coins || 0) - ENTRY_FEE
+                    });
+                } catch(e) { return showToast("Transaction error", "error"); }
+
+                // Start
+                els.startOverlay.classList.add('hidden');
+                els.endOverlay.classList.add('hidden');
+                score = 0;
+                reward = 0;
+                isPlaying = true;
+                updateHUD();
+
+                // Clear previous
+                if (gameLoopId) cancelAnimationFrame(gameLoopId);
+                els.domContainer.innerHTML = '';
+
+                // Route to Logic
+                if (['snake', 'pong', 'breakout', 'dodge', 'jump'].includes(activeGame)) {
+                    els.canvas.classList.remove('hidden');
+                    initCanvasGame(activeGame);
+                } else {
+                    els.domContainer.classList.remove('hidden');
+                    initDomGame(activeGame);
+                }
+            },
+            stop: () => {
+                isPlaying = false;
+                if (gameLoopId) cancelAnimationFrame(gameLoopId);
                 els.modal.classList.add('hidden');
             },
-            setCurrency: (type) => {
-                selectedCurrency = type;
-                if (type === 'coins') {
-                    els.btnCoins.className = "flex-1 py-2 rounded-md text-sm font-bold bg-[#5865F2] text-white transition flex items-center justify-center gap-2";
-                    els.btnGems.className = "flex-1 py-2 rounded-md text-sm font-bold text-gray-400 hover:text-white transition flex items-center justify-center gap-2";
-                } else {
-                    els.btnGems.className = "flex-1 py-2 rounded-md text-sm font-bold bg-[#9b59b6] text-white transition flex items-center justify-center gap-2";
-                    els.btnCoins.className = "flex-1 py-2 rounded-md text-sm font-bold text-gray-400 hover:text-white transition flex items-center justify-center gap-2";
-                }
+            closeModal: () => {
+                arcade.stop();
             },
-            setRps: (move) => {
-                selectedRps = move;
-                document.querySelectorAll('.rps-btn').forEach(b => {
-                    if (b.dataset.move === move) b.classList.add('ring-2', 'ring-[#5865F2]', 'bg-[#35373c]');
-                    else b.classList.remove('ring-2', 'ring-[#5865F2]', 'bg-[#35373c]');
-                });
-            },
-            submitBet: async () => {
-                let amountStr = els.inputAmount.value.trim();
-                let extra = null;
-
-                if (currentGame === 'allin') amountStr = 'all';
-                if (currentGame === 'rps') {
-                    if (!selectedRps) return showToast("Select a move!", "error");
-                    extra = selectedRps;
-                }
-                if (currentGame === 'guess') {
-                    const g = els.inputGuess.value;
-                    if (!g) return showToast("Enter a number!", "error");
-                    extra = g;
-                }
-
-                if (!amountStr) return showToast("Enter amount", "error");
+            gameOver: async (finalScore, finalReward) => {
+                isPlaying = false;
+                if (gameLoopId) cancelAnimationFrame(gameLoopId);
                 
-                arcade.closeModal();
-                await executeGamble(currentGame, amountStr, selectedCurrency, extra);
-            },
-            runUtility: async (type) => {
-                 if (!currentUser) return showToast("Login required", "error");
-                 if (type === 'daily') await executeDaily();
-                 if (type === 'bank') await executeBank();
-                 if (type === 'top') await executeTop();
+                // Update DB with Winnings
+                if (finalReward > 0) {
+                    try {
+                        await updateDoc(doc(db, "users", currentUser.uid), {
+                            coins: (currentUserProfile.coins || 0) + finalReward
+                        });
+                    } catch(e) {}
+                }
+
+                els.finalScore.textContent = finalScore;
+                els.finalReward.textContent = `+${finalReward}`;
+                els.endOverlay.classList.remove('hidden');
             }
         };
 
-        // --- Logic (Mirrored from index.html) ---
+        function updateHUD() {
+            els.gameScore.textContent = score;
+            els.gameReward.textContent = reward;
+        }
 
-        async function executeGamble(game, amountStr, currStr, extra) {
-            if (!currentUserProfile) return;
-            
-            const isCoins = ['c', 'coin', 'coins'].includes(currStr?.toLowerCase());
-            const currencyKey = isCoins ? 'coins' : 'gems';
-            let balance = currentUserProfile[currencyKey] || 0;
-            let bet = 0;
+        // --- CANVAS GAMES LOGIC ---
 
-            if (amountStr === 'all') bet = balance;
-            else bet = parseAbbreviatedNumber(amountStr);
+        function initCanvasGame(game) {
+            const width = els.canvas.width;
+            const height = els.canvas.height;
+            let state = {};
 
-            if (isNaN(bet) || bet <= 0) return showToast("Invalid Amount", 'error');
-            if (balance < bet) return showToast(`Not enough ${currencyKey}`, 'error');
+            // Init State
+            if (game === 'snake') {
+                state = { snake: [{x:10, y:10}], dir: {x:1, y:0}, food: {x:15, y:15}, gridSize: 20 };
+            } else if (game === 'pong') {
+                state = { py: height/2, ey: height/2, bx: width/2, by: height/2, bvx: 5, bvy: 2, ph: 80, pw: 10 };
+            } else if (game === 'breakout') {
+                state = { bx: width/2, by: height-30, bvx: 4, bvy: -4, px: width/2, pw: 100, bricks: [] };
+                for(let r=0; r<4; r++) for(let c=0; c<8; c++) state.bricks.push({x: c*(width/8)+5, y: r*30+40, w: (width/8)-10, h: 20, active:true});
+            } else if (game === 'dodge') {
+                state = { px: width/2, py: height-50, enemies: [], timer: 0 };
+            } else if (game === 'jump') {
+                state = { dy: 0, gravity: 0.6, jump: -12, y: height-40, grounded: true, obstacles: [], timer: 0 };
+            }
 
-            const isDev = currentUser.email === 'dev@gmail.com';
-            let win = false;
-            let multiplier = 0;
-            let details = "";
-
-            // GAME LOGIC
-            if (game === 'allin') {
-                if (isDev) { win = true; multiplier = 10; }
-                else {
-                    win = Math.random() < 0.2;
-                    if (win) {
-                        const r = Math.random();
-                        if (r < 0.5) multiplier = 1;
-                        else if (r < 0.75) multiplier = 2;
-                        else if (r < 0.875) multiplier = 3;
-                        else if (r < 0.975) multiplier = 5;
-                        else multiplier = 10;
-                    }
-                }
-            } else if (game === 'flip') {
-                const isHeads = Math.random() < 0.5;
-                const res = isHeads ? 'Heads' : 'Tails';
-                details = `Coin landed on ${res}`;
-                if (isDev) { win = true; multiplier = 2; details = "Coin landed on WIN (Dev)"; }
-                else {
-                    win = Math.random() < 0.5; // 50% chance
-                    multiplier = 2;
-                }
-            } else if (game === 'roll') {
-                let roll = Math.floor(Math.random() * 6) + 1;
-                if (isDev) { roll = 6; win = true; multiplier = 3; }
-                else {
-                    if (roll >= 4) win = true;
-                    if (roll === 6) multiplier = 3; else multiplier = 1.5;
-                }
-                details = `Rolled a 🎲 ${roll}`;
-            } else if (game === 'slots') {
-                const syms = ['🍒','🍋','🍇','💎','7️⃣'];
-                let s1, s2, s3;
-                if (isDev) { s1=s2=s3='7️⃣'; win=true; multiplier=10; }
-                else {
-                    s1 = syms[Math.floor(Math.random()*syms.length)];
-                    s2 = syms[Math.floor(Math.random()*syms.length)];
-                    s3 = syms[Math.floor(Math.random()*syms.length)];
-                    
-                    if (s1===s2 && s2===s3) {
-                        win = true;
-                        multiplier = (s1==='7️⃣') ? 10 : 5;
-                    } else if (s1===s2 || s2===s3 || s1===s3) {
-                        win = true; multiplier = 1.5;
-                    }
-                }
-                details = `${s1} | ${s2} | ${s3}`;
-            } else if (game === 'rps') {
-                const moves = ['r', 'p', 's'];
-                const map = {'r':'Rock','p':'Paper','s':'Scissors'};
-                const userMove = extra ? extra.toLowerCase()[0] : null;
+            // Loop
+            function loop() {
+                if (!isPlaying) return;
                 
-                let botMove = moves[Math.floor(Math.random()*3)];
-                if (isDev) {
-                    if (userMove === 'r') botMove = 's';
-                    if (userMove === 'p') botMove = 'r';
-                    if (userMove === 's') botMove = 'p';
-                }
+                // Clear
+                ctx.fillStyle = '#111214';
+                ctx.fillRect(0, 0, width, height);
 
-                details = `You: ${map[userMove]} vs Bot: ${map[botMove]}`;
+                // Update & Draw
+                if (game === 'snake') updateSnake(state, width, height);
+                if (game === 'pong') updatePong(state, width, height);
+                if (game === 'breakout') updateBreakout(state, width, height);
+                if (game === 'dodge') updateDodge(state, width, height);
+                if (game === 'jump') updateJump(state, width, height);
 
-                if (userMove === botMove) {
-                    win = true; multiplier = 1; details += " (Draw)";
-                } else if (
-                    (userMove === 'r' && botMove === 's') ||
-                    (userMove === 'p' && botMove === 'r') ||
-                    (userMove === 's' && botMove === 'p')
-                ) {
-                    win = true; multiplier = 2;
-                } else {
-                    win = false;
-                }
-            } else if (game === 'guess') {
-                const guess = parseInt(extra);
-                let secret = Math.floor(Math.random() * 10) + 1;
-                if (isDev) secret = guess;
-
-                details = `Number was ${secret}`;
-                if (guess === secret) {
-                    win = true; multiplier = 5;
-                }
+                updateHUD();
+                gameLoopId = requestAnimationFrame(loop);
             }
+            loop();
 
-            const winnings = win ? Math.floor(bet * multiplier) : 0;
-            const newBal = (balance - bet) + winnings;
+            // Controls
+            window.onkeydown = (e) => {
+                if (game === 'snake') {
+                    if (e.key === 'ArrowUp' && state.dir.y===0) state.dir = {x:0, y:-1};
+                    if (e.key === 'ArrowDown' && state.dir.y===0) state.dir = {x:0, y:1};
+                    if (e.key === 'ArrowLeft' && state.dir.x===0) state.dir = {x:-1, y:0};
+                    if (e.key === 'ArrowRight' && state.dir.x===0) state.dir = {x:1, y:0};
+                }
+                if (game === 'breakout') {
+                    if (e.key === 'ArrowLeft') state.px -= 30;
+                    if (e.key === 'ArrowRight') state.px += 30;
+                    state.px = Math.max(0, Math.min(width-state.pw, state.px));
+                }
+                if (game === 'jump') {
+                    if (e.code === 'Space' && state.grounded) {
+                        state.dy = state.jump;
+                        state.grounded = false;
+                    }
+                }
+            };
+            window.onmousemove = (e) => {
+                const rect = els.canvas.getBoundingClientRect();
+                if (game === 'pong') state.py = e.clientY - rect.top - state.ph/2;
+                if (game === 'dodge') state.px = e.clientX - rect.left;
+            };
+        }
 
-            // Update DB
-            await updateDoc(doc(db, "users", currentUser.uid), { [currencyKey]: newBal });
+        // --- SPECIFIC UPDATE LOOPS ---
 
-            // Post Message to Chat (so everyone sees)
-            await addDoc(collection(db, "messages"), {
-                type: game,
-                uid: currentUser.uid,
-                username: currentUserProfile.username,
-                pfpUrl: currentUserProfile.pfpUrl,
-                currency: currencyKey,
-                result: win ? (multiplier === 1 ? 'DRAW' : 'WON') : 'LOST',
-                amount: win ? winnings : bet,
-                multiplier: multiplier,
-                details: details,
-                createdAt: serverTimestamp()
-            });
+        function updateSnake(s, w, h) {
+            // Move (slow down slightly)
+            if (Date.now() % 5 !== 0) { /* fake frame limit */ }
+            
+            const head = { x: s.snake[0].x + s.dir.x, y: s.snake[0].y + s.dir.y };
+            
+            // Wall Hit
+            if (head.x < 0 || head.x >= w/s.gridSize || head.y < 0 || head.y >= h/s.gridSize) {
+                return arcade.gameOver(score, reward);
+            }
+            // Self Hit
+            for(let part of s.snake) if (head.x === part.x && head.y === part.y) return arcade.gameOver(score, reward);
 
-            if (win) {
-                 if (multiplier === 1) showToast(`Draw! Money back.`, 'success');
-                 else showToast(`WON ${winnings.toLocaleString()} ${currencyKey}!`, 'success');
+            s.snake.unshift(head);
+            
+            // Eat
+            if (head.x === s.food.x && head.y === s.food.y) {
+                score++;
+                reward += 2;
+                s.food = { x: Math.floor(Math.random()*(w/s.gridSize)), y: Math.floor(Math.random()*(h/s.gridSize)) };
             } else {
-                 showToast(`Lost ${bet.toLocaleString()} ${currencyKey}`, 'error');
+                s.snake.pop();
+            }
+
+            // Draw
+            ctx.fillStyle = '#5865F2';
+            s.snake.forEach(p => ctx.fillRect(p.x*s.gridSize, p.y*s.gridSize, s.gridSize-2, s.gridSize-2));
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(s.food.x*s.gridSize, s.food.y*s.gridSize, s.gridSize-2, s.gridSize-2);
+        }
+
+        function updatePong(s, w, h) {
+            // Ball Move
+            s.bx += s.bvx;
+            s.by += s.bvy;
+
+            // AI Move (simple tracking)
+            if (s.ey < s.by - 20) s.ey += 3;
+            if (s.ey > s.by + 20) s.ey -= 3;
+
+            // Bounce Walls
+            if (s.by < 0 || s.by > h) s.bvy *= -1;
+
+            // Bounce Paddles
+            if (s.bx < 20 && s.by > s.py && s.by < s.py + s.ph) { s.bvx *= -1; s.bvx += 1; }
+            if (s.bx > w-20 && s.by > s.ey && s.by < s.ey + s.ph) { s.bvx *= -1; }
+
+            // Score/Lose
+            if (s.bx < 0) return arcade.gameOver(score, 0); // Lose
+            if (s.bx > w) { // Win
+                score = 1; reward = 50;
+                return arcade.gameOver(1, 50);
+            }
+
+            // Draw
+            ctx.fillStyle = 'white';
+            ctx.fillRect(10, s.py, s.pw, s.ph); // Player
+            ctx.fillRect(w-20, s.ey, s.pw, s.ph); // AI
+            ctx.beginPath(); ctx.arc(s.bx, s.by, 8, 0, Math.PI*2); ctx.fill();
+        }
+
+        function updateBreakout(s, w, h) {
+            s.bx += s.bvx;
+            s.by += s.bvy;
+
+            if (s.bx < 0 || s.bx > w) s.bvx *= -1;
+            if (s.by < 0) s.bvy *= -1;
+            
+            // Paddle Hit
+            if (s.by > h-40 && s.bx > s.px && s.bx < s.px+s.pw) s.bvy *= -1;
+
+            // Brick Hit
+            let activeCount = 0;
+            s.bricks.forEach(b => {
+                if (b.active) {
+                    activeCount++;
+                    if (s.bx > b.x && s.bx < b.x+b.w && s.by > b.y && s.by < b.y+b.h) {
+                        b.active = false;
+                        s.bvy *= -1;
+                        score++; reward += 1;
+                    }
+                }
+            });
+
+            if (s.by > h) return arcade.gameOver(score, reward);
+            if (activeCount === 0) return arcade.gameOver(score, reward + 20); // Bonus
+
+            // Draw
+            ctx.fillStyle = '#5865F2';
+            ctx.fillRect(s.px, h-30, s.pw, 10);
+            ctx.beginPath(); ctx.arc(s.bx, s.by, 6, 0, Math.PI*2); ctx.fillStyle='white'; ctx.fill();
+            s.bricks.forEach(b => {
+                if (b.active) {
+                    ctx.fillStyle = `hsl(${b.x}, 70%, 50%)`;
+                    ctx.fillRect(b.x, b.y, b.w, b.h);
+                }
+            });
+        }
+
+        function updateDodge(s, w, h) {
+            s.timer++;
+            if (s.timer % 30 === 0) {
+                s.enemies.push({ x: Math.random()*w, y: -20, r: Math.random()*20+10 });
+                score++;
+                if (score % 60 === 0) reward++; // 1 coin per 60 frames (approx 1 sec)
+            }
+
+            ctx.fillStyle = '#5865F2';
+            ctx.beginPath(); ctx.moveTo(s.px, s.py); ctx.lineTo(s.px-15, s.py+30); ctx.lineTo(s.px+15, s.py+30); ctx.fill();
+
+            ctx.fillStyle = '#ef4444';
+            for (let i=0; i<s.enemies.length; i++) {
+                let e = s.enemies[i];
+                e.y += 3 + (score/500); // gets faster
+                ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, Math.PI*2); ctx.fill();
+                
+                // Collision (Simple distance)
+                let dist = Math.hypot(e.x - s.px, e.y - (s.py+15));
+                if (dist < e.r + 10) return arcade.gameOver(score, reward);
             }
         }
 
-        async function executeDaily() {
-            if (!currentUserProfile) return;
-            const now = Date.now();
-            const last = currentUserProfile.lastDaily || 0;
-            const oneDay = 24 * 60 * 60 * 1000;
+        function updateJump(s, w, h) {
+            s.timer++;
+            // Physics
+            s.dy += s.gravity;
+            s.y += s.dy;
+            if (s.y > h-40) { s.y = h-40; s.dy = 0; s.grounded = true; }
 
-            if (now - last < oneDay) {
-                const timeLeft = Math.ceil((oneDay - (now - last)) / (1000 * 60 * 60));
-                showToast(`Daily reward available in ${timeLeft} hours`, 'error');
-                return;
+            // Obstacles
+            if (s.timer % 100 === 0) {
+                s.obstacles.push({ x: w, w: 20, h: 40 });
             }
 
-            const ref = doc(db, "users", currentUser.uid);
-            await updateDoc(ref, {
-                coins: (currentUserProfile.coins || 0) + 500,
-                gems: (currentUserProfile.gems || 0) + 5,
-                lastDaily: now
-            });
-            showToast("Claimed 500 Coins & 5 Gems!", 'success');
+            // Draw Player
+            ctx.fillStyle = '#5865F2';
+            ctx.fillRect(50, s.y, 30, 30);
+            ctx.fillStyle = '#1e1f22';
+            ctx.fillRect(0, h-10, w, 10); // Floor
+
+            // Draw & Update Obstacles
+            ctx.fillStyle = '#ef4444';
+            for (let i=0; i<s.obstacles.length; i++) {
+                let o = s.obstacles[i];
+                o.x -= 5;
+                ctx.fillRect(o.x, h-10-o.h, o.w, o.h);
+
+                // Collision
+                if (o.x < 80 && o.x+o.w > 50 && s.y+30 > h-10-o.h) return arcade.gameOver(score, reward);
+                
+                // Pass count
+                if (o.x + o.w < 50 && !o.passed) {
+                    o.passed = true;
+                    score++;
+                    reward += 5;
+                }
+            }
         }
 
-        async function executeBank() {
-            if (!currentUserProfile) return;
-            await addDoc(collection(db, "messages"), {
-                type: 'bank',
-                uid: currentUser.uid,
-                username: currentUserProfile.username,
-                pfpUrl: currentUserProfile.pfpUrl,
-                coins: currentUserProfile.coins || 0,
-                gems: currentUserProfile.gems || 0,
-                createdAt: serverTimestamp()
-            });
-            showToast("Bank statement posted to chat!", 'success');
+        // --- DOM GAMES LOGIC ---
+
+        function initDomGame(game) {
+            if (game === 'whack') startWhack();
+            if (game === 'math') startMath();
+            if (game === 'memory') startMemory();
+            if (game === 'reaction') startReaction();
+            if (game === 'typing') startTyping();
+            if (game === 'color') startColor();
+            if (game === 'simon') startSimon();
         }
 
-        async function executeTop() {
-            const q = query(collection(db, "users"), orderBy("coins", "desc"), limit(3));
-            const snap = await getDocs(q);
-            const topUsers = [];
-            snap.forEach(d => {
-                const u = d.data();
-                topUsers.push({
-                    uid: u.uid,
-                    username: u.username,
-                    pfpUrl: u.pfpUrl,
-                    coins: u.coins || 0
+        function startWhack() {
+            let hits = 0;
+            let time = 20;
+            els.domContainer.innerHTML = `<div class="grid grid-cols-4 gap-2 w-full h-full p-4"></div>`;
+            const grid = els.domContainer.firstElementChild;
+            for(let i=0; i<16; i++) {
+                const btn = document.createElement('div');
+                btn.className = 'bg-[#2b2d31] rounded-lg whack-tile cursor-pointer h-full';
+                btn.onclick = () => {
+                    if (btn.classList.contains('whack-active')) {
+                        btn.classList.remove('whack-active');
+                        hits++;
+                        score = hits;
+                        reward = hits * 2;
+                        updateHUD();
+                    }
+                };
+                grid.appendChild(btn);
+            }
+
+            // Timer Loop
+            const timerInt = setInterval(() => {
+                time--;
+                if (time <= 0 || !isPlaying) {
+                    clearInterval(timerInt);
+                    clearInterval(gameInt);
+                    if (isPlaying) arcade.gameOver(score, reward);
+                }
+            }, 1000);
+
+            // Game Loop
+            const gameInt = setInterval(() => {
+                const tiles = document.querySelectorAll('.whack-tile');
+                tiles.forEach(t => t.classList.remove('whack-active'));
+                const r = Math.floor(Math.random()*16);
+                tiles[r].classList.add('whack-active');
+            }, 700);
+            
+            // Cleanup hook
+            window.arcade.stop = () => { isPlaying=false; clearInterval(timerInt); clearInterval(gameInt); els.modal.classList.add('hidden'); };
+        }
+
+        function startMath() {
+            let qCount = 0;
+            const maxQ = 10;
+            
+            function nextQ() {
+                if (qCount >= maxQ) return arcade.gameOver(score, reward);
+                const n1 = Math.floor(Math.random()*20);
+                const n2 = Math.floor(Math.random()*20);
+                const ans = n1 + n2;
+                
+                els.domContainer.innerHTML = `
+                    <div class="text-center">
+                        <h2 class="text-4xl font-bold text-white mb-6">${n1} + ${n2} = ?</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            ${[ans, ans + Math.floor(Math.random()*10)+1, ans - Math.floor(Math.random()*5)-1, ans + 10]
+                                .sort(()=>Math.random()-0.5)
+                                .map(n => `<button class="ans-btn bg-[#2b2d31] hover:bg-[#5865F2] p-4 rounded text-xl font-bold">${n}</button>`)
+                                .join('')}
+                        </div>
+                    </div>
+                `;
+                
+                document.querySelectorAll('.ans-btn').forEach(b => {
+                    b.onclick = () => {
+                        qCount++;
+                        if (parseInt(b.textContent) === ans) {
+                            score++; reward += 5;
+                        }
+                        updateHUD();
+                        nextQ();
+                    };
                 });
-            });
+            }
+            nextQ();
+        }
 
-            await addDoc(collection(db, "messages"), {
-                type: 'leaderboard',
-                topUsers: topUsers,
-                createdAt: serverTimestamp()
+        function startMemory() {
+            const symbols = ['🍎','🍌','🍒','🍇','🍉','🍊','🍍','🥝'];
+            const deck = [...symbols, ...symbols].sort(() => Math.random() - 0.5);
+            let flipped = [];
+            let matched = 0;
+
+            els.domContainer.innerHTML = `<div class="grid grid-cols-4 gap-2 w-full max-w-md aspect-square"></div>`;
+            const grid = els.domContainer.firstElementChild;
+
+            deck.forEach((sym, i) => {
+                const card = document.createElement('div');
+                card.className = 'memory-card w-full h-full';
+                card.innerHTML = `
+                    <div class="memory-inner w-full h-full">
+                        <div class="memory-front">?</div>
+                        <div class="memory-back">${sym}</div>
+                    </div>
+                `;
+                card.onclick = () => {
+                    if (flipped.length < 2 && !card.classList.contains('flipped')) {
+                        card.classList.add('flipped');
+                        flipped.push({ el: card, val: sym });
+                        
+                        if (flipped.length === 2) {
+                            if (flipped[0].val === flipped[1].val) {
+                                matched++;
+                                flipped = [];
+                                if (matched === 8) arcade.gameOver(16, 40);
+                            } else {
+                                setTimeout(() => {
+                                    if(isPlaying) {
+                                        flipped[0].el.classList.remove('flipped');
+                                        flipped[1].el.classList.remove('flipped');
+                                        flipped = [];
+                                    }
+                                }, 1000);
+                            }
+                        }
+                    }
+                };
+                grid.appendChild(card);
             });
-             showToast("Leaderboard posted to chat!", 'success');
+        }
+
+        function startReaction() {
+            els.domContainer.innerHTML = `
+                <div id="react-box" class="w-full h-full bg-red-500 flex items-center justify-center cursor-pointer">
+                    <span class="text-2xl font-bold">WAIT FOR GREEN...</span>
+                </div>
+            `;
+            const box = document.getElementById('react-box');
+            let startTime = 0;
+            let ready = false;
+
+            const timeout = setTimeout(() => {
+                if (!isPlaying) return;
+                box.classList.remove('bg-red-500');
+                box.classList.add('bg-green-500');
+                box.innerHTML = '<span class="text-2xl font-bold">CLICK!</span>';
+                startTime = Date.now();
+                ready = true;
+            }, 2000 + Math.random()*3000);
+
+            box.onclick = () => {
+                if (ready) {
+                    const diff = Date.now() - startTime;
+                    score = diff;
+                    if (diff < 300) reward = 30;
+                    else if (diff < 500) reward = 10;
+                    else reward = 1;
+                    arcade.gameOver(score + 'ms', reward);
+                } else {
+                    clearTimeout(timeout);
+                    arcade.gameOver('Too Early', 0);
+                }
+            };
+        }
+
+        function startTyping() {
+            const words = ['apple', 'banana', 'orbit', 'galaxy', 'rocket', 'code', 'chat', 'game', 'coin', 'gem'];
+            let current = '';
+            
+            function nextWord() {
+                if (!isPlaying) return;
+                current = words[Math.floor(Math.random()*words.length)];
+                els.domContainer.innerHTML = `
+                    <div class="text-center">
+                        <p class="text-gray-400 mb-2">Type this word:</p>
+                        <h2 class="text-4xl font-mono font-bold text-[#5865F2] mb-4">${current}</h2>
+                        <input type="text" id="type-input" class="bg-[#1e1f22] border border-gray-600 p-2 text-center text-white text-xl rounded" autofocus>
+                    </div>
+                `;
+                const input = document.getElementById('type-input');
+                input.focus();
+                input.oninput = () => {
+                    if (input.value.toLowerCase() === current) {
+                        score++; reward += 3;
+                        updateHUD();
+                        nextWord();
+                    }
+                };
+            }
+            
+            // 20s Timer
+            setTimeout(() => { if(isPlaying) arcade.gameOver(score, reward); }, 20000);
+            nextWord();
+        }
+
+        function startColor() {
+            let level = 1;
+            
+            function nextLevel() {
+                if (!isPlaying) return;
+                const size = Math.min(6, Math.floor(level/2) + 2);
+                const count = size * size;
+                const hue = Math.floor(Math.random()*360);
+                const diff = Math.max(10, 50 - level*5); // Harder as level goes up
+                
+                els.domContainer.innerHTML = `<div class="grid gap-2 w-full max-w-md aspect-square" style="grid-template-columns: repeat(${size}, 1fr)"></div>`;
+                const grid = els.domContainer.firstElementChild;
+                
+                const targetIndex = Math.floor(Math.random()*count);
+                
+                for(let i=0; i<count; i++) {
+                    const d = document.createElement('div');
+                    d.className = 'w-full h-full rounded cursor-pointer';
+                    if (i === targetIndex) {
+                        d.style.backgroundColor = `hsl(${hue}, 70%, ${50+diff}%)`;
+                        d.onclick = () => { score++; reward+=5; level++; updateHUD(); nextLevel(); };
+                    } else {
+                        d.style.backgroundColor = `hsl(${hue}, 70%, 50%)`;
+                        d.onclick = () => { arcade.gameOver(score, reward); }; // Wrong click loses
+                    }
+                    grid.appendChild(d);
+                }
+            }
+            nextLevel();
+        }
+
+        function startSimon() {
+            const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500'];
+            let seq = [];
+            let playerSeq = [];
+            
+            els.domContainer.innerHTML = `
+                <div class="grid grid-cols-2 gap-4 w-64 h-64">
+                    <div id="simon-0" class="bg-red-900 rounded-tl-full cursor-pointer opacity-50 transition"></div>
+                    <div id="simon-1" class="bg-blue-900 rounded-tr-full cursor-pointer opacity-50 transition"></div>
+                    <div id="simon-2" class="bg-green-900 rounded-bl-full cursor-pointer opacity-50 transition"></div>
+                    <div id="simon-3" class="bg-yellow-900 rounded-br-full cursor-pointer opacity-50 transition"></div>
+                </div>
+                <div id="simon-status" class="mt-4 text-xl font-bold">Watch...</div>
+            `;
+
+            function flash(idx) {
+                const el = document.getElementById(`simon-${idx}`);
+                el.classList.remove('opacity-50');
+                el.classList.add(colors[idx]);
+                setTimeout(() => {
+                    el.classList.add('opacity-50');
+                    el.classList.remove(colors[idx]);
+                }, 300);
+            }
+
+            function playRound() {
+                playerSeq = [];
+                seq.push(Math.floor(Math.random()*4));
+                document.getElementById('simon-status').textContent = 'Watch...';
+                
+                let i = 0;
+                const interval = setInterval(() => {
+                    flash(seq[i]);
+                    i++;
+                    if (i >= seq.length) {
+                        clearInterval(interval);
+                        document.getElementById('simon-status').textContent = 'Your Turn!';
+                    }
+                }, 600);
+            }
+
+            // Click Handlers
+            for(let i=0; i<4; i++) {
+                document.getElementById(`simon-${i}`).onclick = () => {
+                    flash(i);
+                    playerSeq.push(i);
+                    // Check
+                    if (playerSeq[playerSeq.length-1] !== seq[playerSeq.length-1]) {
+                        return arcade.gameOver(score, reward);
+                    }
+                    if (playerSeq.length === seq.length) {
+                        score++; reward += 5; updateHUD();
+                        setTimeout(playRound, 1000);
+                    }
+                };
+            }
+
+            setTimeout(playRound, 1000);
         }
 
         // --- Auth Listener ---
@@ -595,18 +903,16 @@
                     }
                 });
             } else {
-                window.location.href = 'index.html'; // Redirect back if not logged in
+                window.location.href = 'index.html';
             }
         });
 
-        // --- Toast Utils ---
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             const bgClass = type === 'success' ? 'bg-green-500/90' : 'bg-red-500/90';
-            toast.className = `px-6 py-3 rounded-xl text-white font-bold shadow-xl mb-3 text-sm text-center toast-enter backdrop-blur-md ${bgClass} flex items-center gap-2 min-w-[200px] justify-center`;
-            toast.innerHTML = type === 'success' ? `<span>✅</span> ${message}` : `<span>⚠️</span> ${message}`;
+            toast.className = `px-6 py-3 rounded-xl text-white font-bold shadow-xl mb-3 text-sm text-center toast-enter backdrop-blur-md ${bgClass}`;
+            toast.innerHTML = message;
             els.toastContainer.appendChild(toast);
-            
             setTimeout(() => {
                 toast.classList.remove('toast-enter');
                 toast.classList.add('toast-exit');
