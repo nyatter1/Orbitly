@@ -201,7 +201,7 @@
             <!-- Input Area -->
             <div class="px-4 pb-4 bg-[#313338]">
                 <form id="message-form" class="bg-[#383a40] rounded-lg px-4 py-3 flex items-center w-full shadow-sm">
-                    <input type="text" id="message-input" autocomplete="off" placeholder="Message #general-chat" class="flex-1 bg-transparent border-none text-gray-100 placeholder-gray-500 focus:ring-0 focus:outline-none">
+                    <input type="text" id="message-input" autocomplete="off" placeholder="Message #general-chat (Type /cmds for help)" class="flex-1 bg-transparent border-none text-gray-100 placeholder-gray-500 focus:ring-0 focus:outline-none">
                 </form>
             </div>
         </div>
@@ -247,7 +247,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, setDoc, getDoc, updateDoc, where, getDocs, limit, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyBz9yOlQFZQZE-GtGcRbJ2sWUYQTb0kBi4",
@@ -448,6 +448,7 @@
                     status: 'online', 
                     coins: 1000,
                     gems: 10,
+                    lastDaily: 0,
                     createdAt: serverTimestamp()
                 });
 
@@ -563,21 +564,35 @@
         function renderMessage(msg) {
             const div = document.createElement('div');
             
-            // Special Rendering for Betting
-            if (msg.type === 'allin') {
+            // Special Rendering for Commands
+            if (['allin', 'flip', 'roll', 'slots', 'rps', 'guess'].includes(msg.type)) {
                 const isWin = msg.result === 'WON';
                 const colorClass = isWin ? 'text-green-400' : 'text-red-400';
                 const borderColor = isWin ? 'border-green-500/30' : 'border-red-500/30';
                 const bgGradient = isWin ? 'bg-gradient-to-br from-green-900/20 to-transparent' : 'bg-gradient-to-br from-red-900/20 to-transparent';
+
+                let actionText = "";
+                let detailsText = "";
+                
+                if (msg.type === 'allin') actionText = "went ALL IN";
+                if (msg.type === 'flip') actionText = `flipped a coin`;
+                if (msg.type === 'roll') actionText = `rolled the dice`;
+                if (msg.type === 'slots') actionText = `pulled the slots`;
+                if (msg.type === 'rps') actionText = `played Rock Paper Scissors`;
+                if (msg.type === 'guess') actionText = `guessed a number`;
+
+                if (msg.details) detailsText = `<div class="text-sm font-mono text-gray-300 mt-2 bg-[#1e1f22]/50 px-2 py-1 rounded">${msg.details}</div>`;
 
                 div.className = "flex justify-center my-4 animate-fade-in";
                 div.innerHTML = `
                     <div class="relative flex flex-col items-center p-6 rounded-xl border ${borderColor} ${bgGradient} max-w-sm w-full backdrop-blur-sm">
                         <img src="${msg.pfpUrl}" class="w-16 h-16 rounded-full border-2 border-[#2b2d31] shadow-lg mb-2 object-cover">
                         <div class="text-white font-bold text-lg mb-1">${escapeHtml(msg.username)}</div>
-                        <div class="text-gray-400 text-xs uppercase tracking-widest mb-2">went ALL IN on ${msg.currency === 'coins' ? 'Coins' : 'Gems'}</div>
+                        <div class="text-gray-400 text-xs uppercase tracking-widest mb-2">${actionText} with ${msg.currency === 'coins' ? 'Coins' : 'Gems'}</div>
                         
-                        <div class="text-3xl font-black ${colorClass} mb-2 tracking-tighter">${msg.result}</div>
+                        ${detailsText}
+
+                        <div class="text-3xl font-black ${colorClass} my-2 tracking-tighter">${msg.result}</div>
                         
                         <div class="flex items-center gap-2 text-sm text-gray-300">
                             ${isWin ? `<span>Won</span>` : `<span>Lost</span>`}
@@ -592,7 +607,6 @@
                     </div>
                 `;
             } else if (msg.type === 'bank') {
-                // Bank Command Rendering
                 div.className = "flex justify-center my-4 animate-fade-in";
                 div.innerHTML = `
                     <div class="relative flex flex-col items-center p-6 rounded-xl border border-blue-500/30 bg-gradient-to-br from-blue-900/20 to-transparent max-w-sm w-full backdrop-blur-sm">
@@ -655,29 +669,192 @@
             } catch (err) { console.error(err); }
         });
 
+        // --- Command System ---
+
         async function handleCommand(cmdString) {
             const parts = cmdString.split(' ');
             const command = parts[0].toLowerCase();
-            const arg = parts[1] ? parts[1].toLowerCase() : null;
+            const args = parts.slice(1);
 
-            if (command === '/allin') {
-                if (arg === 'c' || arg === 'coins' || arg === 'g' || arg === 'gems') {
-                    await executeAllIn(arg);
+            if (command === '/cmds') {
+                showHelp();
+                return;
+            }
+
+            if (command === '/top') {
+                await executeTop();
+                return;
+            }
+
+            // Commands requiring user interactions or simple logic
+            if (command === '/daily') {
+                await executeDaily();
+                return;
+            }
+
+            if (command === '/pay') {
+                // Usage: /pay username amount c/g
+                if (args.length < 3) return showToast("Usage: /pay {username} {amount} {c/g}", 'error');
+                await executePay(args[0], args[1], args[2]);
+                return;
+            }
+
+            // Gambling Commands
+            if (['/allin', '/flip', '/roll', '/slots', '/rps', '/guess', '/bank'].includes(command)) {
+                if (command === '/bank') {
+                    await executeBank();
                     showToast("Action complete", 'success');
-                } else {
-                    showToast("Invalid Command", 'error');
+                    return;
                 }
-            } else if (command === '/bank') {
-                await executeBank();
-                showToast("Action complete", 'success');
+                
+                // All gambling requires currency argument except /guess has extra
+                let amountIdx = 0;
+                let currIdx = 1;
+                let extraArg = null;
+
+                if (command === '/rps' || command === '/guess') {
+                    amountIdx = 1;
+                    currIdx = 2;
+                    extraArg = args[0]; // move/number
+                }
+
+                // Parse Amount & Currency
+                let amountStr = args[amountIdx];
+                let currencyStr = args[currIdx];
+
+                // Special case for /allin
+                if (command === '/allin') {
+                    amountStr = 'all';
+                    currencyStr = args[0];
+                }
+
+                await executeGamble(command, amountStr, currencyStr, extraArg);
             } else {
                 showToast("Invalid Command", 'error');
             }
         }
 
+        function showHelp() {
+            const div = document.createElement('div');
+            div.className = "my-4 mx-4 p-4 bg-[#2b2d31] rounded-lg border border-[#1e1f22] text-sm shadow-xl";
+            div.innerHTML = `
+                <h3 class="font-bold text-white mb-3 text-lg border-b border-gray-700 pb-2">Orbitly Commands</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h4 class="text-blue-400 font-bold mb-1 uppercase text-xs">Essentials</h4>
+                        <ul class="space-y-1 text-gray-300">
+                            <li><span class="text-white font-mono">/daily</span> - Claim free reward (24h)</li>
+                            <li><span class="text-white font-mono">/bank</span> - View your balance</li>
+                            <li><span class="text-white font-mono">/pay [user] [amt] [c/g]</span> - Pay someone</li>
+                            <li><span class="text-white font-mono">/top</span> - View richest players</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-green-400 font-bold mb-1 uppercase text-xs">Gambling</h4>
+                        <ul class="space-y-1 text-gray-300">
+                            <li><span class="text-white font-mono">/allin [c/g]</span> - Bet everything</li>
+                            <li><span class="text-white font-mono">/flip [amt] [c/g]</span> - Coin flip (2x)</li>
+                            <li><span class="text-white font-mono">/roll [amt] [c/g]</span> - Dice roll (>3 wins)</li>
+                            <li><span class="text-white font-mono">/slots [amt] [c/g]</span> - Slot machine</li>
+                            <li><span class="text-white font-mono">/rps [r/p/s] [amt] [c/g]</span> - Rock Paper Scissors</li>
+                            <li><span class="text-white font-mono">/guess [1-10] [amt] [c/g]</span> - Guess number (5x)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-3 text-xs text-gray-500 italic">c = coins, g = gems</div>
+            `;
+            els.displays.msgContainer.appendChild(div);
+            requestAnimationFrame(() => els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight);
+        }
+
+        async function executeDaily() {
+            if (!currentUserProfile) return;
+            const now = Date.now();
+            const last = currentUserProfile.lastDaily || 0;
+            const oneDay = 24 * 60 * 60 * 1000;
+
+            if (now - last < oneDay) {
+                const timeLeft = Math.ceil((oneDay - (now - last)) / (1000 * 60 * 60));
+                showToast(`Daily reward available in ${timeLeft} hours`, 'error');
+                return;
+            }
+
+            const ref = doc(db, "users", currentUser.uid);
+            await updateDoc(ref, {
+                coins: (currentUserProfile.coins || 0) + 500,
+                gems: (currentUserProfile.gems || 0) + 5,
+                lastDaily: now
+            });
+            showToast("Claimed 500 Coins & 5 Gems!", 'success');
+        }
+
+        async function executeTop() {
+            const q = query(collection(db, "users"), orderBy("coins", "desc"), limit(3));
+            const snap = await getDocs(q);
+            
+            const div = document.createElement('div');
+            div.className = "my-4 mx-8 p-4 bg-gradient-to-r from-yellow-900/40 to-[#2b2d31] rounded-lg border border-yellow-500/30 text-center";
+            div.innerHTML = `<h3 class="text-yellow-400 font-bold uppercase tracking-widest mb-3">🏆 Richest Players 🏆</h3>`;
+            
+            let i = 1;
+            snap.forEach(d => {
+                const u = d.data();
+                div.innerHTML += `
+                    <div class="flex items-center justify-between py-1 border-b border-white/10 last:border-0">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-gray-400 text-lg">#${i}</span>
+                            <img src="${u.pfpUrl}" class="w-6 h-6 rounded-full">
+                            <span class="text-white font-medium">${escapeHtml(u.username)}</span>
+                        </div>
+                        <span class="text-yellow-500 font-mono">${(u.coins||0).toLocaleString()} 🪙</span>
+                    </div>
+                `;
+                i++;
+            });
+            els.displays.msgContainer.appendChild(div);
+            requestAnimationFrame(() => els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight);
+        }
+
+        async function executePay(targetName, amountStr, currStr) {
+            const amount = parseInt(amountStr);
+            if (isNaN(amount) || amount <= 0) return showToast("Invalid Amount", 'error');
+            
+            const isCoins = (currStr === 'c' || currStr === 'coins');
+            const currency = isCoins ? 'coins' : 'gems';
+            
+            if ((currentUserProfile[currency] || 0) < amount) return showToast("Insufficient funds", 'error');
+            if (currentUserProfile.username === targetName) return showToast("Cannot pay yourself", 'error');
+
+            const q = query(collection(db, "users"), where("username", "==", targetName));
+            const snap = await getDocs(q);
+            
+            if (snap.empty) return showToast("User not found", 'error');
+            const targetDoc = snap.docs[0];
+            const targetUid = targetDoc.id;
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const senderRef = doc(db, "users", currentUser.uid);
+                    const receiverRef = doc(db, "users", targetUid);
+                    const senderSnap = await transaction.get(senderRef);
+                    const receiverSnap = await transaction.get(receiverRef);
+
+                    const senderBal = senderSnap.data()[currency] || 0;
+                    if (senderBal < amount) throw "Insufficient funds";
+
+                    const receiverBal = receiverSnap.data()[currency] || 0;
+
+                    transaction.update(senderRef, { [currency]: senderBal - amount });
+                    transaction.update(receiverRef, { [currency]: receiverBal + amount });
+                });
+                showToast(`Sent ${amount} ${currency} to ${targetName}`, 'success');
+            } catch (e) {
+                showToast("Transaction failed", 'error');
+            }
+        }
+
         async function executeBank() {
             if (!currentUserProfile) return;
-            
             await addDoc(collection(db, "messages"), {
                 type: 'bank',
                 uid: currentUser.uid,
@@ -689,60 +866,143 @@
             });
         }
 
-        async function executeAllIn(arg) {
+        async function executeGamble(game, amountStr, currStr, extra) {
             if (!currentUserProfile) return;
             
-            const isCoins = (arg === 'c' || arg === 'coins');
+            const isCoins = (currStr === 'c' || currStr === 'coins');
             const currencyKey = isCoins ? 'coins' : 'gems';
-            const balance = currentUserProfile[currencyKey] || 0;
+            let balance = currentUserProfile[currencyKey] || 0;
+            let bet = 0;
 
-            if (balance <= 0) {
-                showToast(`You have no ${currencyKey} to bet!`, 'error');
+            if (amountStr === 'all') bet = balance;
+            else bet = parseInt(amountStr);
+
+            if (isNaN(bet) || bet <= 0) {
+                showToast("Invalid Amount", 'error');
+                return;
+            }
+            if (balance < bet) {
+                showToast(`Not enough ${currencyKey}`, 'error');
                 return;
             }
 
-            // RIGGED LOGIC FOR DEV
             const isDev = currentUser.email === 'dev@gmail.com';
-            let win;
-            let multiplier = 1;
+            let win = false;
+            let multiplier = 0;
+            let details = "";
 
-            if (isDev) {
-                win = true;
-                multiplier = 10;
-            } else {
-                // Regular User Logic
-                win = Math.random() < 0.2; // 20% win rate
-                if (win) {
-                    const r = Math.random();
-                    if (r < 0.5) multiplier = 1;      // 50%
-                    else if (r < 0.75) multiplier = 2; // 25%
-                    else if (r < 0.875) multiplier = 3; // 12.5%
-                    else if (r < 0.975) multiplier = 5; // 10%
-                    else multiplier = 10;             // 2.5%
+            // GAME LOGIC
+            if (game === '/allin') {
+                if (isDev) { win = true; multiplier = 10; }
+                else {
+                    win = Math.random() < 0.2;
+                    if (win) {
+                        const r = Math.random();
+                        if (r < 0.5) multiplier = 1;
+                        else if (r < 0.75) multiplier = 2;
+                        else if (r < 0.875) multiplier = 3;
+                        else if (r < 0.975) multiplier = 5;
+                        else multiplier = 10;
+                    }
+                }
+            } else if (game === '/flip') {
+                const isHeads = Math.random() < 0.5;
+                const res = isHeads ? 'Heads' : 'Tails';
+                details = `Coin landed on ${res}`;
+                if (isDev) { win = true; multiplier = 2; details = "Coin landed on WIN (Dev)"; }
+                else {
+                    win = Math.random() < 0.5; // 50% chance
+                    multiplier = 2;
+                }
+            } else if (game === '/roll') {
+                let roll = Math.floor(Math.random() * 6) + 1;
+                if (isDev) { roll = 6; win = true; multiplier = 3; }
+                else {
+                    if (roll >= 4) win = true;
+                    if (roll === 6) multiplier = 3; else multiplier = 1.5;
+                }
+                details = `Rolled a 🎲 ${roll}`;
+            } else if (game === '/slots') {
+                const syms = ['🍒','🍋','🍇','💎','7️⃣'];
+                let s1, s2, s3;
+                if (isDev) { s1=s2=s3='7️⃣'; win=true; multiplier=10; }
+                else {
+                    s1 = syms[Math.floor(Math.random()*syms.length)];
+                    s2 = syms[Math.floor(Math.random()*syms.length)];
+                    s3 = syms[Math.floor(Math.random()*syms.length)];
+                    
+                    if (s1===s2 && s2===s3) {
+                        win = true;
+                        multiplier = (s1==='7️⃣') ? 10 : 5;
+                    } else if (s1===s2 || s2===s3 || s1===s3) {
+                        win = true; multiplier = 1.5;
+                    }
+                }
+                details = `${s1} | ${s2} | ${s3}`;
+            } else if (game === '/rps') {
+                const moves = ['r', 'p', 's'];
+                const map = {'r':'Rock','p':'Paper','s':'Scissors'};
+                const userMove = extra ? extra.toLowerCase()[0] : null;
+                
+                if (!moves.includes(userMove)) { showToast("Use r, p, or s", 'error'); return; }
+
+                let botMove = moves[Math.floor(Math.random()*3)];
+                if (isDev) {
+                    // Bot always loses to Dev
+                    if (userMove === 'r') botMove = 's';
+                    if (userMove === 'p') botMove = 'r';
+                    if (userMove === 's') botMove = 'p';
+                }
+
+                details = `You: ${map[userMove]} vs Bot: ${map[botMove]}`;
+
+                if (userMove === botMove) {
+                    // Tie - Money back (logic handled as win x1)
+                    win = true; multiplier = 1; details += " (Draw)";
+                } else if (
+                    (userMove === 'r' && botMove === 's') ||
+                    (userMove === 'p' && botMove === 'r') ||
+                    (userMove === 's' && botMove === 'p')
+                ) {
+                    win = true; multiplier = 2;
+                } else {
+                    win = false;
+                }
+            } else if (game === '/guess') {
+                const guess = parseInt(extra);
+                if (isNaN(guess) || guess < 1 || guess > 10) { showToast("Guess 1-10", 'error'); return; }
+                
+                let secret = Math.floor(Math.random() * 10) + 1;
+                if (isDev) secret = guess;
+
+                details = `Number was ${secret}`;
+                if (guess === secret) {
+                    win = true; multiplier = 5;
                 }
             }
 
-            const newBalance = win ? (balance * multiplier) : 0;
-            const amountDiff = win ? (newBalance - balance) : balance; // Used for display logic
+            // Calc Result
+            const winnings = win ? Math.floor(bet * multiplier) : 0;
+            const newBal = (balance - bet) + winnings;
 
-            // Update User Balance
-            const userRef = doc(db, "users", currentUser.uid);
-            await updateDoc(userRef, {
-                [currencyKey]: newBalance
-            });
+            // Update DB
+            await updateDoc(doc(db, "users", currentUser.uid), { [currencyKey]: newBal });
 
-            // Post Game Message
+            // Post Message
             await addDoc(collection(db, "messages"), {
-                type: 'allin',
+                type: game.replace('/',''),
                 uid: currentUser.uid,
                 username: currentUserProfile.username,
                 pfpUrl: currentUserProfile.pfpUrl,
                 currency: currencyKey,
-                result: win ? 'WON' : 'LOST',
-                amount: win ? (balance * multiplier) : balance, // Amount shown is total won or total lost
+                result: win ? (multiplier === 1 ? 'DRAW' : 'WON') : 'LOST',
+                amount: win ? winnings : bet,
                 multiplier: multiplier,
+                details: details,
                 createdAt: serverTimestamp()
             });
+
+            showToast("Action complete", 'success');
         }
 
         // --- Users List System ---
