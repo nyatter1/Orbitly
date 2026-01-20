@@ -6,15 +6,15 @@
     <title>Orbitly Chat</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom scrollbar for chat area */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #111827; }
-        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #2b2d31; }
+        ::-webkit-scrollbar-thumb { background: #1a1b1e; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3f4147; }
         
         .loader {
             border: 3px solid #f3f3f3;
-            border-top: 3px solid #3b82f6;
+            border-top: 3px solid #5865F2;
             border-radius: 50%;
             width: 20px;
             height: 20px;
@@ -22,165 +22,191 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Fade in animation */
-        .animate-fade-in {
-            animation: fadeIn 0.3s ease-in-out;
-        }
+        .animate-fade-in { animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Status colors */
+        .status-online { background-color: #23a559; }
+        .status-busy { background-color: #f0b232; }
+        .status-dnd { background-color: #f23f43; }
+        .status-offline { background-color: #80848e; }
+        .status-invisible { background-color: #80848e; }
     </style>
 </head>
-<body class="bg-gray-950 text-gray-100 font-sans antialiased h-screen flex flex-col overflow-hidden">
+<body class="bg-[#313338] text-gray-100 font-sans antialiased h-screen flex flex-col overflow-hidden">
 
-    <!-- Auth View Container -->
-    <div id="auth-view" class="flex-1 flex flex-col justify-center items-center p-4 bg-[url('https://picsum.photos/1920/1080?blur=10')] bg-cover bg-center relative">
+    <!-- Auth View -->
+    <div id="auth-view" class="flex-1 flex flex-col justify-center items-center p-4 bg-[url('https://picsum.photos/1920/1080?blur=10')] bg-cover bg-center relative z-50">
         <div class="absolute inset-0 bg-gray-900/80 backdrop-blur-sm"></div>
         
-        <div class="relative w-full max-w-md bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-gray-800">
-            <!-- Tabs -->
-            <div class="flex border-b border-gray-800">
-                <button id="tab-login" class="flex-1 py-4 text-center font-bold text-gray-400 hover:text-white hover:bg-gray-800 transition" onclick="app.switchTab('login')">Login</button>
-                <button id="tab-signup" class="flex-1 py-4 text-center font-bold bg-gray-800 text-blue-400 shadow-inner" onclick="app.switchTab('signup')">Sign Up</button>
-            </div>
+        <div class="relative w-full max-w-md bg-[#2b2d31] rounded-lg shadow-2xl overflow-hidden">
+            <div class="p-8">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-white">Welcome back!</h2>
+                    <p class="text-gray-400 text-sm">We're so excited to see you again!</p>
+                </div>
 
-            <div class="p-8 max-h-[85vh] overflow-y-auto">
+                <!-- Toggle -->
+                <div class="flex bg-[#1e1f22] p-1 rounded mb-6">
+                    <button id="tab-login" class="flex-1 py-1 text-sm font-medium rounded text-white bg-[#5865F2]" onclick="app.switchTab('login')">Login</button>
+                    <button id="tab-signup" class="flex-1 py-1 text-sm font-medium rounded text-gray-400 hover:text-gray-200" onclick="app.switchTab('signup')">Sign Up</button>
+                </div>
+
                 <!-- Login Form -->
-                <form id="login-form" class="space-y-6 hidden">
-                    <div class="text-center">
-                        <h2 class="text-3xl font-extrabold text-white">Welcome Back</h2>
-                        <p class="text-gray-400 mt-2">Sign in to continue chatting</p>
+                <form id="login-form" class="space-y-4">
+                    <div>
+                        <label class="uppercase text-xs font-bold text-gray-400 mb-1 block">Email</label>
+                        <input type="email" id="login-email" required class="w-full px-3 py-2 bg-[#1e1f22] border-none rounded focus:ring-0 text-white transition-all">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-400 mb-1">Email</label>
-                        <input type="email" id="login-email" required class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-white placeholder-gray-600 transition-all">
+                        <label class="uppercase text-xs font-bold text-gray-400 mb-1 block">Password</label>
+                        <input type="password" id="login-password" required class="w-full px-3 py-2 bg-[#1e1f22] border-none rounded focus:ring-0 text-white transition-all">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-400 mb-1">Password</label>
-                        <input type="password" id="login-password" required class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-white placeholder-gray-600 transition-all">
-                    </div>
-                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 rounded-xl transition transform active:scale-95 shadow-lg shadow-blue-900/50">Log In</button>
+                    <button type="submit" class="w-full bg-[#5865F2] hover:bg-[#4752c4] text-white font-medium py-2.5 rounded transition">Log In</button>
                 </form>
 
                 <!-- Signup Form -->
-                <form id="signup-form" class="space-y-4">
-                    <div class="text-center mb-6">
-                        <h2 class="text-3xl font-extrabold text-white">Join Orbitly</h2>
-                        <p class="text-gray-400 mt-1">Create your alien profile</p>
-                    </div>
-                    
+                <form id="signup-form" class="space-y-4 hidden">
                     <!-- PFP Upload -->
-                    <div class="flex flex-col items-center justify-center mb-6 group cursor-pointer" onclick="document.getElementById('signup-pfp').click()">
-                        <div class="w-28 h-28 rounded-full bg-gray-800 border-2 border-dashed border-gray-600 flex items-center justify-center overflow-hidden relative group-hover:border-blue-500 transition-colors">
-                            <img id="pfp-preview" src="#" alt="Preview" class="w-full h-full object-cover hidden">
-                            <div id="pfp-placeholder" class="text-center p-2">
-                                <svg class="w-8 h-8 mx-auto text-gray-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                <span class="text-xs text-gray-400">Upload PFP</span>
+                    <div class="flex justify-center mb-4">
+                        <div class="w-24 h-24 rounded-full bg-[#1e1f22] relative group cursor-pointer hover:opacity-80 transition" onclick="document.getElementById('signup-pfp').click()">
+                            <img id="pfp-preview" src="" class="w-full h-full rounded-full object-cover hidden">
+                            <div id="pfp-placeholder" class="absolute inset-0 flex items-center justify-center text-gray-500 text-xs text-center p-2">
+                                Upload PFP (GIF ok!)
+                            </div>
+                            <div class="absolute bottom-0 right-0 bg-[#5865F2] rounded-full p-1 border-4 border-[#2b2d31]">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                             </div>
                         </div>
                         <input type="file" id="signup-pfp" accept="image/*" class="hidden">
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-400 mb-1">Username</label>
-                        <input type="text" id="signup-username" required class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white transition-all">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-400 mb-1">Email</label>
-                        <input type="email" id="signup-email" required class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white transition-all">
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-1">Age (11-1000)</label>
-                            <input type="number" id="signup-age" min="11" max="1000" required class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white transition-all">
+                            <label class="uppercase text-xs font-bold text-gray-400 mb-1 block">Username</label>
+                            <input type="text" id="signup-username" required class="w-full px-3 py-2 bg-[#1e1f22] border-none rounded text-white">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-1">Gender</label>
-                            <select id="signup-gender" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white transition-all appearance-none">
+                            <label class="uppercase text-xs font-bold text-gray-400 mb-1 block">Email</label>
+                            <input type="email" id="signup-email" required class="w-full px-3 py-2 bg-[#1e1f22] border-none rounded text-white">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="uppercase text-xs font-bold text-gray-400 mb-1 block">Age</label>
+                            <input type="number" id="signup-age" min="11" max="1000" required class="w-full px-3 py-2 bg-[#1e1f22] border-none rounded text-white">
+                        </div>
+                        <div>
+                            <label class="uppercase text-xs font-bold text-gray-400 mb-1 block">Gender</label>
+                            <select id="signup-gender" class="w-full px-3 py-2 bg-[#1e1f22] border-none rounded text-white appearance-none">
+                                <option value="Alien">Alien</option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
-                                <option value="Other">Other</option>
                                 <option value="Table">Table</option>
                                 <option value="Chair">Chair</option>
-                                <option value="Alien">Alien</option>
+                                <option value="Other">Other</option>
                             </select>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-400 mb-1">Password</label>
-                        <input type="password" id="signup-password" required class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white transition-all">
+                        <label class="uppercase text-xs font-bold text-gray-400 mb-1 block">Password</label>
+                        <input type="password" id="signup-password" required class="w-full px-3 py-2 bg-[#1e1f22] border-none rounded text-white">
                     </div>
-                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 rounded-lg transition transform active:scale-95 shadow-lg">Sign Up</button>
+                    <button type="submit" class="w-full bg-[#5865F2] hover:bg-[#4752c4] text-white font-medium py-2.5 rounded transition">Continue</button>
                 </form>
 
-                <!-- Feedback -->
                 <div id="auth-feedback" class="mt-4 text-center hidden">
-                    <p id="auth-error" class="text-red-400 text-sm bg-red-900/20 p-2 rounded border border-red-800"></p>
+                    <p id="auth-error" class="text-red-400 text-xs"></p>
                 </div>
                 <div id="auth-loader" class="hidden flex justify-center mt-4"><div class="loader"></div></div>
             </div>
         </div>
     </div>
 
-    <!-- Chat View Container -->
-    <div id="chat-view" class="hidden flex-col h-full w-full bg-gray-950">
-        <!-- Header -->
-        <header class="bg-gray-900 border-b border-gray-800 p-3 shadow-lg z-20">
-            <div class="max-w-6xl mx-auto flex justify-between items-center">
-                <div class="flex items-center gap-3">
+    <!-- Main Application View -->
+    <div id="chat-view" class="hidden h-full w-full">
+        
+        <!-- Main Chat Area -->
+        <div class="flex-1 flex flex-col min-w-0 bg-[#313338]">
+            <!-- Header -->
+            <header class="bg-[#313338] border-b border-[#26272d] p-3 shadow-sm flex justify-between items-center h-16 shrink-0 z-10">
+                <div class="flex items-center gap-2 px-2">
+                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
+                    <h1 class="font-bold text-white text-md">general-chat</h1>
+                </div>
+                
+                <!-- User Profile & Status -->
+                <div class="flex items-center gap-3 bg-[#2b2d31] py-1.5 px-3 rounded hover:bg-[#35373c] transition relative cursor-pointer group" id="user-menu-trigger">
                     <div class="relative">
-                        <div class="w-10 h-10 rounded-full bg-gray-800 border border-gray-700 overflow-hidden flex items-center justify-center">
-                            <img id="current-user-pfp" src="" class="w-full h-full object-cover hidden">
-                            <span id="current-user-initial" class="text-lg font-bold text-gray-400">?</span>
+                        <img id="current-user-pfp" src="" class="w-8 h-8 rounded-full bg-gray-700 object-cover">
+                        <div id="current-user-status-dot" class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-[3px] border-[#2b2d31] status-online"></div>
+                    </div>
+                    <div class="flex flex-col">
+                        <span id="current-username" class="text-sm font-semibold text-white leading-tight">User</span>
+                        <span id="current-status-text" class="text-[10px] text-gray-400 leading-tight">Online</span>
+                    </div>
+
+                    <!-- Status Dropdown -->
+                    <div id="status-dropdown" class="hidden absolute top-full right-0 mt-2 w-48 bg-[#111214] rounded shadow-xl border border-[#1e1f22] overflow-hidden z-50">
+                        <div class="p-2 space-y-1">
+                            <button onclick="app.setStatus('online')" class="w-full text-left px-2 py-1.5 rounded hover:bg-[#4752c4] hover:text-white text-gray-300 text-sm flex items-center gap-2 group">
+                                <div class="w-2.5 h-2.5 rounded-full status-online"></div> Online
+                            </button>
+                            <button onclick="app.setStatus('busy')" class="w-full text-left px-2 py-1.5 rounded hover:bg-[#4752c4] hover:text-white text-gray-300 text-sm flex items-center gap-2 group">
+                                <div class="w-2.5 h-2.5 rounded-full status-busy"></div> Busy
+                            </button>
+                            <button onclick="app.setStatus('dnd')" class="w-full text-left px-2 py-1.5 rounded hover:bg-[#4752c4] hover:text-white text-gray-300 text-sm flex items-center gap-2 group">
+                                <div class="w-2.5 h-2.5 rounded-full status-dnd"></div> Do Not Disturb
+                            </button>
+                            <button id="btn-invisible" onclick="app.setStatus('invisible')" class="hidden w-full text-left px-2 py-1.5 rounded hover:bg-[#4752c4] hover:text-white text-gray-300 text-sm flex items-center gap-2 group border-t border-gray-800 mt-1 pt-2">
+                                <div class="w-2.5 h-2.5 rounded-full status-invisible border border-gray-500"></div> Invisible
+                            </button>
+                            <button onclick="app.logout()" class="w-full text-left px-2 py-1.5 rounded hover:bg-red-500 hover:text-white text-red-400 text-sm flex items-center gap-2 mt-1 border-t border-gray-800 pt-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                                Log Out
+                            </button>
                         </div>
-                        <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></div>
-                    </div>
-                    <div>
-                        <h1 class="font-bold text-white leading-tight">Orbitly Chat</h1>
-                        <p id="current-username" class="text-xs text-blue-400 font-medium">Connecting...</p>
                     </div>
                 </div>
-                <button id="logout-btn" class="px-3 py-1.5 bg-gray-800 hover:bg-red-900/30 text-gray-300 hover:text-red-400 border border-gray-700 hover:border-red-900/50 rounded-lg text-sm font-medium transition flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                    Logout
-                </button>
-            </div>
-        </header>
+            </header>
 
-        <!-- Messages Area -->
-        <div class="flex-1 overflow-hidden relative max-w-6xl mx-auto w-full flex flex-col">
-            <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-6 scroll-smooth">
-                <!-- Messages will be injected here -->
-                <div class="flex justify-center mt-10">
-                    <div class="loader"></div>
-                </div>
+            <!-- Messages List -->
+            <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-1 scroll-smooth">
+                <!-- Messages injected here -->
             </div>
-        </div>
 
-        <!-- Input Area -->
-        <div class="bg-gray-900 border-t border-gray-800 p-4 pb-6 sm:pb-4">
-            <div class="max-w-6xl mx-auto w-full">
-                <form id="message-form" class="flex gap-2 relative">
-                    <input type="text" id="message-input" autocomplete="off" placeholder="Type a message to the galaxy..." class="flex-1 bg-gray-800 border border-gray-700 text-gray-100 rounded-full px-6 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500 transition-all shadow-inner">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center transition transform active:scale-95 shadow-lg shadow-blue-900/40">
-                        <svg class="w-5 h-5 translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+            <!-- Input Area -->
+            <div class="p-4 pt-0">
+                <form id="message-form" class="bg-[#383a40] rounded-lg p-2 flex items-center gap-2">
+                    <button type="button" class="text-gray-400 hover:text-gray-200 p-2 rounded-full hover:bg-[#313338]">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l7.51-3.22-7.52-1 .01-4.28L12 12l-5.5 2.5z"/></svg>
                     </button>
+                    <input type="text" id="message-input" autocomplete="off" placeholder="Message #general-chat" class="flex-1 bg-transparent border-none text-gray-100 placeholder-gray-500 focus:ring-0 px-2">
                 </form>
             </div>
         </div>
+
+        <!-- Sidebar (Online Players) -->
+        <div class="w-60 bg-[#2b2d31] flex flex-col shrink-0 border-l border-[#1e1f22]">
+            <div class="p-4 border-b border-[#1e1f22] h-16 flex items-center">
+                <h2 class="font-bold text-gray-400 text-xs uppercase tracking-wide">Players Online</h2>
+            </div>
+            <div id="online-list" class="flex-1 overflow-y-auto p-3 space-y-0.5">
+                <!-- Users injected here -->
+            </div>
+        </div>
+
     </div>
 
     <!-- Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         
-        // REMOVED: getStorage imports to avoid CORS issues
-        // We will store images as Base64 strings directly in Firestore
-
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBz9yOlQFZQZE-GtGcRbJ2sWUYQTb0kBi4",
             authDomain: "orbitly-online.firebaseapp.com",
@@ -191,32 +217,23 @@
             measurementId: "G-9B5458S73M"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Application State
+        // State
         let currentUser = null;
         let currentUserProfile = null;
         let unsubscribeMessages = null;
+        let unsubscribeUsers = null;
 
-        // DOM Elements
+        // Elements
         const els = {
             authView: document.getElementById('auth-view'),
             chatView: document.getElementById('chat-view'),
-            forms: {
-                login: document.getElementById('login-form'),
-                signup: document.getElementById('signup-form'),
-            },
-            tabs: {
-                login: document.getElementById('tab-login'),
-                signup: document.getElementById('tab-signup'),
-            },
-            inputs: {
-                signupPfp: document.getElementById('signup-pfp'),
-                msg: document.getElementById('message-input'),
-            },
+            forms: { login: document.getElementById('login-form'), signup: document.getElementById('signup-form') },
+            tabs: { login: document.getElementById('tab-login'), signup: document.getElementById('tab-signup') },
+            inputs: { signupPfp: document.getElementById('signup-pfp'), msg: document.getElementById('message-input') },
             displays: {
                 pfpPreview: document.getElementById('pfp-preview'),
                 pfpPlaceholder: document.getElementById('pfp-placeholder'),
@@ -224,44 +241,51 @@
                 loader: document.getElementById('auth-loader'),
                 feedback: document.getElementById('auth-feedback'),
                 msgContainer: document.getElementById('messages-container'),
-                currentUserPfp: document.getElementById('current-user-pfp'),
-                currentUserInitial: document.getElementById('current-user-initial'),
-                currentUsername: document.getElementById('current-username'),
+                onlineList: document.getElementById('online-list'),
+                
+                headerPfp: document.getElementById('current-user-pfp'),
+                headerName: document.getElementById('current-username'),
+                headerStatusText: document.getElementById('current-status-text'),
+                headerStatusDot: document.getElementById('current-user-status-dot'),
+                statusDropdown: document.getElementById('status-dropdown'),
+                invisibleBtn: document.getElementById('btn-invisible')
             }
         };
 
-        // Helper: Compress Image to Base64 to avoid Storage CORS
-        function compressImage(file) {
+        // --- Core Functions ---
+
+        // Image Handler (Handles GIFs differently to preserve animation)
+        function processImage(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onload = (event) => {
+                    // If GIF, return raw DataURL (animation preservation)
+                    // Note: Firestore has 1MB limit. Large GIFs might fail.
+                    if (file.type === 'image/gif') {
+                        resolve(event.target.result);
+                        return;
+                    }
+
+                    // Otherwise compress standard images
                     const img = new Image();
                     img.src = event.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        // Resize to thumbnail size (max 150px) to keep Firestore document small
                         const MAX_SIZE = 150; 
                         let width = img.width;
                         let height = img.height;
 
                         if (width > height) {
-                            if (width > MAX_SIZE) {
-                                height *= MAX_SIZE / width;
-                                width = MAX_SIZE;
-                            }
+                            if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
                         } else {
-                            if (height > MAX_SIZE) {
-                                width *= MAX_SIZE / height;
-                                height = MAX_SIZE;
-                            }
+                            if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
                         }
                         canvas.width = width;
                         canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-                        // Convert to medium quality JPEG base64 string
-                        resolve(canvas.toDataURL('image/jpeg', 0.6));
+                        resolve(canvas.toDataURL('image/jpeg', 0.8));
                     };
                     img.onerror = (err) => reject(err);
                 };
@@ -269,34 +293,50 @@
             });
         }
 
-        // Helper: Toggle Auth Tabs
+        // Global App Methods
         window.app = {
             switchTab: (tab) => {
                 els.displays.feedback.classList.add('hidden');
                 if (tab === 'login') {
                     els.forms.login.classList.remove('hidden');
                     els.forms.signup.classList.add('hidden');
-                    
-                    els.tabs.login.classList.add('bg-gray-800', 'text-blue-400', 'shadow-inner');
-                    els.tabs.login.classList.remove('text-gray-400', 'hover:text-white', 'hover:bg-gray-800');
-                    
-                    els.tabs.signup.classList.remove('bg-gray-800', 'text-blue-400', 'shadow-inner');
-                    els.tabs.signup.classList.add('text-gray-400', 'hover:text-white', 'hover:bg-gray-800');
+                    els.tabs.login.className = "flex-1 py-1 text-sm font-medium rounded text-white bg-[#5865F2] transition";
+                    els.tabs.signup.className = "flex-1 py-1 text-sm font-medium rounded text-gray-400 hover:text-gray-200 transition";
                 } else {
                     els.forms.login.classList.add('hidden');
                     els.forms.signup.classList.remove('hidden');
-                    
-                    els.tabs.signup.classList.add('bg-gray-800', 'text-blue-400', 'shadow-inner');
-                    els.tabs.signup.classList.remove('text-gray-400', 'hover:text-white', 'hover:bg-gray-800');
-                    
-                    els.tabs.login.classList.remove('bg-gray-800', 'text-blue-400', 'shadow-inner');
-                    els.tabs.login.classList.add('text-gray-400', 'hover:text-white', 'hover:bg-gray-800');
+                    els.tabs.signup.className = "flex-1 py-1 text-sm font-medium rounded text-white bg-[#5865F2] transition";
+                    els.tabs.login.className = "flex-1 py-1 text-sm font-medium rounded text-gray-400 hover:text-gray-200 transition";
+                }
+            },
+            logout: () => {
+                // Set status to offline before logging out (optional, but good practice)
+                if (currentUser && currentUserProfile && currentUserProfile.status !== 'invisible') {
+                     updateDoc(doc(db, "users", currentUser.uid), { status: 'offline' }).then(() => signOut(auth));
+                } else {
+                    signOut(auth);
+                }
+            },
+            setStatus: async (status) => {
+                if (!currentUser) return;
+                try {
+                    await updateDoc(doc(db, "users", currentUser.uid), { status: status });
+                    // Close dropdown
+                    els.displays.statusDropdown.classList.add('hidden');
+                } catch (e) {
+                    console.error("Status update failed", e);
                 }
             }
         };
 
-        // Initialize view
-        window.app.switchTab('signup');
+        // --- Event Listeners ---
+
+        // Dropdown Toggle
+        document.getElementById('user-menu-trigger').addEventListener('click', (e) => {
+            els.displays.statusDropdown.classList.toggle('hidden');
+            e.stopPropagation();
+        });
+        document.addEventListener('click', () => els.displays.statusDropdown.classList.add('hidden'));
 
         // PFP Preview
         els.inputs.signupPfp.addEventListener('change', (e) => {
@@ -327,40 +367,34 @@
             
             toggleLoading(true);
             try {
-                // 1. Create User in Auth
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // 2. Process PFP (Resize and convert to Base64)
                 let pfpUrl = `https://ui-avatars.com/api/?name=${username}&background=random`;
                 if (pfpFile) {
                     try {
-                        // Compress image to Base64 string to store directly in Firestore
-                        pfpUrl = await compressImage(pfpFile);
+                        pfpUrl = await processImage(pfpFile);
                     } catch (imgError) {
-                        console.error("PFP processing failed, using default.", imgError);
+                        console.error("PFP failed", imgError);
                     }
                 }
 
-                // 3. Save details to Firestore
                 await setDoc(doc(db, "users", user.uid), {
                     uid: user.uid,
                     username,
                     email,
                     age,
                     gender,
-                    pfpUrl, // Stores the base64 string or default URL
+                    pfpUrl,
+                    status: 'online', // Default status
                     createdAt: serverTimestamp()
                 });
 
-                // 4. Update Auth Profile (Note: photoURL has a length limit, so we might only store it in Firestore if too long, but we try anyway)
-                // We primarily rely on Firestore data for the app.
-                try {
-                    await updateProfile(user, { displayName: username, photoURL: pfpUrl.length < 2000 ? pfpUrl : null });
-                } catch(e) { console.log("Skipping auth profile photo update due to length"); }
+                // Try to update auth profile just in case, ignore length errors
+                try { await updateProfile(user, { displayName: username }); } catch(e){}
 
             } catch (err) {
-                showError(parseAuthError(err));
+                showError(err.message);
             } finally {
                 toggleLoading(false);
             }
@@ -375,46 +409,58 @@
             try {
                 await signInWithEmailAndPassword(auth, email, password);
             } catch (err) {
-                showError(parseAuthError(err));
+                showError(err.message);
             } finally {
                 toggleLoading(false);
             }
         });
 
-        document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
-
-        // --- Main Listener ---
+        // --- Main App Logic ---
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
                 
-                // Fetch full profile from Firestore (contains the Base64 PFP)
+                // Get User Data
                 try {
-                    const docSnap = await getDoc(doc(db, "users", user.uid));
+                    const docRef = doc(db, "users", user.uid);
+                    const docSnap = await getDoc(docRef);
+                    
                     if (docSnap.exists()) {
                         currentUserProfile = docSnap.data();
+                        // Set online on login if not already
+                        if (currentUserProfile.status === 'offline') {
+                            await updateDoc(docRef, { status: 'online' });
+                        }
                     } else {
-                        currentUserProfile = { 
-                            username: user.displayName || 'Anonymous', 
-                            pfpUrl: user.photoURL 
-                        };
+                        // Fallback
+                        currentUserProfile = { username: user.displayName || 'User', pfpUrl: null, email: user.email };
                     }
                 } catch (e) {
-                    console.error("Profile fetch error", e);
-                    currentUserProfile = { username: user.displayName, pfpUrl: user.photoURL };
+                    console.error(e);
                 }
 
-                updateHeaderUI();
+                // Update UI based on User
+                renderHeader();
+                
+                // Show/Hide Invisible Option
+                if (user.email === 'dev@gmail.com') {
+                    els.displays.invisibleBtn.classList.remove('hidden');
+                } else {
+                    els.displays.invisibleBtn.classList.add('hidden');
+                }
+
                 els.authView.classList.add('hidden');
                 els.chatView.classList.remove('hidden');
                 els.chatView.classList.add('flex');
                 
                 startChatListener();
+                startUsersListener();
             } else {
+                if (unsubscribeMessages) unsubscribeMessages();
+                if (unsubscribeUsers) unsubscribeUsers();
                 currentUser = null;
                 currentUserProfile = null;
-                if (unsubscribeMessages) unsubscribeMessages();
                 
                 els.chatView.classList.add('hidden');
                 els.chatView.classList.remove('flex');
@@ -422,35 +468,72 @@
             }
         });
 
-        function updateHeaderUI() {
-            els.displays.currentUsername.textContent = currentUserProfile.username;
-            if (currentUserProfile.pfpUrl) {
-                els.displays.currentUserPfp.src = currentUserProfile.pfpUrl;
-                els.displays.currentUserPfp.classList.remove('hidden');
-                els.displays.currentUserInitial.classList.add('hidden');
-            } else {
-                els.displays.currentUserInitial.textContent = currentUserProfile.username[0].toUpperCase();
-                els.displays.currentUserPfp.classList.add('hidden');
-                els.displays.currentUserInitial.classList.remove('hidden');
-            }
+        function renderHeader() {
+            if (!currentUserProfile) return;
+            els.displays.headerName.textContent = currentUserProfile.username;
+            if (currentUserProfile.pfpUrl) els.displays.headerPfp.src = currentUserProfile.pfpUrl;
+            
+            // Listen to my own status changes to update header
+            onSnapshot(doc(db, "users", currentUser.uid), (doc) => {
+                if (doc.exists()) {
+                    const data = doc.data();
+                    const s = data.status || 'online';
+                    els.displays.headerStatusText.textContent = s.charAt(0).toUpperCase() + s.slice(1);
+                    
+                    // Reset classes
+                    els.displays.headerStatusDot.className = "absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-[3px] border-[#2b2d31]";
+                    if (s === 'online') els.displays.headerStatusDot.classList.add('status-online');
+                    else if (s === 'busy') els.displays.headerStatusDot.classList.add('status-busy');
+                    else if (s === 'dnd') els.displays.headerStatusDot.classList.add('status-dnd');
+                    else els.displays.headerStatusDot.classList.add('status-offline');
+                }
+            });
         }
 
-        // --- Chat Logic ---
+        // --- Chat System ---
 
         function startChatListener() {
+            // Initial clear
+            els.displays.msgContainer.innerHTML = ''; 
+
             const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
             
             unsubscribeMessages = onSnapshot(q, (snapshot) => {
-                els.displays.msgContainer.innerHTML = ''; 
-                
-                snapshot.forEach((doc) => {
-                    const msg = doc.data();
-                    renderMessage(msg);
+                // Use docChanges to prevent full refresh
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added") {
+                        const msg = change.doc.data();
+                        renderMessage(msg);
+                    }
                 });
                 
-                // Auto scroll to bottom
-                els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight;
+                // Scroll to bottom
+                requestAnimationFrame(() => {
+                    els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight;
+                });
             });
+        }
+
+        function renderMessage(msg) {
+            const div = document.createElement('div');
+            // Discord style: hover effect, left aligned
+            div.className = "flex gap-4 pl-2 pr-4 py-1 hover:bg-[#2e3035] -mx-2 rounded group animate-fade-in";
+            
+            const time = msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now';
+            
+            div.innerHTML = `
+                <div class="flex-shrink-0 cursor-pointer mt-0.5">
+                    <img src="${msg.pfpUrl || 'https://ui-avatars.com/api/?name=?'}" class="w-10 h-10 rounded-full hover:opacity-80 transition object-cover">
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-baseline gap-2">
+                        <span class="font-medium text-white hover:underline cursor-pointer text-sm">${escapeHtml(msg.username)}</span>
+                        <span class="text-[10px] text-gray-400">${time}</span>
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap break-words">${escapeHtml(msg.text)}</p>
+                </div>
+            `;
+            els.displays.msgContainer.appendChild(div);
         }
 
         document.getElementById('message-form').addEventListener('submit', async (e) => {
@@ -465,47 +548,64 @@
                     text,
                     uid: currentUser.uid,
                     username: currentUserProfile.username,
-                    pfpUrl: currentUserProfile.pfpUrl || null, // Stores Base64 string for this message
+                    pfpUrl: currentUserProfile.pfpUrl,
                     createdAt: serverTimestamp()
                 });
-            } catch (err) {
-                console.error("Msg Error", err);
-                alert("Failed to send message");
-            }
+            } catch (err) { console.error(err); }
         });
 
-        function renderMessage(msg) {
-            const isMe = msg.uid === currentUser.uid;
-            const container = document.createElement('div');
-            container.className = `flex ${isMe ? 'justify-end' : 'justify-start'} animate-fade-in group`;
+        // --- Users List System ---
 
-            const initial = msg.username ? msg.username[0].toUpperCase() : '?';
-            const avatar = !isMe ? `
-                <div class="w-8 h-8 rounded-full bg-gray-700 flex-shrink-0 flex items-center justify-center mr-2 overflow-hidden border border-gray-600 self-end mb-1">
-                    ${msg.pfpUrl 
-                        ? `<img src="${msg.pfpUrl}" class="w-full h-full object-cover">` 
-                        : `<span class="text-xs text-white font-bold">${initial}</span>`
-                    }
-                </div>
-            ` : '';
+        function startUsersListener() {
+            const q = query(collection(db, "users"), orderBy("username", "asc"));
+            
+            unsubscribeUsers = onSnapshot(q, (snapshot) => {
+                els.displays.onlineList.innerHTML = '';
+                
+                snapshot.forEach((doc) => {
+                    const user = doc.data();
+                    const status = user.status || 'offline';
+                    
+                    // Filter: Hide invisible users unless it's me
+                    if (status === 'invisible' && user.uid !== currentUser.uid) return;
 
-            const bubbleColor = isMe 
-                ? 'bg-blue-600 text-white rounded-br-none' 
-                : 'bg-gray-800 text-gray-200 border border-gray-700 rounded-bl-none';
-
-            container.innerHTML = `
-                ${avatar}
-                <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[75%]">
-                    ${!isMe ? `<span class="text-[10px] text-gray-500 ml-1 mb-0.5">${escapeHtml(msg.username)}</span>` : ''}
-                    <div class="${bubbleColor} px-4 py-2 rounded-2xl shadow-md break-words text-sm md:text-base leading-relaxed">
-                        ${escapeHtml(msg.text)}
-                    </div>
-                </div>
-            `;
-            els.displays.msgContainer.appendChild(container);
+                    // If it is me and I am invisible, show as "Offline" in the UI list as requested
+                    // "when clicked it will show your username offline on the players online"
+                    let displayStatus = status;
+                    if (status === 'invisible') displayStatus = 'offline'; 
+                    // Filter offline users entirely? The prompt says "players online list". 
+                    // Usually this implies hiding offline users, but then said "show your username offline".
+                    // I will show everyone but dim offline ones.
+                    
+                    renderUserInList(user, displayStatus);
+                });
+            });
         }
 
-        // --- Utilities ---
+        function renderUserInList(user, status) {
+            const div = document.createElement('div');
+            div.className = "flex items-center gap-3 p-2 rounded hover:bg-[#35373c] cursor-pointer group opacity-90 hover:opacity-100 transition";
+            if (status === 'offline') div.classList.add('opacity-50');
+
+            let statusColor = 'bg-gray-500';
+            if (status === 'online') statusColor = 'bg-green-500';
+            if (status === 'busy') statusColor = 'bg-yellow-500';
+            if (status === 'dnd') statusColor = 'bg-red-500';
+
+            div.innerHTML = `
+                <div class="relative">
+                    <img src="${user.pfpUrl || 'https://ui-avatars.com/api/?name=?'}" class="w-8 h-8 rounded-full object-cover">
+                    ${status !== 'offline' ? `<div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 border-[3px] border-[#2b2d31] rounded-full ${statusColor}"></div>` : ''}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm font-medium text-gray-200 truncate group-hover:text-white">${escapeHtml(user.username)}</div>
+                    <div class="text-[10px] text-gray-400 uppercase font-bold">${status}</div>
+                </div>
+            `;
+            els.displays.onlineList.appendChild(div);
+        }
+
+        // --- Utils ---
 
         function toggleLoading(active) {
             if (active) {
@@ -519,13 +619,6 @@
         function showError(msg) {
             els.displays.error.textContent = msg;
             els.displays.feedback.classList.remove('hidden');
-        }
-
-        function parseAuthError(err) {
-            if (err.code === 'auth/email-already-in-use') return "Email already registered.";
-            if (err.code === 'auth/weak-password') return "Password is too weak.";
-            if (err.code === 'auth/invalid-credential') return "Invalid email or password.";
-            return err.message;
         }
 
         function escapeHtml(text) {
