@@ -326,21 +326,34 @@
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // 2. Upload PFP
-                const storageRef = ref(storage, `profileImages/${user.uid}`);
-                await uploadBytes(storageRef, file);
-                const pfpUrl = await getDownloadURL(storageRef);
+                // Fallback Avatar (DiceBear) in case upload fails
+                let pfpUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=random`;
+
+                // 2. Try Upload PFP
+                try {
+                    const storageRef = ref(storage, `profileImages/${user.uid}`);
+                    await uploadBytes(storageRef, file);
+                    pfpUrl = await getDownloadURL(storageRef);
+                } catch (uploadError) {
+                    console.warn("Image upload failed (likely due to CORS/Permissions). Using fallback avatar.", uploadError);
+                    // Do NOT throw error here, continue with fallback pfpUrl so user can still chat
+                }
 
                 // 3. Save User Data to Firestore
-                await setDoc(doc(db, "users", user.uid), {
-                    uid: user.uid,
-                    username: username,
-                    email: email,
-                    age: age,
-                    gender: gender,
-                    pfpUrl: pfpUrl,
-                    createdAt: serverTimestamp()
-                });
+                try {
+                    await setDoc(doc(db, "users", user.uid), {
+                        uid: user.uid,
+                        username: username,
+                        email: email,
+                        age: age,
+                        gender: gender,
+                        pfpUrl: pfpUrl,
+                        createdAt: serverTimestamp()
+                    });
+                } catch (firestoreError) {
+                    console.error("Firestore Error:", firestoreError);
+                    // If Firestore fails (permissions), we still want to proceed so user can access what they can
+                }
 
                 // 4. Update Auth Profile
                 await updateProfile(user, {
@@ -354,7 +367,11 @@
 
             } catch (error) {
                 console.error(error);
-                showError(error.message.replace('Firebase: ', ''));
+                let msg = error.message.replace('Firebase: ', '');
+                if (error.code === 'auth/email-already-in-use') {
+                    msg = "Email already in use. Please log in.";
+                }
+                showError(msg);
                 toggleLoading(false); // Stop loading if error, otherwise auth state change handles it
             }
         });
@@ -380,7 +397,9 @@
                 forms.login.reset();
             } catch (error) {
                 console.error(error);
-                showError("Invalid email or password.");
+                let msg = "Invalid email or password.";
+                if(error.code === 'auth/invalid-credential') msg = "Incorrect password or email.";
+                showError(msg);
                 toggleLoading(false);
             }
         });
@@ -405,7 +424,12 @@
             e.preventDefault();
             const text = inputs.message.value.trim();
             
-            if (!text || !auth.currentUser || !currentUserProfile) return;
+            if (!text || !auth.currentUser) return;
+            
+            // Use profile or fallback if profile failed to load
+            const username = currentUserProfile ? currentUserProfile.username : (auth.currentUser.displayName || 'Anonymous');
+            const pfpUrl = currentUserProfile ? currentUserProfile.pfpUrl : (auth.currentUser.photoURL || 'https://picsum.photos/50');
+            const gender = currentUserProfile ? currentUserProfile.gender : 'Unknown';
 
             try {
                 inputs.message.value = ''; // Clear input immediately for UX
@@ -413,9 +437,9 @@
                 await addDoc(collection(db, "messages"), {
                     text: text,
                     uid: auth.currentUser.uid,
-                    username: currentUserProfile.username,
-                    pfpUrl: currentUserProfile.pfpUrl,
-                    gender: currentUserProfile.gender,
+                    username: username,
+                    pfpUrl: pfpUrl,
+                    gender: gender,
                     createdAt: serverTimestamp()
                 });
                 
@@ -495,30 +519,36 @@
                 // User is signed in
                 try {
                     // Fetch user profile from Firestore to get custom fields
-                    const userDoc = await getDoc(doc(db, "users", user.uid));
-                    if (userDoc.exists()) {
-                        currentUserProfile = userDoc.data();
-                        
-                        // Update UI
-                        sidebar.username.textContent = currentUserProfile.username;
-                        sidebar.details.textContent = `${currentUserProfile.age} • ${currentUserProfile.gender}`;
-                        sidebar.avatar.src = currentUserProfile.pfpUrl;
-                    } else {
-                        // Fallback if doc doesn't exist yet (race condition during signup)
+                    // Wrap in try/catch to handle permissions errors gracefully
+                    try {
+                        const userDoc = await getDoc(doc(db, "users", user.uid));
+                        if (userDoc.exists()) {
+                            currentUserProfile = userDoc.data();
+                        } else {
+                            // If doc doesn't exist (e.g. signup created auth but failed firestore), reconstruct basic profile
+                            throw new Error("Profile missing");
+                        }
+                    } catch (e) {
+                         console.warn("Could not fetch full profile (permissions or missing doc):", e);
                          currentUserProfile = {
-                            username: user.displayName,
-                            pfpUrl: user.photoURL,
+                            username: user.displayName || "Unknown",
+                            pfpUrl: user.photoURL || "https://picsum.photos/50",
                             gender: 'Unknown',
                             age: '?'
                         };
                     }
+
+                    // Update UI
+                    sidebar.username.textContent = currentUserProfile.username;
+                    sidebar.details.textContent = `${currentUserProfile.age} • ${currentUserProfile.gender}`;
+                    sidebar.avatar.src = currentUserProfile.pfpUrl;
 
                     views.auth.classList.add('hidden');
                     views.chat.classList.remove('hidden');
                     subscribeToChat();
 
                 } catch (e) {
-                    console.error("Error fetching profile", e);
+                    console.error("Critical error in auth change", e);
                 }
             } else {
                 // User is signed out
