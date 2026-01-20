@@ -75,7 +75,7 @@
                         <div class="w-24 h-24 rounded-full bg-[#1e1f22] relative group cursor-pointer hover:opacity-80 transition" onclick="document.getElementById('signup-pfp').click()">
                             <img id="pfp-preview" src="" class="w-full h-full rounded-full object-cover hidden">
                             <div id="pfp-placeholder" class="absolute inset-0 flex items-center justify-center text-gray-500 text-xs text-center p-2">
-                                Upload PFP (GIF ok!)
+                                Upload PFP (Static only)
                             </div>
                             <div class="absolute bottom-0 right-0 bg-[#5865F2] rounded-full p-1 border-4 border-[#2b2d31]">
                                 <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -134,8 +134,7 @@
             <!-- Header -->
             <header class="bg-[#313338] border-b border-[#26272d] p-3 shadow-sm flex justify-between items-center h-16 shrink-0 z-10">
                 <div class="flex items-center gap-2 px-2">
-                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
-                    <h1 class="font-bold text-white text-md">general-chat</h1>
+                    <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExMXBhNjNycTQweDFkY214NjMxYWtiZWs1ZjZ3dTJxb254d21ldHIyOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/HPbuRgMPF2vL2/giphy.gif" alt="Logo" class="h-10 object-contain">
                 </div>
                 
                 <!-- User Profile & Status -->
@@ -191,8 +190,8 @@
 
         <!-- Sidebar (Online Players) -->
         <div class="w-60 bg-[#2b2d31] flex flex-col shrink-0 border-l border-[#1e1f22]">
-            <div class="p-4 border-b border-[#1e1f22] h-16 flex items-center">
-                <h2 class="font-bold text-gray-400 text-xs uppercase tracking-wide">Players Online</h2>
+            <div class="p-4 border-b border-[#1e1f22] h-16 flex items-center justify-center">
+                 <h2 class="font-bold text-gray-400 text-xs uppercase tracking-wide">Players</h2>
             </div>
             <div id="online-list" class="flex-1 overflow-y-auto p-3 space-y-0.5">
                 <!-- Users injected here -->
@@ -254,23 +253,17 @@
 
         // --- Core Functions ---
 
-        // Image Handler (Handles GIFs differently to preserve animation)
+        // Image Handler - MODIFIED: GIF support removed. All images are drawn to canvas to freeze animation.
         function processImage(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onload = (event) => {
-                    // If GIF, return raw DataURL (animation preservation)
-                    // Note: Firestore has 1MB limit. Large GIFs might fail.
-                    if (file.type === 'image/gif') {
-                        resolve(event.target.result);
-                        return;
-                    }
-
-                    // Otherwise compress standard images
+                    // Create image object from input
                     const img = new Image();
                     img.src = event.target.result;
                     img.onload = () => {
+                        // Drawing to canvas converts any file (including GIFs) to a static frame
                         const canvas = document.createElement('canvas');
                         const MAX_SIZE = 150; 
                         let width = img.width;
@@ -285,6 +278,7 @@
                         canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
+                        // Convert to static JPEG
                         resolve(canvas.toDataURL('image/jpeg', 0.8));
                     };
                     img.onerror = (err) => reject(err);
@@ -310,7 +304,7 @@
                 }
             },
             logout: () => {
-                // Set status to offline before logging out (optional, but good practice)
+                // Set status to offline before logging out
                 if (currentUser && currentUserProfile && currentUserProfile.status !== 'invisible') {
                      updateDoc(doc(db, "users", currentUser.uid), { status: 'offline' }).then(() => signOut(auth));
                 } else {
@@ -321,7 +315,6 @@
                 if (!currentUser) return;
                 try {
                     await updateDoc(doc(db, "users", currentUser.uid), { status: status });
-                    // Close dropdown
                     els.displays.statusDropdown.classList.add('hidden');
                 } catch (e) {
                     console.error("Status update failed", e);
@@ -386,11 +379,10 @@
                     age,
                     gender,
                     pfpUrl,
-                    status: 'online', // Default status
+                    status: 'online', 
                     createdAt: serverTimestamp()
                 });
 
-                // Try to update auth profile just in case, ignore length errors
                 try { await updateProfile(user, { displayName: username }); } catch(e){}
 
             } catch (err) {
@@ -428,22 +420,18 @@
                     
                     if (docSnap.exists()) {
                         currentUserProfile = docSnap.data();
-                        // Set online on login if not already
                         if (currentUserProfile.status === 'offline') {
                             await updateDoc(docRef, { status: 'online' });
                         }
                     } else {
-                        // Fallback
                         currentUserProfile = { username: user.displayName || 'User', pfpUrl: null, email: user.email };
                     }
                 } catch (e) {
                     console.error(e);
                 }
 
-                // Update UI based on User
                 renderHeader();
                 
-                // Show/Hide Invisible Option
                 if (user.email === 'dev@gmail.com') {
                     els.displays.invisibleBtn.classList.remove('hidden');
                 } else {
@@ -473,14 +461,12 @@
             els.displays.headerName.textContent = currentUserProfile.username;
             if (currentUserProfile.pfpUrl) els.displays.headerPfp.src = currentUserProfile.pfpUrl;
             
-            // Listen to my own status changes to update header
             onSnapshot(doc(db, "users", currentUser.uid), (doc) => {
                 if (doc.exists()) {
                     const data = doc.data();
                     const s = data.status || 'online';
                     els.displays.headerStatusText.textContent = s.charAt(0).toUpperCase() + s.slice(1);
                     
-                    // Reset classes
                     els.displays.headerStatusDot.className = "absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-[3px] border-[#2b2d31]";
                     if (s === 'online') els.displays.headerStatusDot.classList.add('status-online');
                     else if (s === 'busy') els.displays.headerStatusDot.classList.add('status-busy');
@@ -493,13 +479,11 @@
         // --- Chat System ---
 
         function startChatListener() {
-            // Initial clear
             els.displays.msgContainer.innerHTML = ''; 
 
             const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
             
             unsubscribeMessages = onSnapshot(q, (snapshot) => {
-                // Use docChanges to prevent full refresh
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === "added") {
                         const msg = change.doc.data();
@@ -507,7 +491,6 @@
                     }
                 });
                 
-                // Scroll to bottom
                 requestAnimationFrame(() => {
                     els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight;
                 });
@@ -516,7 +499,6 @@
 
         function renderMessage(msg) {
             const div = document.createElement('div');
-            // Discord style: hover effect, left aligned
             div.className = "flex gap-4 pl-2 pr-4 py-1 hover:bg-[#2e3035] -mx-2 rounded group animate-fade-in";
             
             const time = msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now';
@@ -562,23 +544,49 @@
             unsubscribeUsers = onSnapshot(q, (snapshot) => {
                 els.displays.onlineList.innerHTML = '';
                 
+                const onlineUsers = [];
+                const offlineUsers = [];
+
                 snapshot.forEach((doc) => {
                     const user = doc.data();
                     const status = user.status || 'offline';
                     
-                    // Filter: Hide invisible users unless it's me
+                    // Invisible logic:
+                    // If user is invisible:
+                    //   - If it's me: I see myself in the offline list
+                    //   - If it's not me: I don't see them at all (they are truly hidden)
                     if (status === 'invisible' && user.uid !== currentUser.uid) return;
 
-                    // If it is me and I am invisible, show as "Offline" in the UI list as requested
-                    // "when clicked it will show your username offline on the players online"
+                    // Display logic for the lists
                     let displayStatus = status;
                     if (status === 'invisible') displayStatus = 'offline'; 
-                    // Filter offline users entirely? The prompt says "players online list". 
-                    // Usually this implies hiding offline users, but then said "show your username offline".
-                    // I will show everyone but dim offline ones.
-                    
-                    renderUserInList(user, displayStatus);
+
+                    if (displayStatus === 'offline') {
+                        offlineUsers.push({ ...user, displayStatus });
+                    } else {
+                        onlineUsers.push({ ...user, displayStatus });
+                    }
                 });
+
+                // Render Online Group
+                if (onlineUsers.length > 0) {
+                    const header = document.createElement('div');
+                    header.className = "px-2 py-3 text-xs font-bold text-gray-500 hover:text-gray-400 uppercase tracking-wide mt-2";
+                    header.textContent = `Online — ${onlineUsers.length}`;
+                    els.displays.onlineList.appendChild(header);
+
+                    onlineUsers.forEach(u => renderUserInList(u, u.displayStatus));
+                }
+
+                // Render Offline Group
+                if (offlineUsers.length > 0) {
+                    const header = document.createElement('div');
+                    header.className = "px-2 py-3 text-xs font-bold text-gray-500 hover:text-gray-400 uppercase tracking-wide mt-2";
+                    header.textContent = `Offline — ${offlineUsers.length}`;
+                    els.displays.onlineList.appendChild(header);
+
+                    offlineUsers.forEach(u => renderUserInList(u, u.displayStatus));
+                }
             });
         }
 
