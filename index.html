@@ -28,6 +28,18 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        .toast-enter { animation: toastIn 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
+        .toast-exit { animation: toastOut 0.3s ease-in forwards; }
+
+        @keyframes toastIn {
+            from { transform: translate(-50%, 50px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+        @keyframes toastOut {
+            from { transform: translate(-50%, 0); opacity: 1; }
+            to { transform: translate(-50%, 50px); opacity: 0; }
+        }
+
         /* Status colors */
         .status-online { background-color: #23a559; }
         .status-busy { background-color: #f0b232; }
@@ -127,7 +139,7 @@
     </div>
 
     <!-- Main Application View -->
-    <div id="chat-view" class="hidden h-full w-full">
+    <div id="chat-view" class="hidden h-full w-full relative">
         
         <!-- Main Chat Area -->
         <div class="flex-1 flex flex-col min-w-0 bg-[#313338]">
@@ -137,36 +149,45 @@
                     <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExMXBhNjNycTQweDFkY214NjMxYWtiZWs1ZjZ3dTJxb254d21ldHIyOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/HPbuRgMPF2vL2/giphy.gif" alt="Logo" class="h-10 object-contain">
                 </div>
                 
-                <!-- User Profile & Status -->
-                <div class="flex items-center gap-3 bg-[#2b2d31] py-1.5 px-3 rounded hover:bg-[#35373c] transition relative cursor-pointer group" id="user-menu-trigger">
-                    <div class="relative">
-                        <img id="current-user-pfp" src="" class="w-8 h-8 rounded-full bg-gray-700 object-cover">
-                        <div id="current-user-status-dot" class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-[3px] border-[#2b2d31] status-online"></div>
-                    </div>
-                    <div class="flex flex-col">
-                        <span id="current-username" class="text-sm font-semibold text-white leading-tight">User</span>
-                        <span id="current-status-text" class="text-[10px] text-gray-400 leading-tight">Online</span>
-                    </div>
+                <div class="flex items-center gap-4">
+                    <!-- Wallet Button -->
+                    <button onclick="app.openWallet()" class="text-gray-400 hover:text-yellow-400 transition" title="My Wallet">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                    </button>
 
-                    <!-- Status Dropdown -->
-                    <div id="status-dropdown" class="hidden absolute top-full right-0 mt-2 w-48 bg-[#111214] rounded shadow-xl border border-[#1e1f22] overflow-hidden z-50">
-                        <div class="p-2 space-y-1">
-                            <button onclick="app.setStatus('online')" class="w-full text-left px-2 py-1.5 rounded hover:bg-[#4752c4] hover:text-white text-gray-300 text-sm flex items-center gap-2 group">
-                                <div class="w-2.5 h-2.5 rounded-full status-online"></div> Online
-                            </button>
-                            <button onclick="app.setStatus('busy')" class="w-full text-left px-2 py-1.5 rounded hover:bg-[#4752c4] hover:text-white text-gray-300 text-sm flex items-center gap-2 group">
-                                <div class="w-2.5 h-2.5 rounded-full status-busy"></div> Busy
-                            </button>
-                            <button onclick="app.setStatus('dnd')" class="w-full text-left px-2 py-1.5 rounded hover:bg-[#4752c4] hover:text-white text-gray-300 text-sm flex items-center gap-2 group">
-                                <div class="w-2.5 h-2.5 rounded-full status-dnd"></div> Do Not Disturb
-                            </button>
-                            <button id="btn-invisible" onclick="app.setStatus('invisible')" class="hidden w-full text-left px-2 py-1.5 rounded hover:bg-[#4752c4] hover:text-white text-gray-300 text-sm flex items-center gap-2 group border-t border-gray-800 mt-1 pt-2">
-                                <div class="w-2.5 h-2.5 rounded-full status-invisible border border-gray-500"></div> Invisible
-                            </button>
-                            <button onclick="app.logout()" class="w-full text-left px-2 py-1.5 rounded hover:bg-red-500 hover:text-white text-red-400 text-sm flex items-center gap-2 mt-1 border-t border-gray-800 pt-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                                Log Out
-                            </button>
+                    <!-- User Profile & Status -->
+                    <div class="flex items-center gap-3 bg-[#2b2d31] py-1.5 px-3 rounded hover:bg-[#35373c] transition relative cursor-pointer group" id="user-menu-trigger">
+                        <div class="relative">
+                            <img id="current-user-pfp" src="" class="w-8 h-8 rounded-full bg-gray-700 object-cover">
+                            <div id="current-user-status-dot" class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-[3px] border-[#2b2d31] status-online"></div>
+                        </div>
+                        <div class="flex flex-col">
+                            <span id="current-username" class="text-sm font-semibold text-white leading-tight">User</span>
+                            <span id="current-status-text" class="text-[10px] text-gray-400 leading-tight">Online</span>
+                        </div>
+
+                        <!-- Status Dropdown -->
+                        <div id="status-dropdown" class="hidden absolute top-full right-0 mt-2 w-48 bg-[#111214] rounded shadow-xl border border-[#1e1f22] overflow-hidden z-50">
+                            <div class="p-2 space-y-1">
+                                <button onclick="app.setStatus('online')" class="w-full text-left px-2 py-1.5 rounded hover:bg-[#4752c4] hover:text-white text-gray-300 text-sm flex items-center gap-2 group">
+                                    <div class="w-2.5 h-2.5 rounded-full status-online"></div> Online
+                                </button>
+                                <button onclick="app.setStatus('busy')" class="w-full text-left px-2 py-1.5 rounded hover:bg-[#4752c4] hover:text-white text-gray-300 text-sm flex items-center gap-2 group">
+                                    <div class="w-2.5 h-2.5 rounded-full status-busy"></div> Busy
+                                </button>
+                                <button onclick="app.setStatus('dnd')" class="w-full text-left px-2 py-1.5 rounded hover:bg-[#4752c4] hover:text-white text-gray-300 text-sm flex items-center gap-2 group">
+                                    <div class="w-2.5 h-2.5 rounded-full status-dnd"></div> Do Not Disturb
+                                </button>
+                                <button id="btn-invisible" onclick="app.setStatus('invisible')" class="hidden w-full text-left px-2 py-1.5 rounded hover:bg-[#4752c4] hover:text-white text-gray-300 text-sm flex items-center gap-2 group border-t border-gray-800 mt-1 pt-2">
+                                    <div class="w-2.5 h-2.5 rounded-full status-invisible border border-gray-500"></div> Invisible
+                                </button>
+                                <button onclick="app.logout()" class="w-full text-left px-2 py-1.5 rounded hover:bg-red-500 hover:text-white text-red-400 text-sm flex items-center gap-2 mt-1 border-t border-gray-800 pt-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                                    Log Out
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -194,6 +215,31 @@
                 <!-- Users injected here -->
             </div>
         </div>
+
+        <!-- Wallet Modal -->
+        <div id="wallet-modal" class="absolute inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center">
+            <div class="bg-[#2b2d31] rounded-xl shadow-2xl p-6 w-80 transform transition-all scale-100 border border-[#1e1f22] relative">
+                <button onclick="app.closeWallet()" class="absolute top-2 right-2 text-gray-400 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+                <div class="text-center mb-6">
+                    <h3 class="text-xl font-bold text-white uppercase tracking-wider">My Wallet</h3>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-[#1e1f22] p-4 rounded-lg flex justify-between items-center">
+                        <span class="text-yellow-500 font-bold uppercase text-sm">Coins</span>
+                        <span id="wallet-coins" class="text-white text-lg font-mono">0</span>
+                    </div>
+                    <div class="bg-[#1e1f22] p-4 rounded-lg flex justify-between items-center">
+                        <span class="text-purple-400 font-bold uppercase text-sm">Gems</span>
+                        <span id="wallet-gems" class="text-white text-lg font-mono">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast-container" class="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none"></div>
 
     </div>
 
@@ -244,23 +290,24 @@
                 headerStatusText: document.getElementById('current-status-text'),
                 headerStatusDot: document.getElementById('current-user-status-dot'),
                 statusDropdown: document.getElementById('status-dropdown'),
-                invisibleBtn: document.getElementById('btn-invisible')
+                invisibleBtn: document.getElementById('btn-invisible'),
+                walletModal: document.getElementById('wallet-modal'),
+                walletCoins: document.getElementById('wallet-coins'),
+                walletGems: document.getElementById('wallet-gems'),
+                toastContainer: document.getElementById('toast-container')
             }
         };
 
         // --- Core Functions ---
 
-        // Image Handler - MODIFIED: GIF support removed. All images are drawn to canvas to freeze animation.
         function processImage(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onload = (event) => {
-                    // Create image object from input
                     const img = new Image();
                     img.src = event.target.result;
                     img.onload = () => {
-                        // Drawing to canvas converts any file (including GIFs) to a static frame
                         const canvas = document.createElement('canvas');
                         const MAX_SIZE = 150; 
                         let width = img.width;
@@ -275,7 +322,6 @@
                         canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-                        // Convert to static JPEG
                         resolve(canvas.toDataURL('image/jpeg', 0.8));
                     };
                     img.onerror = (err) => reject(err);
@@ -301,7 +347,6 @@
                 }
             },
             logout: () => {
-                // Set status to offline before logging out
                 if (currentUser && currentUserProfile && currentUserProfile.status !== 'invisible') {
                      updateDoc(doc(db, "users", currentUser.uid), { status: 'offline' }).then(() => signOut(auth));
                 } else {
@@ -316,19 +361,46 @@
                 } catch (e) {
                     console.error("Status update failed", e);
                 }
+            },
+            openWallet: () => {
+                if (currentUserProfile) {
+                    els.displays.walletCoins.textContent = (currentUserProfile.coins || 0).toLocaleString();
+                    els.displays.walletGems.textContent = (currentUserProfile.gems || 0).toLocaleString();
+                }
+                els.displays.walletModal.classList.remove('hidden');
+            },
+            closeWallet: () => {
+                els.displays.walletModal.classList.add('hidden');
             }
         };
 
+        // --- Toast System ---
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-green-500/90' : 'bg-red-500/90';
+            toast.className = `px-6 py-2 rounded-full text-white font-bold shadow-lg mb-2 text-sm text-center toast-enter backdrop-blur-md ${bgClass}`;
+            toast.textContent = message;
+            
+            els.displays.toastContainer.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('toast-enter');
+                toast.classList.add('toast-exit');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
         // --- Event Listeners ---
 
-        // Dropdown Toggle
         document.getElementById('user-menu-trigger').addEventListener('click', (e) => {
             els.displays.statusDropdown.classList.toggle('hidden');
             e.stopPropagation();
         });
-        document.addEventListener('click', () => els.displays.statusDropdown.classList.add('hidden'));
+        document.addEventListener('click', (e) => {
+            els.displays.statusDropdown.classList.add('hidden');
+            if (e.target === els.displays.walletModal) app.closeWallet();
+        });
 
-        // PFP Preview
         els.inputs.signupPfp.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -362,13 +434,10 @@
 
                 let pfpUrl = `https://ui-avatars.com/api/?name=${username}&background=random`;
                 if (pfpFile) {
-                    try {
-                        pfpUrl = await processImage(pfpFile);
-                    } catch (imgError) {
-                        console.error("PFP failed", imgError);
-                    }
+                    try { pfpUrl = await processImage(pfpFile); } catch (e) {}
                 }
 
+                // Initial Balance: 1000 Coins, 10 Gems
                 await setDoc(doc(db, "users", user.uid), {
                     uid: user.uid,
                     username,
@@ -377,6 +446,8 @@
                     gender,
                     pfpUrl,
                     status: 'online', 
+                    coins: 1000,
+                    gems: 10,
                     createdAt: serverTimestamp()
                 });
 
@@ -409,31 +480,49 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                
-                // Get User Data
                 try {
                     const docRef = doc(db, "users", user.uid);
-                    const docSnap = await getDoc(docRef);
                     
-                    if (docSnap.exists()) {
-                        currentUserProfile = docSnap.data();
-                        if (currentUserProfile.status === 'offline') {
-                            await updateDoc(docRef, { status: 'online' });
+                    // Listen to own profile for balance updates
+                    onSnapshot(docRef, (docSnap) => {
+                         if (docSnap.exists()) {
+                            currentUserProfile = docSnap.data();
+                            // Ensure defaults if old user
+                            if (currentUserProfile.coins === undefined) updateDoc(docRef, {coins: 1000});
+                            if (currentUserProfile.gems === undefined) updateDoc(docRef, {gems: 10});
+
+                            // Status Update Header
+                            const s = currentUserProfile.status || 'online';
+                            els.displays.headerStatusText.textContent = s.charAt(0).toUpperCase() + s.slice(1);
+                            
+                            // Reset classes
+                            els.displays.headerStatusDot.className = "absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-[3px] border-[#2b2d31]";
+                            if (s === 'online') els.displays.headerStatusDot.classList.add('status-online');
+                            else if (s === 'busy') els.displays.headerStatusDot.classList.add('status-busy');
+                            else if (s === 'dnd') els.displays.headerStatusDot.classList.add('status-dnd');
+                            else els.displays.headerStatusDot.classList.add('status-offline');
+
+                            // Wallet update if open
+                            if (!els.displays.walletModal.classList.contains('hidden')) {
+                                els.displays.walletCoins.textContent = (currentUserProfile.coins || 0).toLocaleString();
+                                els.displays.walletGems.textContent = (currentUserProfile.gems || 0).toLocaleString();
+                            }
                         }
-                    } else {
-                        currentUserProfile = { username: user.displayName || 'User', pfpUrl: null, email: user.email };
+                    });
+
+                    // One-time fetch for init logic
+                    const initSnap = await getDoc(docRef);
+                    if (initSnap.exists()) {
+                        const data = initSnap.data();
+                        if (data.status === 'offline') await updateDoc(docRef, { status: 'online' });
                     }
-                } catch (e) {
-                    console.error(e);
-                }
+                    
+                } catch (e) { console.error(e); }
 
                 renderHeader();
                 
-                if (user.email === 'dev@gmail.com') {
-                    els.displays.invisibleBtn.classList.remove('hidden');
-                } else {
-                    els.displays.invisibleBtn.classList.add('hidden');
-                }
+                if (user.email === 'dev@gmail.com') els.displays.invisibleBtn.classList.remove('hidden');
+                else els.displays.invisibleBtn.classList.add('hidden');
 
                 els.authView.classList.add('hidden');
                 els.chatView.classList.remove('hidden');
@@ -446,7 +535,6 @@
                 if (unsubscribeUsers) unsubscribeUsers();
                 currentUser = null;
                 currentUserProfile = null;
-                
                 els.chatView.classList.add('hidden');
                 els.chatView.classList.remove('flex');
                 els.authView.classList.remove('hidden');
@@ -457,61 +545,69 @@
             if (!currentUserProfile) return;
             els.displays.headerName.textContent = currentUserProfile.username;
             if (currentUserProfile.pfpUrl) els.displays.headerPfp.src = currentUserProfile.pfpUrl;
-            
-            onSnapshot(doc(db, "users", currentUser.uid), (doc) => {
-                if (doc.exists()) {
-                    const data = doc.data();
-                    const s = data.status || 'online';
-                    els.displays.headerStatusText.textContent = s.charAt(0).toUpperCase() + s.slice(1);
-                    
-                    els.displays.headerStatusDot.className = "absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-[3px] border-[#2b2d31]";
-                    if (s === 'online') els.displays.headerStatusDot.classList.add('status-online');
-                    else if (s === 'busy') els.displays.headerStatusDot.classList.add('status-busy');
-                    else if (s === 'dnd') els.displays.headerStatusDot.classList.add('status-dnd');
-                    else els.displays.headerStatusDot.classList.add('status-offline');
-                }
-            });
         }
 
         // --- Chat System ---
 
         function startChatListener() {
             els.displays.msgContainer.innerHTML = ''; 
-
             const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
-            
             unsubscribeMessages = onSnapshot(q, (snapshot) => {
                 snapshot.docChanges().forEach((change) => {
-                    if (change.type === "added") {
-                        const msg = change.doc.data();
-                        renderMessage(msg);
-                    }
+                    if (change.type === "added") renderMessage(change.doc.data());
                 });
-                
-                requestAnimationFrame(() => {
-                    els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight;
-                });
+                requestAnimationFrame(() => els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight);
             });
         }
 
         function renderMessage(msg) {
             const div = document.createElement('div');
-            div.className = "flex gap-4 pl-2 pr-4 py-1 hover:bg-[#2e3035] -mx-2 rounded group animate-fade-in";
             
-            const time = msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now';
-            
-            div.innerHTML = `
-                <div class="flex-shrink-0 cursor-pointer mt-0.5">
-                    <img src="${msg.pfpUrl || 'https://ui-avatars.com/api/?name=?'}" class="w-10 h-10 rounded-full hover:opacity-80 transition object-cover">
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-baseline gap-2">
-                        <span class="font-medium text-white hover:underline cursor-pointer text-sm">${escapeHtml(msg.username)}</span>
-                        <span class="text-[10px] text-gray-400">${time}</span>
+            // Special Rendering for Betting
+            if (msg.type === 'allin') {
+                const isWin = msg.result === 'WON';
+                const colorClass = isWin ? 'text-green-400' : 'text-red-400';
+                const borderColor = isWin ? 'border-green-500/30' : 'border-red-500/30';
+                const bgGradient = isWin ? 'bg-gradient-to-br from-green-900/20 to-transparent' : 'bg-gradient-to-br from-red-900/20 to-transparent';
+
+                div.className = "flex justify-center my-4 animate-fade-in";
+                div.innerHTML = `
+                    <div class="relative flex flex-col items-center p-6 rounded-xl border ${borderColor} ${bgGradient} max-w-sm w-full backdrop-blur-sm">
+                        <img src="${msg.pfpUrl}" class="w-16 h-16 rounded-full border-2 border-[#2b2d31] shadow-lg mb-2 object-cover">
+                        <div class="text-white font-bold text-lg mb-1">${escapeHtml(msg.username)}</div>
+                        <div class="text-gray-400 text-xs uppercase tracking-widest mb-2">went ALL IN on ${msg.currency === 'coins' ? 'Coins' : 'Gems'}</div>
+                        
+                        <div class="text-3xl font-black ${colorClass} mb-2 tracking-tighter">${msg.result}</div>
+                        
+                        <div class="flex items-center gap-2 text-sm text-gray-300">
+                            ${isWin ? `<span>Won</span>` : `<span>Lost</span>`}
+                            <span class="font-mono font-bold text-white">${msg.amount.toLocaleString()}</span>
+                        </div>
+
+                        ${isWin && msg.multiplier > 1 ? `
+                            <div class="absolute -top-3 -right-3 bg-yellow-500 text-black font-bold w-10 h-10 rounded-full flex items-center justify-center border-4 border-[#313338] shadow-lg transform rotate-12">
+                                x${msg.multiplier}
+                            </div>
+                        ` : ''}
                     </div>
-                    <p class="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap break-words">${escapeHtml(msg.text)}</p>
-                </div>
-            `;
+                `;
+            } else {
+                // Normal Chat Message
+                div.className = "flex gap-4 pl-2 pr-4 py-1 hover:bg-[#2e3035] -mx-2 rounded group animate-fade-in";
+                const time = msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now';
+                div.innerHTML = `
+                    <div class="flex-shrink-0 cursor-pointer mt-0.5">
+                        <img src="${msg.pfpUrl || 'https://ui-avatars.com/api/?name=?'}" class="w-10 h-10 rounded-full hover:opacity-80 transition object-cover">
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-baseline gap-2">
+                            <span class="font-medium text-white hover:underline cursor-pointer text-sm">${escapeHtml(msg.username)}</span>
+                            <span class="text-[10px] text-gray-400">${time}</span>
+                        </div>
+                        <p class="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap break-words">${escapeHtml(msg.text)}</p>
+                    </div>
+                `;
+            }
             els.displays.msgContainer.appendChild(div);
         }
 
@@ -519,8 +615,13 @@
             e.preventDefault();
             const text = els.inputs.msg.value.trim();
             if (!text) return;
-
             els.inputs.msg.value = '';
+
+            // Command Handling
+            if (text.startsWith('/')) {
+                handleCommand(text);
+                return;
+            }
 
             try {
                 await addDoc(collection(db, "messages"), {
@@ -533,55 +634,104 @@
             } catch (err) { console.error(err); }
         });
 
+        async function handleCommand(cmdString) {
+            const parts = cmdString.split(' ');
+            const command = parts[0].toLowerCase();
+            const arg = parts[1] ? parts[1].toLowerCase() : null;
+
+            if (command === '/allin') {
+                if (arg === 'c' || arg === 'coins' || arg === 'g' || arg === 'gems') {
+                    await executeAllIn(arg);
+                    showToast("Action complete", 'success');
+                } else {
+                    showToast("Aesthetically Invalid Command", 'error');
+                }
+            } else {
+                showToast("Aesthetically Invalid Command", 'error');
+            }
+        }
+
+        async function executeAllIn(arg) {
+            if (!currentUserProfile) return;
+            
+            const isCoins = (arg === 'c' || arg === 'coins');
+            const currencyKey = isCoins ? 'coins' : 'gems';
+            const balance = currentUserProfile[currencyKey] || 0;
+
+            if (balance <= 0) {
+                showToast(`You have no ${currencyKey} to bet!`, 'error');
+                return;
+            }
+
+            const win = Math.random() < 0.2; // 20% win rate
+            let multiplier = 1;
+            
+            if (win) {
+                const r = Math.random();
+                if (r < 0.5) multiplier = 1;      // 50%
+                else if (r < 0.75) multiplier = 2; // 25%
+                else if (r < 0.875) multiplier = 3; // 12.5%
+                else if (r < 0.975) multiplier = 5; // 10%
+                else multiplier = 10;             // 2.5%
+            }
+
+            const newBalance = win ? (balance * multiplier) : 0;
+            const amountDiff = win ? (newBalance - balance) : balance; // Used for display logic
+
+            // Update User Balance
+            const userRef = doc(db, "users", currentUser.uid);
+            await updateDoc(userRef, {
+                [currencyKey]: newBalance
+            });
+
+            // Post Game Message
+            await addDoc(collection(db, "messages"), {
+                type: 'allin',
+                uid: currentUser.uid,
+                username: currentUserProfile.username,
+                pfpUrl: currentUserProfile.pfpUrl,
+                currency: currencyKey,
+                result: win ? 'WON' : 'LOST',
+                amount: win ? (balance * multiplier) : balance, // Amount shown is total won or total lost
+                multiplier: multiplier,
+                createdAt: serverTimestamp()
+            });
+        }
+
         // --- Users List System ---
 
         function startUsersListener() {
             const q = query(collection(db, "users"), orderBy("username", "asc"));
-            
             unsubscribeUsers = onSnapshot(q, (snapshot) => {
                 els.displays.onlineList.innerHTML = '';
-                
                 const onlineUsers = [];
                 const offlineUsers = [];
 
                 snapshot.forEach((doc) => {
                     const user = doc.data();
                     const status = user.status || 'offline';
-                    
-                    // Invisible logic:
-                    // If user is invisible:
-                    //   - If it's me: I see myself in the offline list
-                    //   - If it's not me: I don't see them at all (they are truly hidden)
                     if (status === 'invisible' && user.uid !== currentUser.uid) return;
-
-                    // Display logic for the lists
+                    
                     let displayStatus = status;
                     if (status === 'invisible') displayStatus = 'offline'; 
 
-                    if (displayStatus === 'offline') {
-                        offlineUsers.push({ ...user, displayStatus });
-                    } else {
-                        onlineUsers.push({ ...user, displayStatus });
-                    }
+                    if (displayStatus === 'offline') offlineUsers.push({ ...user, displayStatus });
+                    else onlineUsers.push({ ...user, displayStatus });
                 });
 
-                // Render Online Group
                 if (onlineUsers.length > 0) {
                     const header = document.createElement('div');
                     header.className = "px-2 py-3 text-xs font-bold text-gray-500 hover:text-gray-400 uppercase tracking-wide mt-2";
                     header.textContent = `Online — ${onlineUsers.length}`;
                     els.displays.onlineList.appendChild(header);
-
                     onlineUsers.forEach(u => renderUserInList(u, u.displayStatus));
                 }
 
-                // Render Offline Group
                 if (offlineUsers.length > 0) {
                     const header = document.createElement('div');
                     header.className = "px-2 py-3 text-xs font-bold text-gray-500 hover:text-gray-400 uppercase tracking-wide mt-2";
                     header.textContent = `Offline — ${offlineUsers.length}`;
                     els.displays.onlineList.appendChild(header);
-
                     offlineUsers.forEach(u => renderUserInList(u, u.displayStatus));
                 }
             });
