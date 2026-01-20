@@ -5,85 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orbitly Chat</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-default::-webkit-scrollbar { width: 6px; }
-        .scrollbar-default::-webkit-scrollbar-track { background: #1e293b; }
-        .scrollbar-default::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        /* Custom scrollbar for chat area */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+        
         .loader {
             border: 3px solid #f3f3f3;
-            border-radius: 50%;
             border-top: 3px solid #3b82f6;
+            border-radius: 50%;
             width: 20px;
             height: 20px;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Fade in animation */
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans h-screen flex flex-col overflow-hidden">
+<body class="bg-gray-950 text-gray-100 font-sans antialiased h-screen flex flex-col overflow-hidden">
 
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center">
-        <div class="flex flex-col items-center gap-4">
-            <div class="loader w-12 h-12 border-4"></div>
-            <p class="text-slate-400 animate-pulse">Initializing Orbitly...</p>
-        </div>
-    </div>
-
-    <!-- Auth Container -->
-    <div id="auth-view" class="hidden h-full w-full flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950">
-        <div class="w-full max-w-md bg-slate-800 rounded-2xl shadow-2xl overflow-hidden border border-slate-700">
-            <div class="flex border-b border-slate-700">
-                <button id="tab-login" class="flex-1 py-4 text-center font-semibold text-blue-400 border-b-2 border-blue-400 hover:bg-slate-700/50 transition-colors">Login</button>
-                <button id="tab-signup" class="flex-1 py-4 text-center font-semibold text-slate-400 hover:text-blue-300 hover:bg-slate-700/50 transition-colors">Sign Up</button>
+    <!-- Auth View Container -->
+    <div id="auth-view" class="flex-1 flex flex-col justify-center items-center p-4 bg-[url('https://picsum.photos/1920/1080?blur=10')] bg-cover bg-center relative">
+        <div class="absolute inset-0 bg-gray-900/80 backdrop-blur-sm"></div>
+        
+        <div class="relative w-full max-w-md bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-gray-800">
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-800">
+                <button id="tab-login" class="flex-1 py-4 text-center font-bold text-gray-400 hover:text-white hover:bg-gray-800 transition" onclick="app.switchTab('login')">Login</button>
+                <button id="tab-signup" class="flex-1 py-4 text-center font-bold bg-gray-800 text-blue-400 shadow-inner" onclick="app.switchTab('signup')">Sign Up</button>
             </div>
 
-            <div class="p-8">
-                <h1 class="text-3xl font-bold text-center mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">Orbitly</h1>
-                <p class="text-center text-slate-400 mb-8 text-sm">Join the galactic conversation.</p>
-
-                <!-- Error Message -->
-                <div id="auth-error" class="hidden mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400 text-sm text-center"></div>
-
+            <div class="p-8 max-h-[85vh] overflow-y-auto">
                 <!-- Login Form -->
-                <form id="login-form" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Email Address</label>
-                        <input type="email" id="login-email" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder-slate-600" placeholder="you@example.com">
+                <form id="login-form" class="space-y-6 hidden">
+                    <div class="text-center">
+                        <h2 class="text-3xl font-extrabold text-white">Welcome Back</h2>
+                        <p class="text-gray-400 mt-2">Sign in to continue chatting</p>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Password</label>
-                        <input type="password" id="login-password" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder-slate-600" placeholder="••••••••">
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Email</label>
+                        <input type="email" id="login-email" required class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-white placeholder-gray-600 transition-all">
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-blue-500/20 transition-all transform active:scale-95">
-                        Log In
-                    </button>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Password</label>
+                        <input type="password" id="login-password" required class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-white placeholder-gray-600 transition-all">
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 rounded-xl transition transform active:scale-95 shadow-lg shadow-blue-900/50">Log In</button>
                 </form>
 
                 <!-- Signup Form -->
-                <form id="signup-form" class="hidden space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Username</label>
-                            <input type="text" id="signup-username" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all placeholder-slate-600" placeholder="StarWalker">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Age (11-1000)</label>
-                            <input type="number" id="signup-age" min="11" max="1000" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all placeholder-slate-600" placeholder="25">
-                        </div>
+                <form id="signup-form" class="space-y-4">
+                    <div class="text-center mb-6">
+                        <h2 class="text-3xl font-extrabold text-white">Join Orbitly</h2>
+                        <p class="text-gray-400 mt-1">Create your alien profile</p>
                     </div>
-                   
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Email Address</label>
-                        <input type="email" id="signup-email" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all placeholder-slate-600" placeholder="alien@orbitly.com">
+                    
+                    <!-- PFP Upload -->
+                    <div class="flex flex-col items-center justify-center mb-6 group cursor-pointer" onclick="document.getElementById('signup-pfp').click()">
+                        <div class="w-28 h-28 rounded-full bg-gray-800 border-2 border-dashed border-gray-600 flex items-center justify-center overflow-hidden relative group-hover:border-blue-500 transition-colors">
+                            <img id="pfp-preview" src="#" alt="Preview" class="w-full h-full object-cover hidden">
+                            <div id="pfp-placeholder" class="text-center p-2">
+                                <svg class="w-8 h-8 mx-auto text-gray-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                <span class="text-xs text-gray-400">Upload PFP</span>
+                            </div>
+                        </div>
+                        <input type="file" id="signup-pfp" accept="image/*" class="hidden">
                     </div>
 
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Username</label>
+                        <input type="text" id="signup-username" required class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Email</label>
+                        <input type="email" id="signup-email" required class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white transition-all">
+                    </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Gender</label>
-                            <select id="signup-gender" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all appearance-none">
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Age (11-1000)</label>
+                            <input type="number" id="signup-age" min="11" max="1000" required class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Gender</label>
+                            <select id="signup-gender" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white transition-all appearance-none">
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
                                 <option value="Other">Other</option>
@@ -92,97 +106,79 @@
                                 <option value="Alien">Alien</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Password</label>
-                            <input type="password" id="signup-password" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all placeholder-slate-600" placeholder="••••••••">
-                        </div>
                     </div>
-
                     <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Profile Picture</label>
-                        <label class="flex items-center justify-center w-full h-12 px-4 transition bg-slate-900 border-2 border-slate-700 border-dashed rounded-lg appearance-none cursor-pointer hover:border-purple-500 focus:outline-none group">
-                            <span class="flex items-center space-x-2 text-slate-400 group-hover:text-purple-400 transition-colors">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                                <span id="file-name" class="text-sm font-medium truncate max-w-[200px]">Upload Image</span>
-                            </span>
-                            <input type="file" id="signup-pfp" accept="image/*" class="hidden">
-                        </label>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Password</label>
+                        <input type="password" id="signup-password" required class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-white transition-all">
                     </div>
-
-                    <button type="submit" id="signup-btn" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-purple-500/20 transition-all transform active:scale-95">
-                        Sign Up
-                    </button>
+                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 rounded-lg transition transform active:scale-95 shadow-lg">Sign Up</button>
                 </form>
+
+                <!-- Feedback -->
+                <div id="auth-feedback" class="mt-4 text-center hidden">
+                    <p id="auth-error" class="text-red-400 text-sm bg-red-900/20 p-2 rounded border border-red-800"></p>
+                </div>
+                <div id="auth-loader" class="hidden flex justify-center mt-4"><div class="loader"></div></div>
             </div>
         </div>
     </div>
 
-    <!-- Chat Container -->
-    <div id="chat-view" class="hidden flex-1 flex flex-col md:flex-row h-full">
-        <!-- Sidebar -->
-        <div class="hidden md:flex w-64 bg-slate-800 border-r border-slate-700 flex-col">
-            <div class="p-4 border-b border-slate-700">
-                <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                    <i class="fas fa-satellite-dish text-blue-400"></i> Orbitly
-                </h2>
-            </div>
-            <div class="p-4 flex-1 overflow-y-auto">
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Your Profile</div>
-                <div class="flex items-center gap-3 p-3 bg-slate-700/50 rounded-lg mb-6">
-                    <img id="sidebar-avatar" src="https://picsum.photos/200" class="w-10 h-10 rounded-full object-cover border-2 border-blue-400" alt="Avatar">
-                    <div class="overflow-hidden">
-                        <div id="sidebar-username" class="font-bold text-sm truncate text-white">Loading...</div>
-                        <div id="sidebar-details" class="text-xs text-slate-400 truncate">Alien</div>
+    <!-- Chat View Container -->
+    <div id="chat-view" class="hidden flex-col h-full w-full bg-gray-950">
+        <!-- Header -->
+        <header class="bg-gray-900 border-b border-gray-800 p-3 shadow-lg z-20">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-full bg-gray-800 border border-gray-700 overflow-hidden flex items-center justify-center">
+                            <img id="current-user-pfp" src="" class="w-full h-full object-cover hidden">
+                            <span id="current-user-initial" class="text-lg font-bold text-gray-400">?</span>
+                        </div>
+                        <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></div>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-white leading-tight">Orbitly Chat</h1>
+                        <p id="current-username" class="text-xs text-blue-400 font-medium">Connecting...</p>
                     </div>
                 </div>
-                
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">About</div>
-                <p class="text-xs text-slate-400 leading-relaxed">
-                    Welcome to the global chat. All species (and furniture) are welcome here.
-                </p>
-            </div>
-            <div class="p-4 border-t border-slate-700">
-                <button id="logout-btn" class="w-full flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-700 p-2 rounded transition-colors text-sm font-medium">
-                    <i class="fas fa-sign-out-alt"></i> Sign Out
+                <button id="logout-btn" class="px-3 py-1.5 bg-gray-800 hover:bg-red-900/30 text-gray-300 hover:text-red-400 border border-gray-700 hover:border-red-900/50 rounded-lg text-sm font-medium transition flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    Logout
                 </button>
             </div>
-        </div>
+        </header>
 
-        <!-- Mobile Header -->
-        <div class="md:hidden bg-slate-800 border-b border-slate-700 p-4 flex justify-between items-center z-10 shadow-md">
-            <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                <i class="fas fa-satellite-dish text-blue-400"></i> Orbitly
-            </h2>
-            <button id="mobile-logout-btn" class="text-slate-400 hover:text-white">
-                <i class="fas fa-sign-out-alt"></i>
-            </button>
-        </div>
-
-        <!-- Main Chat -->
-        <div class="flex-1 flex flex-col bg-slate-900 relative">
-            <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-default">
-                <!-- Messages injected here -->
+        <!-- Messages Area -->
+        <div class="flex-1 overflow-hidden relative max-w-6xl mx-auto w-full flex flex-col">
+            <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-6 scroll-smooth">
+                <!-- Messages will be injected here -->
+                <div class="flex justify-center mt-10">
+                    <div class="loader"></div>
+                </div>
             </div>
+        </div>
 
-            <div class="p-4 bg-slate-800 border-t border-slate-700">
-                <form id="chat-form" class="flex items-end gap-2 max-w-4xl mx-auto">
-                    <div class="flex-1 bg-slate-900 border border-slate-700 rounded-2xl flex items-center p-1 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all">
-                        <input type="text" id="message-input" autocomplete="off" class="w-full bg-transparent text-white px-4 py-3 focus:outline-none placeholder-slate-500" placeholder="Type a message to the galaxy...">
-                    </div>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white p-3.5 rounded-full shadow-lg transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <i class="fas fa-paper-plane"></i>
+        <!-- Input Area -->
+        <div class="bg-gray-900 border-t border-gray-800 p-4 pb-6 sm:pb-4">
+            <div class="max-w-6xl mx-auto w-full">
+                <form id="message-form" class="flex gap-2 relative">
+                    <input type="text" id="message-input" autocomplete="off" placeholder="Type a message to the galaxy..." class="flex-1 bg-gray-800 border border-gray-700 text-gray-100 rounded-full px-6 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500 transition-all shadow-inner">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center transition transform active:scale-95 shadow-lg shadow-blue-900/40">
+                        <svg class="w-5 h-5 translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                     </button>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
+        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBz9yOlQFZQZE-GtGcRbJ2sWUYQTb0kBi4",
             authDomain: "orbitly-online.firebaseapp.com",
@@ -193,341 +189,303 @@
             measurementId: "G-9B5458S73M"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const storage = getStorage(app);
 
-        const views = {
-            loading: document.getElementById('loading-overlay'),
-            auth: document.getElementById('auth-view'),
-            chat: document.getElementById('chat-view')
-        };
-
-        const tabs = {
-            login: document.getElementById('tab-login'),
-            signup: document.getElementById('tab-signup')
-        };
-
-        const forms = {
-            login: document.getElementById('login-form'),
-            signup: document.getElementById('signup-form'),
-            chat: document.getElementById('chat-form')
-        };
-
-        const inputs = {
-            loginEmail: document.getElementById('login-email'),
-            loginPass: document.getElementById('login-password'),
-            signupUser: document.getElementById('signup-username'),
-            signupEmail: document.getElementById('signup-email'),
-            signupPass: document.getElementById('signup-password'),
-            signupAge: document.getElementById('signup-age'),
-            signupGender: document.getElementById('signup-gender'),
-            signupPfp: document.getElementById('signup-pfp'),
-            message: document.getElementById('message-input')
-        };
-
-        const sidebar = {
-            avatar: document.getElementById('sidebar-avatar'),
-            username: document.getElementById('sidebar-username'),
-            details: document.getElementById('sidebar-details'),
-            logout: document.getElementById('logout-btn'),
-            mobileLogout: document.getElementById('mobile-logout-btn')
-        };
-
-        const messagesContainer = document.getElementById('messages-container');
-        const authError = document.getElementById('auth-error');
-        const fileNameDisplay = document.getElementById('file-name');
-
+        // Application State
+        let currentUser = null;
         let currentUserProfile = null;
-        let messagesUnsubscribe = null;
-        let isSigningUp = false; // Flag to handle race conditions
+        let unsubscribeMessages = null;
 
-        function showError(msg) {
-            authError.textContent = msg;
-            authError.classList.remove('hidden');
-            setTimeout(() => authError.classList.add('hidden'), 5000);
-        }
-
-        function toggleLoading(show) {
-            views.loading.style.display = show ? 'flex' : 'none';
-        }
-
-        function switchAuthTab(tab) {
-            if (tab === 'login') {
-                tabs.login.classList.add('text-blue-400', 'border-b-2', 'border-blue-400');
-                tabs.login.classList.remove('text-slate-400');
-                tabs.signup.classList.remove('text-blue-400', 'border-b-2', 'border-blue-400');
-                tabs.signup.classList.add('text-slate-400');
-                forms.login.classList.remove('hidden');
-                forms.signup.classList.add('hidden');
-            } else {
-                tabs.signup.classList.add('text-blue-400', 'border-b-2', 'border-blue-400');
-                tabs.signup.classList.remove('text-slate-400');
-                tabs.login.classList.remove('text-blue-400', 'border-b-2', 'border-blue-400');
-                tabs.login.classList.add('text-slate-400');
-                forms.signup.classList.remove('hidden');
-                forms.login.classList.add('hidden');
+        // DOM Elements
+        const els = {
+            authView: document.getElementById('auth-view'),
+            chatView: document.getElementById('chat-view'),
+            forms: {
+                login: document.getElementById('login-form'),
+                signup: document.getElementById('signup-form'),
+            },
+            tabs: {
+                login: document.getElementById('tab-login'),
+                signup: document.getElementById('tab-signup'),
+            },
+            inputs: {
+                signupPfp: document.getElementById('signup-pfp'),
+                msg: document.getElementById('message-input'),
+            },
+            displays: {
+                pfpPreview: document.getElementById('pfp-preview'),
+                pfpPlaceholder: document.getElementById('pfp-placeholder'),
+                error: document.getElementById('auth-error'),
+                loader: document.getElementById('auth-loader'),
+                feedback: document.getElementById('auth-feedback'),
+                msgContainer: document.getElementById('messages-container'),
+                currentUserPfp: document.getElementById('current-user-pfp'),
+                currentUserInitial: document.getElementById('current-user-initial'),
+                currentUsername: document.getElementById('current-username'),
             }
-            authError.classList.add('hidden');
-        }
+        };
 
-        // --- SIGNUP ---
-        forms.signup.addEventListener('submit', async (e) => {
+        // Helper: Toggle Auth Tabs
+        window.app = {
+            switchTab: (tab) => {
+                els.displays.feedback.classList.add('hidden');
+                if (tab === 'login') {
+                    els.forms.login.classList.remove('hidden');
+                    els.forms.signup.classList.add('hidden');
+                    
+                    els.tabs.login.classList.add('bg-gray-800', 'text-blue-400', 'shadow-inner');
+                    els.tabs.login.classList.remove('text-gray-400', 'hover:text-white', 'hover:bg-gray-800');
+                    
+                    els.tabs.signup.classList.remove('bg-gray-800', 'text-blue-400', 'shadow-inner');
+                    els.tabs.signup.classList.add('text-gray-400', 'hover:text-white', 'hover:bg-gray-800');
+                } else {
+                    els.forms.login.classList.add('hidden');
+                    els.forms.signup.classList.remove('hidden');
+                    
+                    els.tabs.signup.classList.add('bg-gray-800', 'text-blue-400', 'shadow-inner');
+                    els.tabs.signup.classList.remove('text-gray-400', 'hover:text-white', 'hover:bg-gray-800');
+                    
+                    els.tabs.login.classList.remove('bg-gray-800', 'text-blue-400', 'shadow-inner');
+                    els.tabs.login.classList.add('text-gray-400', 'hover:text-white', 'hover:bg-gray-800');
+                }
+            }
+        };
+
+        // Initialize view
+        window.app.switchTab('signup');
+
+        // PFP Preview
+        els.inputs.signupPfp.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    els.displays.pfpPreview.src = ev.target.result;
+                    els.displays.pfpPreview.classList.remove('hidden');
+                    els.displays.pfpPlaceholder.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // --- Auth Handlers ---
+
+        els.forms.signup.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = inputs.signupUser.value.trim();
-            const email = inputs.signupEmail.value.trim();
-            const password = inputs.signupPass.value;
-            const age = parseInt(inputs.signupAge.value);
-            const gender = inputs.signupGender.value;
-            const file = inputs.signupPfp.files[0];
+            const username = document.getElementById('signup-username').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const age = parseInt(document.getElementById('signup-age').value);
+            const gender = document.getElementById('signup-gender').value;
+            const pfpFile = els.inputs.signupPfp.files[0];
 
             if (age < 11 || age > 1000) return showError("Age must be between 11 and 1000.");
-            if (!file) return showError("Please upload a profile picture.");
-
+            
             toggleLoading(true);
-            isSigningUp = true;
-
             try {
-                // 1. Create Auth User
+                // 1. Create User in Auth
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
-                
-                // Fallback PFP (used initially to ensure fast DB write)
-                let pfpUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=random`;
 
-                // 2. IMMEDIATE Firestore Write (Optimistic)
-                // We write basic data first so onAuthStateChanged finds it.
-                // We'll update it with the real PFP url later.
-                const profileData = {
-                    uid: user.uid,
-                    username: username,
-                    email: email,
-                    age: age,
-                    gender: gender,
-                    pfpUrl: pfpUrl,
-                    createdAt: serverTimestamp()
-                };
-
-                try {
-                    await setDoc(doc(db, "users", user.uid), profileData);
-                } catch (dbErr) {
-                    console.error("Initial DB write failed", dbErr);
-                    // Continue anyway
-                }
-
-                // 3. Upload Image (Async)
-                try {
-                    const storageRef = ref(storage, `profileImages/${user.uid}`);
-                    await uploadBytes(storageRef, file);
+                // 2. Upload PFP to Storage
+                let pfpUrl = `https://ui-avatars.com/api/?name=${username}&background=random`;
+                if (pfpFile) {
+                    const storageRef = ref(storage, `profile_pictures/${user.uid}`);
+                    await uploadBytes(storageRef, pfpFile);
                     pfpUrl = await getDownloadURL(storageRef);
-                    
-                    // Update DB with real URL
-                    await setDoc(doc(db, "users", user.uid), { ...profileData, pfpUrl: pfpUrl });
-                    
-                    // Update Auth Profile
-                    await updateProfile(user, { displayName: username, photoURL: pfpUrl });
-                } catch (uploadErr) {
-                    console.warn("Image upload failed, using fallback.", uploadErr);
-                    // Use fallback, but ensure Auth profile is at least set with name
-                    await updateProfile(user, { displayName: username, photoURL: pfpUrl });
                 }
 
-                forms.signup.reset();
-                fileNameDisplay.textContent = "Upload Image";
+                // 3. Save details to Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    uid: user.uid,
+                    username,
+                    email,
+                    age,
+                    gender,
+                    pfpUrl,
+                    createdAt: serverTimestamp()
+                });
 
-            } catch (error) {
-                console.error(error);
-                let msg = error.message.replace('Firebase: ', '');
-                if (error.code === 'auth/email-already-in-use') msg = "Email already in use. Log in.";
-                showError(msg);
-                // Only if FATAL auth error (like email in use) do we stop loading/flag.
-                // If it was just a storage error, we fell through and isSigningUp is still true (or handled by auth change)
-                if (error.code) {
-                     toggleLoading(false);
-                     isSigningUp = false;
-                }
-            }
-        });
+                // 4. Update Auth Profile
+                await updateProfile(user, { displayName: username, photoURL: pfpUrl });
 
-        inputs.signupPfp.addEventListener('change', (e) => {
-            fileNameDisplay.textContent = e.target.files[0] ? e.target.files[0].name : "Upload Image";
-        });
-
-        // --- LOGIN ---
-        forms.login.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            toggleLoading(true);
-            try {
-                await signInWithEmailAndPassword(auth, inputs.loginEmail.value.trim(), inputs.loginPass.value);
-                forms.login.reset();
-            } catch (error) {
-                console.error(error);
-                showError("Invalid email or password.");
+            } catch (err) {
+                showError(parseAuthError(err));
+            } finally {
                 toggleLoading(false);
             }
         });
 
-        const handleLogout = async () => {
-            if (messagesUnsubscribe) messagesUnsubscribe();
-            await signOut(auth);
-        };
-        sidebar.logout.addEventListener('click', handleLogout);
-        sidebar.mobileLogout.addEventListener('click', handleLogout);
-
-        // --- CHAT ---
-        forms.chat.addEventListener('submit', async (e) => {
+        els.forms.login.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const text = inputs.message.value.trim();
-            if (!text || !auth.currentUser) return;
-            
-            const username = currentUserProfile?.username || auth.currentUser.displayName || 'Anonymous';
-            const pfpUrl = currentUserProfile?.pfpUrl || auth.currentUser.photoURL || 'https://picsum.photos/50';
-            const gender = currentUserProfile?.gender || 'Unknown';
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
 
+            toggleLoading(true);
             try {
-                inputs.message.value = '';
-                await addDoc(collection(db, "messages"), {
-                    text: text,
-                    uid: auth.currentUser.uid,
-                    username: username,
-                    pfpUrl: pfpUrl,
-                    gender: gender,
-                    createdAt: serverTimestamp()
-                });
-            } catch (error) {
-                console.error("Msg send error:", error);
-                inputs.message.value = text;
-                alert("Message failed to send. Permissions?");
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (err) {
+                showError(parseAuthError(err));
+            } finally {
+                toggleLoading(false);
             }
         });
 
-        function createMessageElement(msg, isMe) {
-            const div = document.createElement('div');
-            div.className = `flex gap-3 mb-4 ${isMe ? 'flex-row-reverse' : ''}`;
-            const time = msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '...';
-            
-            let badgeColor = 'bg-slate-600';
-            if (msg.gender === 'Alien') badgeColor = 'bg-green-600';
-            else if (msg.gender === 'Table') badgeColor = 'bg-amber-700';
-            else if (msg.gender === 'Chair') badgeColor = 'bg-red-700';
+        document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
 
-            div.innerHTML = `
-                <div class="flex-shrink-0 flex flex-col items-center">
-                    <img src="${msg.pfpUrl || 'https://picsum.photos/50'}" class="w-10 h-10 rounded-full object-cover border border-slate-600">
-                    <span class="text-[10px] mt-1 px-1.5 py-0.5 rounded-full text-white ${badgeColor} opacity-80">${msg.gender || 'Unknown'}</span>
+        // --- Main Listener ---
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                
+                // Try to get extended profile from Firestore, fallback to Auth
+                try {
+                    const docSnap = await getDoc(doc(db, "users", user.uid));
+                    if (docSnap.exists()) {
+                        currentUserProfile = docSnap.data();
+                    } else {
+                        currentUserProfile = { 
+                            username: user.displayName || 'Anonymous', 
+                            pfpUrl: user.photoURL 
+                        };
+                    }
+                } catch (e) {
+                    console.error("Profile fetch error", e);
+                    currentUserProfile = { username: user.displayName, pfpUrl: user.photoURL };
+                }
+
+                updateHeaderUI();
+                els.authView.classList.add('hidden');
+                els.chatView.classList.remove('hidden');
+                els.chatView.classList.add('flex');
+                
+                startChatListener();
+            } else {
+                currentUser = null;
+                currentUserProfile = null;
+                if (unsubscribeMessages) unsubscribeMessages();
+                
+                els.chatView.classList.add('hidden');
+                els.chatView.classList.remove('flex');
+                els.authView.classList.remove('hidden');
+            }
+        });
+
+        function updateHeaderUI() {
+            els.displays.currentUsername.textContent = currentUserProfile.username;
+            if (currentUserProfile.pfpUrl) {
+                els.displays.currentUserPfp.src = currentUserProfile.pfpUrl;
+                els.displays.currentUserPfp.classList.remove('hidden');
+                els.displays.currentUserInitial.classList.add('hidden');
+            } else {
+                els.displays.currentUserInitial.textContent = currentUserProfile.username[0].toUpperCase();
+                els.displays.currentUserPfp.classList.add('hidden');
+                els.displays.currentUserInitial.classList.remove('hidden');
+            }
+        }
+
+        // --- Chat Logic ---
+
+        function startChatListener() {
+            const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
+            
+            unsubscribeMessages = onSnapshot(q, (snapshot) => {
+                els.displays.msgContainer.innerHTML = ''; // Basic clear and redraw for simplicity in vanilla JS
+                
+                snapshot.forEach((doc) => {
+                    const msg = doc.data();
+                    renderMessage(msg);
+                });
+                
+                // Auto scroll to bottom
+                els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight;
+            });
+        }
+
+        document.getElementById('message-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = els.inputs.msg.value.trim();
+            if (!text) return;
+
+            els.inputs.msg.value = '';
+
+            try {
+                await addDoc(collection(db, "messages"), {
+                    text,
+                    uid: currentUser.uid,
+                    username: currentUserProfile.username,
+                    pfpUrl: currentUserProfile.pfpUrl || null,
+                    createdAt: serverTimestamp()
+                });
+            } catch (err) {
+                console.error("Msg Error", err);
+                alert("Failed to send message");
+            }
+        });
+
+        function renderMessage(msg) {
+            const isMe = msg.uid === currentUser.uid;
+            const container = document.createElement('div');
+            container.className = `flex ${isMe ? 'justify-end' : 'justify-start'} animate-fade-in group`;
+
+            const initial = msg.username ? msg.username[0].toUpperCase() : '?';
+            const avatar = !isMe ? `
+                <div class="w-8 h-8 rounded-full bg-gray-700 flex-shrink-0 flex items-center justify-center mr-2 overflow-hidden border border-gray-600 self-end mb-1">
+                    ${msg.pfpUrl 
+                        ? `<img src="${msg.pfpUrl}" class="w-full h-full object-cover">` 
+                        : `<span class="text-xs text-white font-bold">${initial}</span>`
+                    }
                 </div>
-                <div class="flex flex-col max-w-[75%] ${isMe ? 'items-end' : 'items-start'}">
-                    <div class="flex items-baseline gap-2 mb-1 ${isMe ? 'flex-row-reverse' : ''}">
-                        <span class="text-sm font-bold text-white">${msg.username}</span>
-                        <span class="text-xs text-slate-500">${time}</span>
-                    </div>
-                    <div class="${isMe ? 'bg-blue-600 text-white rounded-l-2xl rounded-tr-2xl' : 'bg-slate-700 text-slate-200 rounded-r-2xl rounded-tl-2xl'} px-4 py-2.5 shadow-sm break-words text-sm">
-                        ${msg.text}
+            ` : '';
+
+            const bubbleColor = isMe 
+                ? 'bg-blue-600 text-white rounded-br-none' 
+                : 'bg-gray-800 text-gray-200 border border-gray-700 rounded-bl-none';
+
+            container.innerHTML = `
+                ${avatar}
+                <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[75%]">
+                    ${!isMe ? `<span class="text-[10px] text-gray-500 ml-1 mb-0.5">${escapeHtml(msg.username)}</span>` : ''}
+                    <div class="${bubbleColor} px-4 py-2 rounded-2xl shadow-md break-words text-sm md:text-base leading-relaxed">
+                        ${escapeHtml(msg.text)}
                     </div>
                 </div>
             `;
-            return div;
+            els.displays.msgContainer.appendChild(container);
         }
 
-        function subscribeToChat() {
-            if (messagesUnsubscribe) messagesUnsubscribe();
-            
-            try {
-                const q = query(collection(db, "messages"), orderBy("createdAt", "asc"), limit(50));
-                
-                messagesUnsubscribe = onSnapshot(q, (snapshot) => {
-                    messagesContainer.innerHTML = '';
-                    if (snapshot.empty) {
-                        messagesContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-slate-500 opacity-50"><i class="fas fa-comments text-4xl mb-2"></i><p>No messages yet.</p></div>`;
-                        return;
-                    }
-                    const fragment = document.createDocumentFragment();
-                    snapshot.forEach((doc) => {
-                        const data = doc.data();
-                        const isMe = auth.currentUser && data.uid === auth.currentUser.uid;
-                        fragment.appendChild(createMessageElement(data, isMe));
-                    });
-                    messagesContainer.appendChild(fragment);
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                }, (error) => {
-                    console.error("Snapshot error:", error);
-                    messagesContainer.innerHTML = `<div class="p-4 text-center text-red-400 bg-red-900/20 rounded border border-red-500/50 mt-10"><i class="fas fa-lock text-2xl mb-2"></i><br>Chat Access Denied</div>`;
-                });
-            } catch (e) {
-                console.error("Query creation failed", e);
-            }
-        }
+        // --- Utilities ---
 
-        // --- AUTH STATE MONITOR ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                try {
-                    const userRef = doc(db, "users", user.uid);
-                    let userDoc = null;
-                    let retries = 3;
-
-                    // Retry logic to give Signup time to write
-                    while (retries > 0) {
-                        try {
-                            userDoc = await getDoc(userRef);
-                            if (userDoc.exists()) break;
-                        } catch (e) { console.warn("Fetch attempt failed", e); }
-                        
-                        if (isSigningUp) await new Promise(r => setTimeout(r, 800)); // Wait longer if signing up
-                        else await new Promise(r => setTimeout(r, 200));
-                        retries--;
-                    }
-
-                    if (userDoc && userDoc.exists()) {
-                        currentUserProfile = userDoc.data();
-                    } else {
-                        // Profile still missing?
-                        console.log("Profile not found in DB. Constructing fallback.");
-                        currentUserProfile = {
-                            username: user.displayName || "User",
-                            pfpUrl: user.photoURL || "https://picsum.photos/200",
-                            age: '?',
-                            gender: 'Unknown'
-                        };
-                        
-                        // Try one last time to heal it
-                        try {
-                            const healProfile = {
-                                uid: user.uid,
-                                email: user.email,
-                                ...currentUserProfile,
-                                createdAt: serverTimestamp()
-                            };
-                            await setDoc(userRef, healProfile);
-                        } catch (e) { console.warn("Self-heal failed", e); }
-                    }
-
-                    // Update UI
-                    sidebar.username.textContent = currentUserProfile.username;
-                    sidebar.details.textContent = `${currentUserProfile.age} • ${currentUserProfile.gender}`;
-                    sidebar.avatar.src = currentUserProfile.pfpUrl;
-
-                    views.auth.classList.add('hidden');
-                    views.chat.classList.remove('hidden');
-                    subscribeToChat();
-
-                } catch (err) {
-                    console.error("Critical Auth State Error:", err);
-                }
+        function toggleLoading(active) {
+            if (active) {
+                els.displays.loader.classList.remove('hidden');
+                els.displays.feedback.classList.add('hidden');
             } else {
-                currentUserProfile = null;
-                isSigningUp = false;
-                views.chat.classList.add('hidden');
-                views.auth.classList.remove('hidden');
-                switchAuthTab('login');
-                if (messagesUnsubscribe) messagesUnsubscribe();
+                els.displays.loader.classList.add('hidden');
             }
-            toggleLoading(false);
-        });
+        }
 
-        // Initial Load
-        toggleLoading(true);
+        function showError(msg) {
+            els.displays.error.textContent = msg;
+            els.displays.feedback.classList.remove('hidden');
+        }
+
+        function parseAuthError(err) {
+            if (err.code === 'auth/email-already-in-use') return "Email already registered.";
+            if (err.code === 'auth/weak-password') return "Password is too weak.";
+            if (err.code === 'auth/invalid-credential') return "Invalid email or password.";
+            return err.message;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
     </script>
 </body>
 </html>
