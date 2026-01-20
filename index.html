@@ -840,14 +840,6 @@
             return;
         }
 
-        if (command === '/lottery') {
-            const countStr = args[0] || '1';
-            const count = parseAbbreviatedNumber(countStr);
-            if (isNaN(count) || count < 1) return showToast("Invalid ticket count", 'error');
-            await executeLottery(count);
-            return;
-        }
-
         // Commands requiring user interactions or simple logic
         if (command === '/daily') {
             await executeDaily();
@@ -909,7 +901,6 @@
                         <li><span class="text-white font-mono">/bank</span> - View your balance</li>
                         <li><span class="text-white font-mono">/pay [user] [amt] [c/g]</span> - Pay someone</li>
                         <li><span class="text-white font-mono">/top</span> - Leaderboard (Public)</li>
-                        <li><span class="text-white font-mono">/lottery [tickets]</span> - Buy ticket (100c)</li>
                         <li><span class="text-white font-mono">/prefixs</span> - List number shortcuts</li>
                     </ul>
                 </div>
@@ -989,115 +980,6 @@
             topUsers: topUsers,
             createdAt: serverTimestamp()
         });
-    }
-
-    async function executeLottery(count) {
-         const TICKET_PRICE = 100;
-         const totalCost = count * TICKET_PRICE;
-         
-         if (!currentUserProfile) return;
-         // Pre-check to save a read
-         if ((currentUserProfile.coins || 0) < totalCost) return showToast(`Need ${totalCost} coins`, 'error');
-
-         try {
-            // Variables to hold side-effects (like announcing winner)
-            let winnerAnnouncement = null;
-
-            await runTransaction(db, async (transaction) => {
-                // 1. PREPARE REFS
-                const lotRef = doc(db, "system", "lottery");
-                const userRef = doc(db, "users", currentUser.uid);
-
-                // 2. READS (Must be before any writes)
-                const lotSnap = await transaction.get(lotRef);
-                const userSnap = await transaction.get(userRef);
-
-                if (!userSnap.exists()) throw "User does not exist";
-                const userData = userSnap.data();
-                if ((userData.coins || 0) < totalCost) throw "Insufficient funds";
-
-                // Initialize lottery data in memory
-                let lotData = { pot: 0, tickets: [], nextDraw: Date.now() + 86400000 };
-                if (lotSnap.exists()) {
-                    lotData = lotSnap.data();
-                    // Ensure fields exist
-                    lotData.pot = lotData.pot || 0;
-                    lotData.tickets = lotData.tickets || [];
-                    lotData.nextDraw = lotData.nextDraw || (Date.now() + 86400000);
-                }
-
-                // 3. LOGIC & CONDITIONAL READS
-                let drawHappened = false;
-                let winnerRef = null;
-                let winnerSnap = null;
-                let potWon = 0;
-
-                // Check if draw needed
-                if (Date.now() > lotData.nextDraw && lotData.tickets.length > 0) {
-                    const winnerUid = lotData.tickets[Math.floor(Math.random() * lotData.tickets.length)];
-                    winnerRef = doc(db, "users", winnerUid);
-                    // READ Winner (Allowed because we haven't written yet)
-                    winnerSnap = await transaction.get(winnerRef);
-                    potWon = lotData.pot;
-                    drawHappened = true;
-                } else if (Date.now() > lotData.nextDraw) {
-                    // Reset timer if no tickets
-                    lotData.nextDraw = Date.now() + 86400000;
-                }
-
-                // 4. WRITES
-
-                // a. Deduct from buyer
-                transaction.update(userRef, { coins: userData.coins - totalCost });
-
-                // b. Update Winner (if draw happened and user exists)
-                if (drawHappened && winnerSnap && winnerSnap.exists()) {
-                    const wData = winnerSnap.data();
-                    transaction.update(winnerRef, { coins: (wData.coins || 0) + potWon });
-                    
-                    // Prepare announcement data
-                    winnerAnnouncement = {
-                        type: 'lottery_win',
-                        uid: winnerSnap.id,
-                        username: wData.username,
-                        pfpUrl: wData.pfpUrl,
-                        amount: potWon,
-                        createdAt: serverTimestamp()
-                    };
-                }
-
-                // c. Update Lottery State
-                if (drawHappened) {
-                    lotData.pot = 0;
-                    lotData.tickets = [];
-                    lotData.nextDraw = Date.now() + 86400000;
-                }
-
-                // Add new tickets
-                const newTickets = Array(count).fill(currentUser.uid);
-                lotData.tickets.push(...newTickets);
-                lotData.pot += totalCost;
-
-                if (lotSnap.exists()) {
-                    transaction.update(lotRef, lotData);
-                } else {
-                    transaction.set(lotRef, lotData);
-                }
-            });
-            
-            // Post-transaction side effects
-            if (winnerAnnouncement) {
-                await addDoc(collection(db, "messages"), winnerAnnouncement);
-            }
-            
-            showToast(`Bought ${count} ticket(s)!`, 'success');
-
-         } catch (e) {
-             console.error("Lottery Error:", e);
-             // Show specific string if it's a string error, else generic
-             const msg = typeof e === 'string' ? e : "Transaction failed";
-             showToast(msg, 'error');
-         }
     }
 
     async function executePay(targetName, amountStr, currStr) {
