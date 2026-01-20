@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbitly Arcade</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #2b2d31; }
+    ::-webkit-scrollbar-thumb { background: #1a1b1e; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3f4147; }
+    
+    .loader {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #5865F2;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .game-card:hover { transform: translateY(-5px); }
+    
+    .toast-enter { animation: toastIn 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
+    .toast-exit { animation: toastOut 0.3s ease-in forwards; }
+
+    @keyframes toastIn {
+        from { transform: translate(-50%, 50px); opacity: 0; }
+        to { transform: translate(-50%, 0); opacity: 1; }
+    }
+    @keyframes toastOut {
+        from { transform: translate(-50%, 0); opacity: 1; }
+        to { transform: translate(-50%, 50px); opacity: 0; }
+    }
+
+    .arcade-bg {
+        background-color: #313338;
+        background-image: radial-gradient(#3f4147 1px, transparent 1px);
+        background-size: 20px 20px;
+    }
+</style>
+</head>
+<body class="arcade-bg text-gray-100 font-sans antialiased h-screen flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="bg-[#2b2d31]/90 backdrop-blur border-b border-[#1e1f22] p-4 shadow-lg z-20 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <button onclick="window.location.href='index.html'" class="bg-[#1e1f22] hover:bg-[#35373c] text-gray-300 px-4 py-2 rounded-lg font-bold text-sm transition flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Back to Chat
+            </button>
+            <h1 class="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500 uppercase tracking-wider italic">Orbitly Arcade</h1>
+        </div>
+        
+        <!-- Wallet Display -->
+        <div class="flex items-center gap-4 bg-[#111214] px-4 py-2 rounded-lg border border-[#3f4147]">
+            <div class="flex flex-col items-end leading-none">
+                <span class="text-[10px] text-gray-500 font-bold uppercase">Balance</span>
+                <div class="flex gap-3">
+                    <span class="text-yellow-500 font-mono font-bold" id="arcade-coins">0 🪙</span>
+                    <span class="text-purple-400 font-mono font-bold" id="arcade-gems">0 💎</span>
+                </div>
+            </div>
+            <img id="user-pfp" src="" class="w-8 h-8 rounded-full border border-gray-600 bg-gray-700 object-cover">
+        </div>
+    </header>
+
+    <!-- Game Grid -->
+    <div class="flex-1 overflow-y-auto p-6">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-gray-400 font-bold uppercase tracking-widest text-sm mb-4">Featured Games</h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                
+                <!-- Coin Flip -->
+                <div onclick="arcade.openGame('flip')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition shadow-xl hover:shadow-purple-500/20 group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+                    <div class="text-4xl mb-3">🪙</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Coin Flip</h3>
+                    <p class="text-gray-400 text-xs mb-3">Double your money instantly. 50/50 chance.</p>
+                    <span class="bg-yellow-500/20 text-yellow-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Win 2x</span>
+                </div>
+
+                <!-- Dice Roll -->
+                <div onclick="arcade.openGame('roll')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition shadow-xl hover:shadow-blue-500/20 group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+                    <div class="text-4xl mb-3">🎲</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Dice Roll</h3>
+                    <p class="text-gray-400 text-xs mb-3">Roll 4+ to win. Roll a 6 for big rewards.</p>
+                    <span class="bg-blue-500/20 text-blue-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Win up to 3x</span>
+                </div>
+
+                <!-- Slots -->
+                <div onclick="arcade.openGame('slots')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition shadow-xl hover:shadow-pink-500/20 group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+                    <div class="text-4xl mb-3">🎰</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Slots</h3>
+                    <p class="text-gray-400 text-xs mb-3">Spin the wheels. Match symbols to hit the jackpot.</p>
+                    <span class="bg-pink-500/20 text-pink-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Win up to 10x</span>
+                </div>
+
+                <!-- RPS -->
+                <div onclick="arcade.openGame('rps')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition shadow-xl hover:shadow-green-500/20 group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+                    <div class="text-4xl mb-3">✂️</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Rock Paper Scissors</h3>
+                    <p class="text-gray-400 text-xs mb-3">Classic duel against the bot.</p>
+                    <span class="bg-green-500/20 text-green-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Win 2x</span>
+                </div>
+
+                <!-- Guess -->
+                <div onclick="arcade.openGame('guess')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition shadow-xl hover:shadow-indigo-500/20 group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+                    <div class="text-4xl mb-3">🔢</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Number Guess</h3>
+                    <p class="text-gray-400 text-xs mb-3">Guess the secret number between 1-10.</p>
+                    <span class="bg-indigo-500/20 text-indigo-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Win 5x</span>
+                </div>
+
+                <!-- All In -->
+                <div onclick="arcade.openGame('allin')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition shadow-xl hover:shadow-red-500/20 group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+                    <div class="text-4xl mb-3">🔥</div>
+                    <h3 class="text-xl font-bold text-white mb-1">All In</h3>
+                    <p class="text-gray-400 text-xs mb-3">Risk it all for glory. Only for the brave.</p>
+                    <span class="bg-red-500/20 text-red-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Win up to 10x</span>
+                </div>
+            </div>
+
+            <h2 class="text-gray-400 font-bold uppercase tracking-widest text-sm mb-4 mt-8">Utilities & More</h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Daily -->
+                <div onclick="arcade.runUtility('daily')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition shadow-xl group hover:border-yellow-500/50">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="text-3xl">🎁</div>
+                        <span class="bg-yellow-500/10 text-yellow-500 text-[10px] font-bold px-2 py-1 rounded">FREE</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">Daily Reward</h3>
+                    <p class="text-gray-400 text-xs">Claim your daily 500 Coins & 5 Gems.</p>
+                </div>
+
+                <!-- Bank -->
+                <div onclick="arcade.runUtility('bank')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition shadow-xl group hover:border-blue-500/50">
+                    <div class="text-3xl mb-2">🏦</div>
+                    <h3 class="text-lg font-bold text-white">Bank Statement</h3>
+                    <p class="text-gray-400 text-xs">Publish your wealth to the public chat.</p>
+                </div>
+
+                <!-- Leaderboard -->
+                <div onclick="arcade.runUtility('top')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition shadow-xl group hover:border-purple-500/50">
+                    <div class="text-3xl mb-2">🏆</div>
+                    <h3 class="text-lg font-bold text-white">Leaderboard</h3>
+                    <p class="text-gray-400 text-xs">See who runs the economy.</p>
+                </div>
+            </div>
+
+            <h2 class="text-gray-400 font-bold uppercase tracking-widest text-sm mb-4 mt-8">Coming Soon</h2>
+             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+                <div class="bg-[#1e1f22] rounded-xl p-5 border border-[#111214] border-dashed">
+                    <div class="text-3xl mb-2">💣</div>
+                    <h3 class="text-lg font-bold text-gray-400">Mines</h3>
+                    <p class="text-gray-500 text-xs">Avoid the bombs to multiply your wins.</p>
+                </div>
+                <div class="bg-[#1e1f22] rounded-xl p-5 border border-[#111214] border-dashed">
+                    <div class="text-3xl mb-2">🃏</div>
+                    <h3 class="text-lg font-bold text-gray-400">Blackjack</h3>
+                    <p class="text-gray-500 text-xs">Race to 21 against the dealer.</p>
+                </div>
+                <div class="bg-[#1e1f22] rounded-xl p-5 border border-[#111214] border-dashed">
+                    <div class="text-3xl mb-2">🎡</div>
+                    <h3 class="text-lg font-bold text-gray-400">Roulette</h3>
+                    <p class="text-gray-500 text-xs">Spin the wheel of fortune.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Betting Modal -->
+    <div id="bet-modal" class="absolute inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#2b2d31] rounded-2xl shadow-2xl w-full max-w-sm border border-[#3f4147] transform transition-all scale-100">
+            <!-- Modal Header -->
+            <div class="bg-[#1e1f22] p-4 rounded-t-2xl border-b border-[#111214] flex justify-between items-center">
+                <h3 id="modal-title" class="text-xl font-black text-white uppercase italic tracking-wider">GAME TITLE</h3>
+                <button onclick="arcade.closeModal()" class="text-gray-500 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 space-y-5">
+                
+                <!-- Currency Toggle -->
+                <div class="flex bg-[#111214] p-1 rounded-lg">
+                    <button id="btn-coins" onclick="arcade.setCurrency('coins')" class="flex-1 py-2 rounded-md text-sm font-bold bg-[#5865F2] text-white transition flex items-center justify-center gap-2">
+                        <span>🪙</span> Coins
+                    </button>
+                    <button id="btn-gems" onclick="arcade.setCurrency('gems')" class="flex-1 py-2 rounded-md text-sm font-bold text-gray-400 hover:text-white transition flex items-center justify-center gap-2">
+                        <span>💎</span> Gems
+                    </button>
+                </div>
+
+                <!-- Input: Amount -->
+                <div id="input-amount-container">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Bet Amount</label>
+                    <div class="relative">
+                        <input type="text" id="bet-amount" placeholder="e.g. 100, 1k, all" class="w-full bg-[#1e1f22] border border-[#111214] text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#5865F2] transition font-mono">
+                    </div>
+                </div>
+
+                <!-- Input: RPS Specific -->
+                <div id="input-rps-container" class="hidden">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Select Move</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="arcade.setRps('r')" class="rps-btn bg-[#1e1f22] hover:bg-[#35373c] border border-[#111214] rounded-lg py-3 text-2xl transition focus:ring-2 focus:ring-[#5865F2]" data-move="r">🪨</button>
+                        <button onclick="arcade.setRps('p')" class="rps-btn bg-[#1e1f22] hover:bg-[#35373c] border border-[#111214] rounded-lg py-3 text-2xl transition focus:ring-2 focus:ring-[#5865F2]" data-move="p">📄</button>
+                        <button onclick="arcade.setRps('s')" class="rps-btn bg-[#1e1f22] hover:bg-[#35373c] border border-[#111214] rounded-lg py-3 text-2xl transition focus:ring-2 focus:ring-[#5865F2]" data-move="s">✂️</button>
+                    </div>
+                </div>
+
+                <!-- Input: Guess Specific -->
+                <div id="input-guess-container" class="hidden">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Pick Number (1-10)</label>
+                    <input type="number" id="guess-number" min="1" max="10" placeholder="?" class="w-full bg-[#1e1f22] border border-[#111214] text-white rounded-lg px-4 py-3 focus:outline-none focus:border-[#5865F2] transition text-center font-bold text-xl">
+                </div>
+
+                <button onclick="arcade.submitBet()" class="w-full bg-gradient-to-r from-[#5865F2] to-purple-600 hover:opacity-90 text-white font-black uppercase py-4 rounded-xl shadow-lg transform active:scale-95 transition">
+                    PLAY NOW
+                </button>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none w-full max-w-sm flex flex-col items-center"></div>
+
+    <!-- Firebase & Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, updateDoc, onSnapshot, serverTimestamp, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBz9yOlQFZQZE-GtGcRbJ2sWUYQTb0kBi4",
+            authDomain: "orbitly-online.firebaseapp.com",
+            projectId: "orbitly-online",
+            storageBucket: "orbitly-online.firebasestorage.app",
+            messagingSenderId: "75415636853",
+            appId: "1:75415636853:web:ccf4ac9c74a1769335a13c",
+            measurementId: "G-9B5458S73M"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Abbreviation System (Same as index.html)
+        const SUFFIXES = {
+            'k': 1e3, 'm': 1e6, 'b': 1e9, 't': 1e12, 'qa': 1e15, 'qi': 1e18, 'sx': 1e21, 'sp': 1e24, 'oc': 1e27, 'no': 1e30,
+            'dc': 1e33, 'ud': 1e36, 'dd': 1e39, 'td': 1e42, 'qad': 1e45, 'qid': 1e48, 'sxd': 1e51, 'spd': 1e54, 'ocd': 1e57, 'nod': 1e60,
+            'vg': 1e63, 'uvg': 1e66, 'dvg': 1e69, 'tvg': 1e72, 'qavg': 1e75, 'qivg': 1e78, 'sxvg': 1e81, 'spvg': 1e84, 'ocvg': 1e87, 'novg': 1e90,
+            'tg': 1e93, 'utg': 1e96, 'dtg': 1e99, 'ttg': 1e102, 'qatg': 1e105, 'qitg': 1e108, 'sxtg': 1e111, 'sptg': 1e114, 'octg': 1e117, 'notg': 1e120,
+            'qg': 1e123, 'uqg': 1e126, 'dqg': 1e129, 'tqg': 1e132, 'qaqg': 1e135, 'qiqg': 1e138, 'sxqg': 1e141, 'spqg': 1e144, 'ocqg': 1e147, 'noqg': 1e150
+        };
+
+        function parseAbbreviatedNumber(input) {
+            if (!input) return NaN;
+            input = input.toLowerCase().replace(/,/g, ''); 
+            if (input === 'all') return 'all';
+            const sortedSuffixes = Object.keys(SUFFIXES).sort((a, b) => b.length - a.length);
+            for (const suffix of sortedSuffixes) {
+                if (input.endsWith(suffix)) {
+                    const numPart = input.slice(0, -suffix.length);
+                    const val = parseFloat(numPart);
+                    if (isNaN(val)) return NaN;
+                    return Math.floor(val * SUFFIXES[suffix]);
+                }
+            }
+            return Math.floor(parseFloat(input));
+        }
+
+        // State
+        let currentUser = null;
+        let currentUserProfile = null;
+        let currentGame = null;
+        let selectedCurrency = 'coins';
+        let selectedRps = null;
+
+        // Elements
+        const els = {
+            walletCoins: document.getElementById('arcade-coins'),
+            walletGems: document.getElementById('arcade-gems'),
+            userPfp: document.getElementById('user-pfp'),
+            modal: document.getElementById('bet-modal'),
+            modalTitle: document.getElementById('modal-title'),
+            inputAmountContainer: document.getElementById('input-amount-container'),
+            inputRpsContainer: document.getElementById('input-rps-container'),
+            inputGuessContainer: document.getElementById('input-guess-container'),
+            inputAmount: document.getElementById('bet-amount'),
+            inputGuess: document.getElementById('guess-number'),
+            btnCoins: document.getElementById('btn-coins'),
+            btnGems: document.getElementById('btn-gems'),
+            toastContainer: document.getElementById('toast-container')
+        };
+
+        // --- Core Arcade Logic ---
+
+        window.arcade = {
+            openGame: (gameId) => {
+                if (!currentUser) return showToast("Please login first", "error");
+                currentGame = gameId;
+                selectedRps = null;
+                els.inputAmount.value = '';
+                els.inputGuess.value = '';
+
+                // Reset UI
+                els.inputAmountContainer.classList.remove('hidden');
+                els.inputRpsContainer.classList.add('hidden');
+                els.inputGuessContainer.classList.add('hidden');
+                document.querySelectorAll('.rps-btn').forEach(b => b.classList.remove('ring-2', 'ring-[#5865F2]', 'bg-[#35373c]'));
+
+                // Custom UI per game
+                if (gameId === 'flip') els.modalTitle.textContent = "COIN FLIP";
+                if (gameId === 'roll') els.modalTitle.textContent = "DICE ROLL";
+                if (gameId === 'slots') els.modalTitle.textContent = "SLOT MACHINE";
+                if (gameId === 'allin') {
+                    els.modalTitle.textContent = "ALL IN";
+                    els.inputAmount.value = "all";
+                    els.inputAmountContainer.classList.add('hidden');
+                }
+                if (gameId === 'rps') {
+                    els.modalTitle.textContent = "ROCK PAPER SCISSORS";
+                    els.inputRpsContainer.classList.remove('hidden');
+                }
+                if (gameId === 'guess') {
+                    els.modalTitle.textContent = "NUMBER GUESS (1-10)";
+                    els.inputGuessContainer.classList.remove('hidden');
+                }
+
+                els.modal.classList.remove('hidden');
+            },
+            closeModal: () => {
+                els.modal.classList.add('hidden');
+            },
+            setCurrency: (type) => {
+                selectedCurrency = type;
+                if (type === 'coins') {
+                    els.btnCoins.className = "flex-1 py-2 rounded-md text-sm font-bold bg-[#5865F2] text-white transition flex items-center justify-center gap-2";
+                    els.btnGems.className = "flex-1 py-2 rounded-md text-sm font-bold text-gray-400 hover:text-white transition flex items-center justify-center gap-2";
+                } else {
+                    els.btnGems.className = "flex-1 py-2 rounded-md text-sm font-bold bg-[#9b59b6] text-white transition flex items-center justify-center gap-2";
+                    els.btnCoins.className = "flex-1 py-2 rounded-md text-sm font-bold text-gray-400 hover:text-white transition flex items-center justify-center gap-2";
+                }
+            },
+            setRps: (move) => {
+                selectedRps = move;
+                document.querySelectorAll('.rps-btn').forEach(b => {
+                    if (b.dataset.move === move) b.classList.add('ring-2', 'ring-[#5865F2]', 'bg-[#35373c]');
+                    else b.classList.remove('ring-2', 'ring-[#5865F2]', 'bg-[#35373c]');
+                });
+            },
+            submitBet: async () => {
+                let amountStr = els.inputAmount.value.trim();
+                let extra = null;
+
+                if (currentGame === 'allin') amountStr = 'all';
+                if (currentGame === 'rps') {
+                    if (!selectedRps) return showToast("Select a move!", "error");
+                    extra = selectedRps;
+                }
+                if (currentGame === 'guess') {
+                    const g = els.inputGuess.value;
+                    if (!g) return showToast("Enter a number!", "error");
+                    extra = g;
+                }
+
+                if (!amountStr) return showToast("Enter amount", "error");
+                
+                arcade.closeModal();
+                await executeGamble(currentGame, amountStr, selectedCurrency, extra);
+            },
+            runUtility: async (type) => {
+                 if (!currentUser) return showToast("Login required", "error");
+                 if (type === 'daily') await executeDaily();
+                 if (type === 'bank') await executeBank();
+                 if (type === 'top') await executeTop();
+            }
+        };
+
+        // --- Logic (Mirrored from index.html) ---
+
+        async function executeGamble(game, amountStr, currStr, extra) {
+            if (!currentUserProfile) return;
+            
+            const isCoins = ['c', 'coin', 'coins'].includes(currStr?.toLowerCase());
+            const currencyKey = isCoins ? 'coins' : 'gems';
+            let balance = currentUserProfile[currencyKey] || 0;
+            let bet = 0;
+
+            if (amountStr === 'all') bet = balance;
+            else bet = parseAbbreviatedNumber(amountStr);
+
+            if (isNaN(bet) || bet <= 0) return showToast("Invalid Amount", 'error');
+            if (balance < bet) return showToast(`Not enough ${currencyKey}`, 'error');
+
+            const isDev = currentUser.email === 'dev@gmail.com';
+            let win = false;
+            let multiplier = 0;
+            let details = "";
+
+            // GAME LOGIC
+            if (game === 'allin') {
+                if (isDev) { win = true; multiplier = 10; }
+                else {
+                    win = Math.random() < 0.2;
+                    if (win) {
+                        const r = Math.random();
+                        if (r < 0.5) multiplier = 1;
+                        else if (r < 0.75) multiplier = 2;
+                        else if (r < 0.875) multiplier = 3;
+                        else if (r < 0.975) multiplier = 5;
+                        else multiplier = 10;
+                    }
+                }
+            } else if (game === 'flip') {
+                const isHeads = Math.random() < 0.5;
+                const res = isHeads ? 'Heads' : 'Tails';
+                details = `Coin landed on ${res}`;
+                if (isDev) { win = true; multiplier = 2; details = "Coin landed on WIN (Dev)"; }
+                else {
+                    win = Math.random() < 0.5; // 50% chance
+                    multiplier = 2;
+                }
+            } else if (game === 'roll') {
+                let roll = Math.floor(Math.random() * 6) + 1;
+                if (isDev) { roll = 6; win = true; multiplier = 3; }
+                else {
+                    if (roll >= 4) win = true;
+                    if (roll === 6) multiplier = 3; else multiplier = 1.5;
+                }
+                details = `Rolled a 🎲 ${roll}`;
+            } else if (game === 'slots') {
+                const syms = ['🍒','🍋','🍇','💎','7️⃣'];
+                let s1, s2, s3;
+                if (isDev) { s1=s2=s3='7️⃣'; win=true; multiplier=10; }
+                else {
+                    s1 = syms[Math.floor(Math.random()*syms.length)];
+                    s2 = syms[Math.floor(Math.random()*syms.length)];
+                    s3 = syms[Math.floor(Math.random()*syms.length)];
+                    
+                    if (s1===s2 && s2===s3) {
+                        win = true;
+                        multiplier = (s1==='7️⃣') ? 10 : 5;
+                    } else if (s1===s2 || s2===s3 || s1===s3) {
+                        win = true; multiplier = 1.5;
+                    }
+                }
+                details = `${s1} | ${s2} | ${s3}`;
+            } else if (game === 'rps') {
+                const moves = ['r', 'p', 's'];
+                const map = {'r':'Rock','p':'Paper','s':'Scissors'};
+                const userMove = extra ? extra.toLowerCase()[0] : null;
+                
+                let botMove = moves[Math.floor(Math.random()*3)];
+                if (isDev) {
+                    if (userMove === 'r') botMove = 's';
+                    if (userMove === 'p') botMove = 'r';
+                    if (userMove === 's') botMove = 'p';
+                }
+
+                details = `You: ${map[userMove]} vs Bot: ${map[botMove]}`;
+
+                if (userMove === botMove) {
+                    win = true; multiplier = 1; details += " (Draw)";
+                } else if (
+                    (userMove === 'r' && botMove === 's') ||
+                    (userMove === 'p' && botMove === 'r') ||
+                    (userMove === 's' && botMove === 'p')
+                ) {
+                    win = true; multiplier = 2;
+                } else {
+                    win = false;
+                }
+            } else if (game === 'guess') {
+                const guess = parseInt(extra);
+                let secret = Math.floor(Math.random() * 10) + 1;
+                if (isDev) secret = guess;
+
+                details = `Number was ${secret}`;
+                if (guess === secret) {
+                    win = true; multiplier = 5;
+                }
+            }
+
+            const winnings = win ? Math.floor(bet * multiplier) : 0;
+            const newBal = (balance - bet) + winnings;
+
+            // Update DB
+            await updateDoc(doc(db, "users", currentUser.uid), { [currencyKey]: newBal });
+
+            // Post Message to Chat (so everyone sees)
+            await addDoc(collection(db, "messages"), {
+                type: game,
+                uid: currentUser.uid,
+                username: currentUserProfile.username,
+                pfpUrl: currentUserProfile.pfpUrl,
+                currency: currencyKey,
+                result: win ? (multiplier === 1 ? 'DRAW' : 'WON') : 'LOST',
+                amount: win ? winnings : bet,
+                multiplier: multiplier,
+                details: details,
+                createdAt: serverTimestamp()
+            });
+
+            if (win) {
+                 if (multiplier === 1) showToast(`Draw! Money back.`, 'success');
+                 else showToast(`WON ${winnings.toLocaleString()} ${currencyKey}!`, 'success');
+            } else {
+                 showToast(`Lost ${bet.toLocaleString()} ${currencyKey}`, 'error');
+            }
+        }
+
+        async function executeDaily() {
+            if (!currentUserProfile) return;
+            const now = Date.now();
+            const last = currentUserProfile.lastDaily || 0;
+            const oneDay = 24 * 60 * 60 * 1000;
+
+            if (now - last < oneDay) {
+                const timeLeft = Math.ceil((oneDay - (now - last)) / (1000 * 60 * 60));
+                showToast(`Daily reward available in ${timeLeft} hours`, 'error');
+                return;
+            }
+
+            const ref = doc(db, "users", currentUser.uid);
+            await updateDoc(ref, {
+                coins: (currentUserProfile.coins || 0) + 500,
+                gems: (currentUserProfile.gems || 0) + 5,
+                lastDaily: now
+            });
+            showToast("Claimed 500 Coins & 5 Gems!", 'success');
+        }
+
+        async function executeBank() {
+            if (!currentUserProfile) return;
+            await addDoc(collection(db, "messages"), {
+                type: 'bank',
+                uid: currentUser.uid,
+                username: currentUserProfile.username,
+                pfpUrl: currentUserProfile.pfpUrl,
+                coins: currentUserProfile.coins || 0,
+                gems: currentUserProfile.gems || 0,
+                createdAt: serverTimestamp()
+            });
+            showToast("Bank statement posted to chat!", 'success');
+        }
+
+        async function executeTop() {
+            const q = query(collection(db, "users"), orderBy("coins", "desc"), limit(3));
+            const snap = await getDocs(q);
+            const topUsers = [];
+            snap.forEach(d => {
+                const u = d.data();
+                topUsers.push({
+                    uid: u.uid,
+                    username: u.username,
+                    pfpUrl: u.pfpUrl,
+                    coins: u.coins || 0
+                });
+            });
+
+            await addDoc(collection(db, "messages"), {
+                type: 'leaderboard',
+                topUsers: topUsers,
+                createdAt: serverTimestamp()
+            });
+             showToast("Leaderboard posted to chat!", 'success');
+        }
+
+        // --- Auth Listener ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                const docRef = doc(db, "users", user.uid);
+                onSnapshot(docRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        currentUserProfile = docSnap.data();
+                        els.walletCoins.textContent = `${(currentUserProfile.coins || 0).toLocaleString()} 🪙`;
+                        els.walletGems.textContent = `${(currentUserProfile.gems || 0).toLocaleString()} 💎`;
+                        if(currentUserProfile.pfpUrl) els.userPfp.src = currentUserProfile.pfpUrl;
+                    }
+                });
+            } else {
+                window.location.href = 'index.html'; // Redirect back if not logged in
+            }
+        });
+
+        // --- Toast Utils ---
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-green-500/90' : 'bg-red-500/90';
+            toast.className = `px-6 py-3 rounded-xl text-white font-bold shadow-xl mb-3 text-sm text-center toast-enter backdrop-blur-md ${bgClass} flex items-center gap-2 min-w-[200px] justify-center`;
+            toast.innerHTML = type === 'success' ? `<span>✅</span> ${message}` : `<span>⚠️</span> ${message}`;
+            els.toastContainer.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('toast-enter');
+                toast.classList.add('toast-exit');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+    </script>
+</body>
+</html>
