@@ -49,6 +49,12 @@
 
         /* Profile Modal Gradient */
         .profile-header { background: linear-gradient(135deg, #5865F2, #9b59b6); }
+
+        /* Markdown Styles */
+        .md-bold { font-weight: 700; color: #fff; }
+        .md-italic { font-style: italic; }
+        .md-code { background: #2f3136; padding: 1px 4px; border-radius: 3px; font-family: monospace; color: #e83e8c; font-size: 0.9em; }
+        .md-mention { color: #dee0fc; background: rgba(88, 101, 242, 0.3); padding: 0 2px; border-radius: 3px; font-weight: 500; }
     </style>
 </head>
 <body class="bg-[#313338] text-gray-100 font-sans antialiased h-screen flex flex-col overflow-hidden">
@@ -258,14 +264,18 @@
                     </button>
                 </div>
                 <div class="px-6 pb-6 relative">
-                    <div class="relative -mt-12 mb-4 flex justify-between items-end">
+                    <div class="relative -mt-12 mb-2 flex justify-between items-end">
                         <img id="profile-pfp" src="" class="w-24 h-24 rounded-full border-4 border-[#2b2d31] bg-[#2b2d31] object-cover">
-                        <div class="bg-[#1e1f22] px-3 py-1 rounded text-xs font-bold text-gray-400 border border-[#111214]" id="profile-status-badge">ONLINE</div>
+                        <div class="flex gap-2">
+                            <div class="bg-[#1e1f22] px-3 py-1 rounded text-xs font-bold text-yellow-400 border border-[#111214]" id="profile-rep">REP: 0</div>
+                            <div class="bg-[#1e1f22] px-3 py-1 rounded text-xs font-bold text-gray-400 border border-[#111214]" id="profile-status-badge">ONLINE</div>
+                        </div>
                     </div>
                     
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <h3 id="profile-username" class="text-2xl font-bold text-white leading-tight"></h3>
-                        <p id="profile-joined" class="text-xs text-gray-400 mt-1">Joined Dec 2023</p>
+                        <p id="profile-bio" class="text-xs text-gray-300 mt-1 italic opacity-80 line-clamp-2">No bio set.</p>
+                        <p id="profile-joined" class="text-[10px] text-gray-500 mt-1">Joined Dec 2023</p>
                     </div>
 
                     <div class="bg-[#111214] rounded-lg p-3 border border-[#1e1f22] mb-4 grid grid-cols-2 gap-2">
@@ -329,12 +339,9 @@
 
         function parseAbbreviatedNumber(input) {
             if (!input) return NaN;
-            input = input.toLowerCase().replace(/,/g, ''); // Remove commas
+            input = input.toLowerCase().replace(/,/g, ''); 
             if (input === 'all') return 'all';
-            
-            // Sort suffixes by length desc to match 'qad' before 'qa'
             const sortedSuffixes = Object.keys(SUFFIXES).sort((a, b) => b.length - a.length);
-            
             for (const suffix of sortedSuffixes) {
                 if (input.endsWith(suffix)) {
                     const numPart = input.slice(0, -suffix.length);
@@ -343,9 +350,19 @@
                     return Math.floor(val * SUFFIXES[suffix]);
                 }
             }
-            
-            // No suffix, just number
             return Math.floor(parseFloat(input));
+        }
+
+        function formatNumber(num) {
+            if (!num) return '0';
+            if (num < 1000) return num.toLocaleString();
+            const sortedSuffixes = Object.entries(SUFFIXES).sort((a, b) => b[1] - a[1]);
+            for (const [suffix, val] of sortedSuffixes) {
+                if (num >= val) {
+                    return (num / val).toFixed(1).replace(/\.0$/, '') + suffix;
+                }
+            }
+            return num.toLocaleString();
         }
 
         // State
@@ -416,6 +433,18 @@
             });
         }
 
+        function processText(text) {
+            if (!text) return '';
+            let processed = escapeHtml(text);
+            // Markdown: Bold, Italic, Code
+            processed = processed.replace(/\*\*(.*?)\*\*/g, '<span class="md-bold">$1</span>');
+            processed = processed.replace(/\*(.*?)\*/g, '<span class="md-italic">$1</span>');
+            processed = processed.replace(/`(.*?)`/g, '<span class="md-code">$1</span>');
+            // Mentions
+            processed = processed.replace(/@(\w+)/g, '<span class="md-mention">@$1</span>');
+            return processed;
+        }
+
         // Global App Methods
         window.app = {
             switchTab: (tab) => {
@@ -450,8 +479,8 @@
             },
             openWallet: () => {
                 if (currentUserProfile) {
-                    els.displays.walletCoins.textContent = (currentUserProfile.coins || 0).toLocaleString();
-                    els.displays.walletGems.textContent = (currentUserProfile.gems || 0).toLocaleString();
+                    els.displays.walletCoins.textContent = formatNumber(currentUserProfile.coins || 0);
+                    els.displays.walletGems.textContent = formatNumber(currentUserProfile.gems || 0);
                 }
                 els.displays.walletModal.classList.remove('hidden');
             },
@@ -467,8 +496,10 @@
                         document.getElementById('profile-username').textContent = data.username;
                         document.getElementById('profile-age').textContent = data.age || 'N/A';
                         document.getElementById('profile-gender').textContent = data.gender || 'N/A';
-                        document.getElementById('profile-coins').textContent = (data.coins || 0).toLocaleString();
-                        document.getElementById('profile-gems').textContent = (data.gems || 0).toLocaleString();
+                        document.getElementById('profile-coins').textContent = formatNumber(data.coins || 0);
+                        document.getElementById('profile-gems').textContent = formatNumber(data.gems || 0);
+                        document.getElementById('profile-bio').textContent = data.bio || 'No bio set.';
+                        document.getElementById('profile-rep').textContent = `REP: ${formatNumber(data.rep || 0)}`;
                         
                         const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown';
                         document.getElementById('profile-joined').textContent = `Joined ${date}`;
@@ -507,12 +538,10 @@
 
         // --- Event Listeners ---
 
-        // (User menu listener handled inline in HTML now)
         document.addEventListener('click', (e) => {
-            // Only hide if click is outside the dropdown and outside the trigger
             const dropdown = els.displays.statusDropdown;
-            const trigger = document.getElementById('user-menu-trigger'); // Parent container
-            if (!dropdown.contains(e.target) && !trigger.contains(e.target)) {
+            const trigger = document.getElementById('user-menu-trigger'); 
+            if (!dropdown.contains(e.target) && !trigger?.contains(e.target)) {
                  dropdown.classList.add('hidden');
             }
             if (e.target === els.displays.walletModal) app.closeWallet();
@@ -555,7 +584,6 @@
                     try { pfpUrl = await processImage(pfpFile); } catch (e) {}
                 }
 
-                // Initial Balance: 1000 Coins, 10 Gems
                 await setDoc(doc(db, "users", user.uid), {
                     uid: user.uid,
                     username,
@@ -566,7 +594,15 @@
                     status: 'online', 
                     coins: 1000,
                     gems: 10,
+                    rep: 0,
+                    bio: '',
+                    nameColor: '#ffffff',
                     lastDaily: 0,
+                    lastWork: 0,
+                    lastCrime: 0,
+                    lastRob: 0,
+                    lastBeg: 0,
+                    lastRep: 0,
                     createdAt: serverTimestamp()
                 });
 
@@ -602,34 +638,28 @@
                 try {
                     const docRef = doc(db, "users", user.uid);
                     
-                    // Listen to own profile for balance updates
                     onSnapshot(docRef, (docSnap) => {
                          if (docSnap.exists()) {
                             currentUserProfile = docSnap.data();
-                            // Ensure defaults if old user
                             if (currentUserProfile.coins === undefined) updateDoc(docRef, {coins: 1000});
                             if (currentUserProfile.gems === undefined) updateDoc(docRef, {gems: 10});
 
-                            // Status Update Header
                             const s = currentUserProfile.status || 'online';
                             els.displays.headerStatusText.textContent = s.charAt(0).toUpperCase() + s.slice(1);
                             
-                            // Reset classes
                             els.displays.headerStatusDot.className = "absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-[3px] border-[#2b2d31]";
                             if (s === 'online') els.displays.headerStatusDot.classList.add('status-online');
                             else if (s === 'busy') els.displays.headerStatusDot.classList.add('status-busy');
                             else if (s === 'dnd') els.displays.headerStatusDot.classList.add('status-dnd');
                             else els.displays.headerStatusDot.classList.add('status-offline');
 
-                            // Wallet update if open
                             if (!els.displays.walletModal.classList.contains('hidden')) {
-                                els.displays.walletCoins.textContent = (currentUserProfile.coins || 0).toLocaleString();
-                                els.displays.walletGems.textContent = (currentUserProfile.gems || 0).toLocaleString();
+                                els.displays.walletCoins.textContent = formatNumber(currentUserProfile.coins || 0);
+                                els.displays.walletGems.textContent = formatNumber(currentUserProfile.gems || 0);
                             }
                         }
                     });
 
-                    // One-time fetch for init logic
                     const initSnap = await getDoc(docRef);
                     if (initSnap.exists()) {
                         const data = initSnap.data();
@@ -714,7 +744,7 @@
                         
                         <div class="flex items-center gap-2 text-sm text-gray-300">
                             ${isWin ? `<span>Won</span>` : `<span>Lost</span>`}
-                            <span class="font-mono font-bold text-white">${msg.amount.toLocaleString()}</span>
+                            <span class="font-mono font-bold text-white">${formatNumber(msg.amount)}</span>
                         </div>
 
                         ${isWin && msg.multiplier > 1 ? `
@@ -735,11 +765,11 @@
                         <div class="w-full space-y-2">
                             <div class="flex justify-between items-center bg-[#1e1f22]/50 p-3 rounded">
                                 <span class="text-yellow-500 font-bold uppercase text-xs">Coins</span>
-                                <span class="text-white font-mono font-bold">${msg.coins.toLocaleString()}</span>
+                                <span class="text-white font-mono font-bold">${formatNumber(msg.coins)}</span>
                             </div>
                             <div class="flex justify-between items-center bg-[#1e1f22]/50 p-3 rounded">
                                 <span class="text-purple-400 font-bold uppercase text-xs">Gems</span>
-                                <span class="text-white font-mono font-bold">${msg.gems.toLocaleString()}</span>
+                                <span class="text-white font-mono font-bold">${formatNumber(msg.gems)}</span>
                             </div>
                         </div>
                     </div>
@@ -754,7 +784,7 @@
                                 <img src="${u.pfpUrl}" onclick="app.openProfile('${u.uid}')" class="w-6 h-6 rounded-full cursor-pointer hover:opacity-80">
                                 <span class="text-white font-medium cursor-pointer hover:underline" onclick="app.openProfile('${u.uid}')">${escapeHtml(u.username)}</span>
                             </div>
-                            <span class="text-yellow-500 font-mono">${(u.coins||0).toLocaleString()} 🪙</span>
+                            <span class="text-yellow-500 font-mono">${formatNumber(u.coins||0)} 🪙</span>
                         </div>
                      `;
                  });
@@ -766,20 +796,35 @@
                         ${rows}
                     </div>
                  `;
+            } else if (msg.type === 'lottery_win') {
+                div.className = "flex justify-center my-4 animate-fade-in";
+                div.innerHTML = `
+                    <div class="relative flex flex-col items-center p-6 rounded-xl border border-purple-500/50 bg-gradient-to-br from-purple-900/40 to-transparent max-w-sm w-full backdrop-blur-sm animate-bounce">
+                         <div class="absolute -top-3 bg-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase">Lottery Winner</div>
+                        <img src="${msg.pfpUrl}" onclick="app.openProfile('${msg.uid}')" class="w-20 h-20 rounded-full border-4 border-yellow-400 shadow-xl mb-2 object-cover cursor-pointer">
+                        <div class="text-yellow-400 font-black text-2xl mb-1">${escapeHtml(msg.username)}</div>
+                        <div class="text-white text-sm">Won the Daily Pot!</div>
+                        <div class="text-4xl font-black text-yellow-300 mt-2 tracking-tighter">+${formatNumber(msg.amount)} 🪙</div>
+                    </div>
+                `;
             } else {
                 // Normal Chat Message
                 div.className = "flex gap-4 pl-2 pr-4 py-1 hover:bg-[#2e3035] -mx-2 rounded group animate-fade-in";
                 const time = msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now';
+                
+                const nameColor = msg.nameColor || 'white';
+                const processedText = processText(msg.text);
+
                 div.innerHTML = `
                     <div class="flex-shrink-0 cursor-pointer mt-0.5" onclick="app.openProfile('${msg.uid}')">
                         <img src="${msg.pfpUrl || 'https://ui-avatars.com/api/?name=?'}" class="w-10 h-10 rounded-full hover:opacity-80 transition object-cover">
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-baseline gap-2">
-                            <span class="font-medium text-white hover:underline cursor-pointer text-sm" onclick="app.openProfile('${msg.uid}')">${escapeHtml(msg.username)}</span>
+                            <span class="font-medium hover:underline cursor-pointer text-sm" style="color: ${nameColor}" onclick="app.openProfile('${msg.uid}')">${escapeHtml(msg.username)}</span>
                             <span class="text-[10px] text-gray-400">${time}</span>
                         </div>
-                        <p class="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap break-words">${escapeHtml(msg.text)}</p>
+                        <p class="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap break-words">${processedText}</p>
                     </div>
                 `;
             }
@@ -804,6 +849,7 @@
                     uid: currentUser.uid,
                     username: currentUserProfile.username,
                     pfpUrl: currentUserProfile.pfpUrl,
+                    nameColor: currentUserProfile.nameColor || 'white',
                     createdAt: serverTimestamp()
                 });
             } catch (err) { console.error(err); }
@@ -831,14 +877,26 @@
                 return;
             }
 
-            // Commands requiring user interactions or simple logic
-            if (command === '/daily') {
-                await executeDaily();
+            if (command === '/lottery') {
+                const countStr = args[0] || '1';
+                const count = parseAbbreviatedNumber(countStr);
+                if (isNaN(count) || count < 1) return showToast("Invalid ticket count", 'error');
+                await executeLottery(count);
                 return;
             }
 
+            // Commands requiring user interactions or simple logic
+            if (command === '/daily') { await executeDaily(); return; }
+            if (command === '/work') { await executeWork(); return; }
+            if (command === '/beg') { await executeBeg(); return; }
+            if (command === '/crime') { await executeCrime(); return; }
+            if (command === '/rob') { await executeRob(args[0]); return; }
+            if (command === '/bio') { await executeBio(args.join(' ')); return; }
+            if (command === '/color') { await executeColor(args[0]); return; }
+            if (command === '/rep') { await executeRep(args[0]); return; }
+            if (command === '/8ball') { await execute8Ball(args.join(' ')); return; }
+
             if (command === '/pay') {
-                // Usage: /pay username amount c/g
                 if (args.length < 3) return showToast("Usage: /pay {username} {amount} {c/g}", 'error');
                 await executePay(args[0], args[1], args[2]);
                 return;
@@ -852,7 +910,6 @@
                     return;
                 }
                 
-                // All gambling requires currency argument except /guess has extra
                 let amountIdx = 0;
                 let currIdx = 1;
                 let extraArg = null;
@@ -860,14 +917,12 @@
                 if (command === '/rps' || command === '/guess') {
                     amountIdx = 1;
                     currIdx = 2;
-                    extraArg = args[0]; // move/number
+                    extraArg = args[0]; 
                 }
 
-                // Parse Amount & Currency
                 let amountStr = args[amountIdx];
                 let currencyStr = args[currIdx];
 
-                // Special case for /allin
                 if (command === '/allin') {
                     amountStr = 'all';
                     currencyStr = args[0];
@@ -888,26 +943,29 @@
                     <div>
                         <h4 class="text-blue-400 font-bold mb-1 uppercase text-xs">Essentials</h4>
                         <ul class="space-y-1 text-gray-300">
-                            <li><span class="text-white font-mono">/daily</span> - Claim free reward (24h)</li>
-                            <li><span class="text-white font-mono">/bank</span> - View your balance</li>
-                            <li><span class="text-white font-mono">/pay [user] [amt] [c/g]</span> - Pay someone</li>
-                            <li><span class="text-white font-mono">/top</span> - Leaderboard (Public)</li>
-                            <li><span class="text-white font-mono">/prefixs</span> - List number shortcuts</li>
+                            <li><span class="text-white font-mono">/daily</span> - Claim reward (24h)</li>
+                            <li><span class="text-white font-mono">/work</span> - Earn coins (1h)</li>
+                            <li><span class="text-white font-mono">/beg</span> - Small earnings (10m)</li>
+                            <li><span class="text-white font-mono">/crime</span> - High risk/reward (4h)</li>
+                            <li><span class="text-white font-mono">/rob [user]</span> - Steal coins (2h)</li>
+                            <li><span class="text-white font-mono">/bank</span> - View balance</li>
+                            <li><span class="text-white font-mono">/pay [user] [amt] [c/g]</span></li>
+                            <li><span class="text-white font-mono">/top</span> - Leaderboard</li>
+                            <li><span class="text-white font-mono">/lottery [tickets]</span></li>
                         </ul>
                     </div>
                     <div>
-                        <h4 class="text-green-400 font-bold mb-1 uppercase text-xs">Gambling</h4>
+                        <h4 class="text-green-400 font-bold mb-1 uppercase text-xs">Social & Fun</h4>
                         <ul class="space-y-1 text-gray-300">
-                            <li><span class="text-white font-mono">/allin [c/g]</span> - Bet everything</li>
-                            <li><span class="text-white font-mono">/flip [amt] [c/g]</span> - Coin flip (2x)</li>
-                            <li><span class="text-white font-mono">/roll [amt] [c/g]</span> - Dice roll (>3 wins)</li>
-                            <li><span class="text-white font-mono">/slots [amt] [c/g]</span> - Slot machine</li>
-                            <li><span class="text-white font-mono">/rps [r/p/s] [amt] [c/g]</span> - Rock Paper Scissors</li>
-                            <li><span class="text-white font-mono">/guess [1-10] [amt] [c/g]</span> - Guess number (5x)</li>
+                            <li><span class="text-white font-mono">/bio [text]</span> - Set profile bio</li>
+                            <li><span class="text-white font-mono">/color [hex]</span> - Set name color</li>
+                            <li><span class="text-white font-mono">/rep [user]</span> - Give reputation</li>
+                            <li><span class="text-white font-mono">/8ball [q]</span> - Ask magic 8 ball</li>
+                            <li><span class="text-white font-mono">/flip, /roll, /slots</span> - Gamble</li>
+                            <li><span class="text-white font-mono">Markdown</span> - **bold**, *italic*, \`code\`</li>
                         </ul>
                     </div>
                 </div>
-                <div class="mt-3 text-xs text-gray-500 italic">Accepts k, m, b, t... (e.g. 100k, 1.5m)</div>
             `;
             els.displays.msgContainer.appendChild(div);
             requestAnimationFrame(() => els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight);
@@ -921,13 +979,184 @@
              div.className = "my-4 mx-4 p-4 bg-[#2b2d31] rounded-lg border border-[#1e1f22] text-sm shadow-xl";
              div.innerHTML = `
                 <h3 class="font-bold text-white mb-2 text-lg">Number Abbreviations</h3>
-                <p class="text-gray-400 text-xs mb-3">Use these suffixes to type large numbers quickly (e.g., 1k = 1,000).</p>
+                <p class="text-gray-400 text-xs mb-3">Use these suffixes to type numbers (e.g., 1k = 1,000).</p>
                 <div class="flex flex-wrap gap-2 leading-relaxed">
                     ${list}
                 </div>
              `;
              els.displays.msgContainer.appendChild(div);
              requestAnimationFrame(() => els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight);
+        }
+
+        async function executeWork() {
+            if (!currentUserProfile) return;
+            const now = Date.now();
+            const last = currentUserProfile.lastWork || 0;
+            const cooldown = 60 * 60 * 1000; // 1 hr
+
+            if (now - last < cooldown) {
+                const mins = Math.ceil((cooldown - (now - last)) / 60000);
+                showToast(`Work available in ${mins}m`, 'error');
+                return;
+            }
+
+            const earnings = Math.floor(Math.random() * 400) + 100;
+            await updateDoc(doc(db, "users", currentUser.uid), {
+                coins: (currentUserProfile.coins || 0) + earnings,
+                lastWork: now
+            });
+            showToast(`Worked and earned ${earnings} Coins!`, 'success');
+        }
+
+        async function executeBeg() {
+            if (!currentUserProfile) return;
+            const now = Date.now();
+            const last = currentUserProfile.lastBeg || 0;
+            const cooldown = 10 * 60 * 1000; // 10 min
+
+            if (now - last < cooldown) {
+                const mins = Math.ceil((cooldown - (now - last)) / 60000);
+                showToast(`Beg available in ${mins}m`, 'error');
+                return;
+            }
+
+            const earnings = Math.floor(Math.random() * 50) + 1;
+            await updateDoc(doc(db, "users", currentUser.uid), {
+                coins: (currentUserProfile.coins || 0) + earnings,
+                lastBeg: now
+            });
+            showToast(`Begged and received ${earnings} Coins.`, 'success');
+        }
+
+        async function executeCrime() {
+            if (!currentUserProfile) return;
+            const now = Date.now();
+            const last = currentUserProfile.lastCrime || 0;
+            const cooldown = 4 * 60 * 60 * 1000; // 4 hr
+
+            if (now - last < cooldown) {
+                const mins = Math.ceil((cooldown - (now - last)) / 60000);
+                showToast(`Crime available in ${mins}m`, 'error');
+                return;
+            }
+
+            const success = Math.random() < 0.4; // 40% chance
+            if (success) {
+                const earnings = Math.floor(Math.random() * 2000) + 1000;
+                await updateDoc(doc(db, "users", currentUser.uid), {
+                    coins: (currentUserProfile.coins || 0) + earnings,
+                    lastCrime: now
+                });
+                showToast(`Crime Successful! Stole ${earnings} Coins!`, 'success');
+            } else {
+                const fine = 500;
+                await updateDoc(doc(db, "users", currentUser.uid), {
+                    coins: Math.max(0, (currentUserProfile.coins || 0) - fine),
+                    lastCrime: now
+                });
+                showToast(`Caught! Fined ${fine} Coins.`, 'error');
+            }
+        }
+
+        async function executeRob(targetName) {
+            if (!targetName) return showToast("Specify a user to rob", 'error');
+            if (currentUserProfile.username === targetName) return showToast("Cannot rob yourself", 'error');
+
+            const now = Date.now();
+            const last = currentUserProfile.lastRob || 0;
+            const cooldown = 2 * 60 * 60 * 1000;
+
+            if (now - last < cooldown) {
+                const mins = Math.ceil((cooldown - (now - last)) / 60000);
+                showToast(`Rob available in ${mins}m`, 'error');
+                return;
+            }
+
+            const q = query(collection(db, "users"), where("username", "==", targetName));
+            const snap = await getDocs(q);
+            if (snap.empty) return showToast("User not found", 'error');
+            
+            const targetDoc = snap.docs[0];
+            const targetData = targetDoc.data();
+            const targetUid = targetDoc.id;
+            
+            if ((targetData.coins || 0) < 500) return showToast("User is too poor to rob", 'error');
+
+            const success = Math.random() < 0.35; // 35% chance
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const sRef = doc(db, "users", currentUser.uid);
+                    const tRef = doc(db, "users", targetUid);
+                    const sSnap = await transaction.get(sRef);
+                    const tSnap = await transaction.get(tRef);
+                    
+                    const sData = sSnap.data();
+                    const tData = tSnap.data();
+
+                    if (success) {
+                        const stealAmt = Math.floor((tData.coins || 0) * (Math.random() * 0.05 + 0.01)); // 1-5%
+                        transaction.update(sRef, { coins: (sData.coins || 0) + stealAmt, lastRob: now });
+                        transaction.update(tRef, { coins: (tData.coins || 0) - stealAmt });
+                        showToast(`Robbed ${stealAmt} coins from ${targetName}!`, 'success');
+                    } else {
+                        const fine = 500;
+                        transaction.update(sRef, { coins: Math.max(0, (sData.coins || 0) - fine), lastRob: now });
+                        transaction.update(tRef, { coins: (tData.coins || 0) + fine });
+                        showToast(`Robbery failed! You paid ${fine} coins to ${targetName}.`, 'error');
+                    }
+                });
+            } catch(e) { showToast("Robbery failed (error)", 'error'); }
+        }
+
+        async function executeBio(text) {
+            if (!text) return showToast("Usage: /bio [text]", 'error');
+            if (text.length > 80) return showToast("Bio too long (max 80 chars)", 'error');
+            await updateDoc(doc(db, "users", currentUser.uid), { bio: text });
+            showToast("Bio updated!", 'success');
+        }
+
+        async function executeColor(hex) {
+            if (!/^#[0-9A-F]{6}$/i.test(hex)) return showToast("Invalid Hex Color (e.g. #FF0000)", 'error');
+            await updateDoc(doc(db, "users", currentUser.uid), { nameColor: hex });
+            showToast("Name color updated!", 'success');
+        }
+
+        async function executeRep(targetName) {
+            if (!targetName) return showToast("Specify user", 'error');
+            if (currentUserProfile.username === targetName) return showToast("Cannot rep yourself", 'error');
+
+            const now = Date.now();
+            const last = currentUserProfile.lastRep || 0;
+            const cooldown = 24 * 60 * 60 * 1000;
+
+            if (now - last < cooldown) return showToast("Rep available in 24h", 'error');
+
+            const q = query(collection(db, "users"), where("username", "==", targetName));
+            const snap = await getDocs(q);
+            if (snap.empty) return showToast("User not found", 'error');
+            
+            const targetUid = snap.docs[0].id;
+            const currentRep = snap.docs[0].data().rep || 0;
+
+            await updateDoc(doc(db, "users", targetUid), { rep: currentRep + 1 });
+            await updateDoc(doc(db, "users", currentUser.uid), { lastRep: now });
+            showToast(`Gave +1 Rep to ${targetName}`, 'success');
+        }
+
+        async function execute8Ball(question) {
+            if (!question) return showToast("Ask a question!", 'error');
+            const answers = ["Yes.", "No.", "Maybe.", "Ask again later.", "Definitely.", "Absolutely not."];
+            const ans = answers[Math.floor(Math.random() * answers.length)];
+            
+            await addDoc(collection(db, "messages"), {
+                text: `🎱 Question: ${question}\nAnswer: **${ans}**`,
+                uid: currentUser.uid,
+                username: currentUserProfile.username,
+                pfpUrl: currentUserProfile.pfpUrl,
+                nameColor: currentUserProfile.nameColor,
+                createdAt: serverTimestamp()
+            });
         }
 
         async function executeDaily() {
@@ -971,6 +1200,95 @@
                 topUsers: topUsers,
                 createdAt: serverTimestamp()
             });
+        }
+
+        async function executeLottery(count) {
+             const TICKET_PRICE = 100;
+             const totalCost = count * TICKET_PRICE;
+             
+             if (!currentUserProfile) return;
+             if ((currentUserProfile.coins || 0) < totalCost) return showToast(`Need ${totalCost} coins`, 'error');
+
+             try {
+                let winnerAnnouncement = null;
+
+                await runTransaction(db, async (transaction) => {
+                    const lotRef = doc(db, "system", "lottery");
+                    const userRef = doc(db, "users", currentUser.uid);
+                    const lotSnap = await transaction.get(lotRef);
+                    const userSnap = await transaction.get(userRef);
+
+                    if (!userSnap.exists()) throw "User does not exist";
+                    const userData = userSnap.data();
+                    if ((userData.coins || 0) < totalCost) throw "Insufficient funds";
+
+                    let lotData = { pot: 0, tickets: [], nextDraw: Date.now() + 86400000 };
+                    if (lotSnap.exists()) {
+                        lotData = lotSnap.data();
+                        lotData.pot = lotData.pot || 0;
+                        lotData.tickets = lotData.tickets || [];
+                        lotData.nextDraw = lotData.nextDraw || (Date.now() + 86400000);
+                    }
+
+                    let drawHappened = false;
+                    let winnerRef = null;
+                    let winnerSnap = null;
+                    let potWon = 0;
+
+                    if (Date.now() > lotData.nextDraw && lotData.tickets.length > 0) {
+                        const winnerUid = lotData.tickets[Math.floor(Math.random() * lotData.tickets.length)];
+                        winnerRef = doc(db, "users", winnerUid);
+                        winnerSnap = await transaction.get(winnerRef);
+                        potWon = lotData.pot;
+                        drawHappened = true;
+                    } else if (Date.now() > lotData.nextDraw) {
+                        lotData.nextDraw = Date.now() + 86400000;
+                    }
+
+                    transaction.update(userRef, { coins: userData.coins - totalCost });
+
+                    if (drawHappened && winnerSnap && winnerSnap.exists()) {
+                        const wData = winnerSnap.data();
+                        transaction.update(winnerRef, { coins: (wData.coins || 0) + potWon });
+                        
+                        winnerAnnouncement = {
+                            type: 'lottery_win',
+                            uid: winnerSnap.id,
+                            username: wData.username,
+                            pfpUrl: wData.pfpUrl,
+                            amount: potWon,
+                            createdAt: serverTimestamp()
+                        };
+                    }
+
+                    if (drawHappened) {
+                        lotData.pot = 0;
+                        lotData.tickets = [];
+                        lotData.nextDraw = Date.now() + 86400000;
+                    }
+
+                    const newTickets = Array(count).fill(currentUser.uid);
+                    lotData.tickets.push(...newTickets);
+                    lotData.pot += totalCost;
+
+                    if (lotSnap.exists()) {
+                        transaction.update(lotRef, lotData);
+                    } else {
+                        transaction.set(lotRef, lotData);
+                    }
+                });
+                
+                if (winnerAnnouncement) {
+                    await addDoc(collection(db, "messages"), winnerAnnouncement);
+                }
+                
+                showToast(`Bought ${count} ticket(s)!`, 'success');
+
+             } catch (e) {
+                 console.error("Lottery Error:", e);
+                 const msg = typeof e === 'string' ? e : "Transaction failed";
+                 showToast(msg, 'error');
+             }
         }
 
         async function executePay(targetName, amountStr, currStr) {
