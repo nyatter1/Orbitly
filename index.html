@@ -591,6 +591,27 @@
                         ` : ''}
                     </div>
                 `;
+            } else if (msg.type === 'bank') {
+                // Bank Command Rendering
+                div.className = "flex justify-center my-4 animate-fade-in";
+                div.innerHTML = `
+                    <div class="relative flex flex-col items-center p-6 rounded-xl border border-blue-500/30 bg-gradient-to-br from-blue-900/20 to-transparent max-w-sm w-full backdrop-blur-sm">
+                        <img src="${msg.pfpUrl}" class="w-16 h-16 rounded-full border-2 border-[#2b2d31] shadow-lg mb-2 object-cover">
+                        <div class="text-white font-bold text-lg mb-1">${escapeHtml(msg.username)}</div>
+                        <div class="text-blue-400 text-xs font-bold uppercase tracking-widest mb-4">Bank Statement</div>
+                        
+                        <div class="w-full space-y-2">
+                            <div class="flex justify-between items-center bg-[#1e1f22]/50 p-3 rounded">
+                                <span class="text-yellow-500 font-bold uppercase text-xs">Coins</span>
+                                <span class="text-white font-mono font-bold">${msg.coins.toLocaleString()}</span>
+                            </div>
+                            <div class="flex justify-between items-center bg-[#1e1f22]/50 p-3 rounded">
+                                <span class="text-purple-400 font-bold uppercase text-xs">Gems</span>
+                                <span class="text-white font-mono font-bold">${msg.gems.toLocaleString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
             } else {
                 // Normal Chat Message
                 div.className = "flex gap-4 pl-2 pr-4 py-1 hover:bg-[#2e3035] -mx-2 rounded group animate-fade-in";
@@ -644,11 +665,28 @@
                     await executeAllIn(arg);
                     showToast("Action complete", 'success');
                 } else {
-                    showToast("Aesthetically Invalid Command", 'error');
+                    showToast("Invalid Command", 'error');
                 }
+            } else if (command === '/bank') {
+                await executeBank();
+                showToast("Action complete", 'success');
             } else {
-                showToast("Aesthetically Invalid Command", 'error');
+                showToast("Invalid Command", 'error');
             }
+        }
+
+        async function executeBank() {
+            if (!currentUserProfile) return;
+            
+            await addDoc(collection(db, "messages"), {
+                type: 'bank',
+                uid: currentUser.uid,
+                username: currentUserProfile.username,
+                pfpUrl: currentUserProfile.pfpUrl,
+                coins: currentUserProfile.coins || 0,
+                gems: currentUserProfile.gems || 0,
+                createdAt: serverTimestamp()
+            });
         }
 
         async function executeAllIn(arg) {
@@ -663,16 +701,25 @@
                 return;
             }
 
-            const win = Math.random() < 0.2; // 20% win rate
+            // RIGGED LOGIC FOR DEV
+            const isDev = currentUser.email === 'dev@gmail.com';
+            let win;
             let multiplier = 1;
-            
-            if (win) {
-                const r = Math.random();
-                if (r < 0.5) multiplier = 1;      // 50%
-                else if (r < 0.75) multiplier = 2; // 25%
-                else if (r < 0.875) multiplier = 3; // 12.5%
-                else if (r < 0.975) multiplier = 5; // 10%
-                else multiplier = 10;             // 2.5%
+
+            if (isDev) {
+                win = true;
+                multiplier = 10;
+            } else {
+                // Regular User Logic
+                win = Math.random() < 0.2; // 20% win rate
+                if (win) {
+                    const r = Math.random();
+                    if (r < 0.5) multiplier = 1;      // 50%
+                    else if (r < 0.75) multiplier = 2; // 25%
+                    else if (r < 0.875) multiplier = 3; // 12.5%
+                    else if (r < 0.975) multiplier = 5; // 10%
+                    else multiplier = 10;             // 2.5%
+                }
             }
 
             const newBalance = win ? (balance * multiplier) : 0;
