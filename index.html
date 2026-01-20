@@ -46,6 +46,9 @@
         .status-dnd { background-color: #f23f43; }
         .status-offline { background-color: #80848e; }
         .status-invisible { background-color: #80848e; }
+
+        /* Profile Modal Gradient */
+        .profile-header { background: linear-gradient(135deg, #5865F2, #9b59b6); }
     </style>
 </head>
 <body class="bg-[#313338] text-gray-100 font-sans antialiased h-screen flex flex-col overflow-hidden">
@@ -238,6 +241,50 @@
             </div>
         </div>
 
+        <!-- User Profile Modal -->
+        <div id="profile-modal" class="absolute inset-0 z-50 hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-[#2b2d31] rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-[#1e1f22] relative transform transition-all scale-100">
+                <div class="h-24 profile-header relative">
+                    <button onclick="app.closeProfile()" class="absolute top-2 right-2 text-white/80 hover:text-white bg-black/20 rounded-full p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <div class="px-6 pb-6 relative">
+                    <div class="relative -mt-12 mb-4 flex justify-between items-end">
+                        <img id="profile-pfp" src="" class="w-24 h-24 rounded-full border-4 border-[#2b2d31] bg-[#2b2d31] object-cover">
+                        <div class="bg-[#1e1f22] px-3 py-1 rounded text-xs font-bold text-gray-400 border border-[#111214]" id="profile-status-badge">ONLINE</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h3 id="profile-username" class="text-2xl font-bold text-white leading-tight"></h3>
+                        <p id="profile-joined" class="text-xs text-gray-400 mt-1">Joined Dec 2023</p>
+                    </div>
+
+                    <div class="bg-[#111214] rounded-lg p-3 border border-[#1e1f22] mb-4 grid grid-cols-2 gap-2">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] uppercase text-gray-500 font-bold">Age</span>
+                            <span id="profile-age" class="text-sm text-gray-200"></span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-[10px] uppercase text-gray-500 font-bold">Gender</span>
+                            <span id="profile-gender" class="text-sm text-gray-200"></span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-[#1e1f22] p-3 rounded-lg border border-[#111214] flex flex-col items-center">
+                            <span class="text-yellow-500 font-bold text-lg" id="profile-coins">0</span>
+                            <span class="text-[10px] text-gray-500 uppercase tracking-wide">Coins</span>
+                        </div>
+                        <div class="bg-[#1e1f22] p-3 rounded-lg border border-[#111214] flex flex-col items-center">
+                            <span class="text-purple-400 font-bold text-lg" id="profile-gems">0</span>
+                            <span class="text-[10px] text-gray-500 uppercase tracking-wide">Gems</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Toast Notification -->
         <div id="toast-container" class="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none"></div>
 
@@ -294,6 +341,7 @@
                 walletModal: document.getElementById('wallet-modal'),
                 walletCoins: document.getElementById('wallet-coins'),
                 walletGems: document.getElementById('wallet-gems'),
+                profileModal: document.getElementById('profile-modal'),
                 toastContainer: document.getElementById('toast-container')
             }
         };
@@ -371,6 +419,32 @@
             },
             closeWallet: () => {
                 els.displays.walletModal.classList.add('hidden');
+            },
+            openProfile: async (uid) => {
+                try {
+                    const snap = await getDoc(doc(db, "users", uid));
+                    if(snap.exists()) {
+                        const data = snap.data();
+                        document.getElementById('profile-pfp').src = data.pfpUrl || 'https://ui-avatars.com/api/?name=?';
+                        document.getElementById('profile-username').textContent = data.username;
+                        document.getElementById('profile-age').textContent = data.age || 'N/A';
+                        document.getElementById('profile-gender').textContent = data.gender || 'N/A';
+                        document.getElementById('profile-coins').textContent = (data.coins || 0).toLocaleString();
+                        document.getElementById('profile-gems').textContent = (data.gems || 0).toLocaleString();
+                        
+                        const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown';
+                        document.getElementById('profile-joined').textContent = `Joined ${date}`;
+                        
+                        const status = (data.status || 'offline').toUpperCase();
+                        const badge = document.getElementById('profile-status-badge');
+                        badge.textContent = status;
+                        
+                        els.displays.profileModal.classList.remove('hidden');
+                    }
+                } catch(e) { console.error(e); }
+            },
+            closeProfile: () => {
+                els.displays.profileModal.classList.add('hidden');
             }
         };
 
@@ -399,6 +473,7 @@
         document.addEventListener('click', (e) => {
             els.displays.statusDropdown.classList.add('hidden');
             if (e.target === els.displays.walletModal) app.closeWallet();
+            if (e.target === els.displays.profileModal) app.closeProfile();
         });
 
         els.inputs.signupPfp.addEventListener('change', (e) => {
@@ -586,8 +661,8 @@
                 div.className = "flex justify-center my-4 animate-fade-in";
                 div.innerHTML = `
                     <div class="relative flex flex-col items-center p-6 rounded-xl border ${borderColor} ${bgGradient} max-w-sm w-full backdrop-blur-sm">
-                        <img src="${msg.pfpUrl}" class="w-16 h-16 rounded-full border-2 border-[#2b2d31] shadow-lg mb-2 object-cover">
-                        <div class="text-white font-bold text-lg mb-1">${escapeHtml(msg.username)}</div>
+                        <img src="${msg.pfpUrl}" onclick="app.openProfile('${msg.uid}')" class="w-16 h-16 rounded-full border-2 border-[#2b2d31] shadow-lg mb-2 object-cover cursor-pointer hover:opacity-80 transition">
+                        <div onclick="app.openProfile('${msg.uid}')" class="text-white font-bold text-lg mb-1 cursor-pointer hover:underline">${escapeHtml(msg.username)}</div>
                         <div class="text-gray-400 text-xs uppercase tracking-widest mb-2">${actionText} with ${msg.currency === 'coins' ? 'Coins' : 'Gems'}</div>
                         
                         ${detailsText}
@@ -610,8 +685,8 @@
                 div.className = "flex justify-center my-4 animate-fade-in";
                 div.innerHTML = `
                     <div class="relative flex flex-col items-center p-6 rounded-xl border border-blue-500/30 bg-gradient-to-br from-blue-900/20 to-transparent max-w-sm w-full backdrop-blur-sm">
-                        <img src="${msg.pfpUrl}" class="w-16 h-16 rounded-full border-2 border-[#2b2d31] shadow-lg mb-2 object-cover">
-                        <div class="text-white font-bold text-lg mb-1">${escapeHtml(msg.username)}</div>
+                        <img src="${msg.pfpUrl}" onclick="app.openProfile('${msg.uid}')" class="w-16 h-16 rounded-full border-2 border-[#2b2d31] shadow-lg mb-2 object-cover cursor-pointer hover:opacity-80 transition">
+                        <div onclick="app.openProfile('${msg.uid}')" class="text-white font-bold text-lg mb-1 cursor-pointer hover:underline">${escapeHtml(msg.username)}</div>
                         <div class="text-blue-400 text-xs font-bold uppercase tracking-widest mb-4">Bank Statement</div>
                         
                         <div class="w-full space-y-2">
@@ -626,17 +701,50 @@
                         </div>
                     </div>
                 `;
+            } else if (msg.type === 'leaderboard') {
+                 let rows = '';
+                 msg.topUsers.forEach((u, i) => {
+                     rows += `
+                        <div class="flex items-center justify-between py-1 border-b border-white/10 last:border-0">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-gray-400 text-lg">#${i+1}</span>
+                                <img src="${u.pfpUrl}" onclick="app.openProfile('${u.uid}')" class="w-6 h-6 rounded-full cursor-pointer hover:opacity-80">
+                                <span class="text-white font-medium cursor-pointer hover:underline" onclick="app.openProfile('${u.uid}')">${escapeHtml(u.username)}</span>
+                            </div>
+                            <span class="text-yellow-500 font-mono">${(u.coins||0).toLocaleString()} 🪙</span>
+                        </div>
+                     `;
+                 });
+
+                 div.className = "flex justify-center my-4 animate-fade-in";
+                 div.innerHTML = `
+                    <div class="w-full max-w-md p-4 bg-gradient-to-r from-yellow-900/40 to-[#2b2d31] rounded-lg border border-yellow-500/30">
+                        <h3 class="text-yellow-400 font-bold uppercase tracking-widest mb-3 text-center">🏆 Richest Players 🏆</h3>
+                        ${rows}
+                    </div>
+                 `;
+            } else if (msg.type === 'lottery_win') {
+                div.className = "flex justify-center my-4 animate-fade-in";
+                div.innerHTML = `
+                    <div class="relative flex flex-col items-center p-6 rounded-xl border border-purple-500/50 bg-gradient-to-br from-purple-900/40 to-transparent max-w-sm w-full backdrop-blur-sm animate-bounce">
+                         <div class="absolute -top-3 bg-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase">Lottery Winner</div>
+                        <img src="${msg.pfpUrl}" onclick="app.openProfile('${msg.uid}')" class="w-20 h-20 rounded-full border-4 border-yellow-400 shadow-xl mb-2 object-cover cursor-pointer">
+                        <div class="text-yellow-400 font-black text-2xl mb-1">${escapeHtml(msg.username)}</div>
+                        <div class="text-white text-sm">Won the Daily Pot!</div>
+                        <div class="text-4xl font-black text-yellow-300 mt-2 tracking-tighter">+${msg.amount.toLocaleString()} 🪙</div>
+                    </div>
+                `;
             } else {
                 // Normal Chat Message
                 div.className = "flex gap-4 pl-2 pr-4 py-1 hover:bg-[#2e3035] -mx-2 rounded group animate-fade-in";
                 const time = msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now';
                 div.innerHTML = `
-                    <div class="flex-shrink-0 cursor-pointer mt-0.5">
+                    <div class="flex-shrink-0 cursor-pointer mt-0.5" onclick="app.openProfile('${msg.uid}')">
                         <img src="${msg.pfpUrl || 'https://ui-avatars.com/api/?name=?'}" class="w-10 h-10 rounded-full hover:opacity-80 transition object-cover">
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-baseline gap-2">
-                            <span class="font-medium text-white hover:underline cursor-pointer text-sm">${escapeHtml(msg.username)}</span>
+                            <span class="font-medium text-white hover:underline cursor-pointer text-sm" onclick="app.openProfile('${msg.uid}')">${escapeHtml(msg.username)}</span>
                             <span class="text-[10px] text-gray-400">${time}</span>
                         </div>
                         <p class="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap break-words">${escapeHtml(msg.text)}</p>
@@ -683,6 +791,12 @@
 
             if (command === '/top') {
                 await executeTop();
+                return;
+            }
+
+            if (command === '/lottery') {
+                const count = parseInt(args[0]) || 1;
+                await executeLottery(count);
                 return;
             }
 
@@ -746,7 +860,8 @@
                             <li><span class="text-white font-mono">/daily</span> - Claim free reward (24h)</li>
                             <li><span class="text-white font-mono">/bank</span> - View your balance</li>
                             <li><span class="text-white font-mono">/pay [user] [amt] [c/g]</span> - Pay someone</li>
-                            <li><span class="text-white font-mono">/top</span> - View richest players</li>
+                            <li><span class="text-white font-mono">/top</span> - Leaderboard (Public)</li>
+                            <li><span class="text-white font-mono">/lottery [tickets]</span> - Buy ticket (100c)</li>
                         </ul>
                     </div>
                     <div>
@@ -791,28 +906,98 @@
         async function executeTop() {
             const q = query(collection(db, "users"), orderBy("coins", "desc"), limit(3));
             const snap = await getDocs(q);
-            
-            const div = document.createElement('div');
-            div.className = "my-4 mx-8 p-4 bg-gradient-to-r from-yellow-900/40 to-[#2b2d31] rounded-lg border border-yellow-500/30 text-center";
-            div.innerHTML = `<h3 class="text-yellow-400 font-bold uppercase tracking-widest mb-3">🏆 Richest Players 🏆</h3>`;
-            
-            let i = 1;
+            const topUsers = [];
             snap.forEach(d => {
                 const u = d.data();
-                div.innerHTML += `
-                    <div class="flex items-center justify-between py-1 border-b border-white/10 last:border-0">
-                        <div class="flex items-center gap-2">
-                            <span class="font-bold text-gray-400 text-lg">#${i}</span>
-                            <img src="${u.pfpUrl}" class="w-6 h-6 rounded-full">
-                            <span class="text-white font-medium">${escapeHtml(u.username)}</span>
-                        </div>
-                        <span class="text-yellow-500 font-mono">${(u.coins||0).toLocaleString()} 🪙</span>
-                    </div>
-                `;
-                i++;
+                topUsers.push({
+                    uid: u.uid,
+                    username: u.username,
+                    pfpUrl: u.pfpUrl,
+                    coins: u.coins || 0
+                });
             });
-            els.displays.msgContainer.appendChild(div);
-            requestAnimationFrame(() => els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight);
+
+            // Send to chat publicly
+            await addDoc(collection(db, "messages"), {
+                type: 'leaderboard',
+                topUsers: topUsers,
+                createdAt: serverTimestamp()
+            });
+        }
+
+        async function executeLottery(count) {
+             const TICKET_PRICE = 100;
+             const totalCost = count * TICKET_PRICE;
+             
+             if (!currentUserProfile) return;
+             if ((currentUserProfile.coins || 0) < totalCost) return showToast(`Need ${totalCost} coins`, 'error');
+
+             try {
+                await runTransaction(db, async (transaction) => {
+                    // 1. Get Lottery State
+                    const lotRef = doc(db, "system", "lottery");
+                    const lotSnap = await transaction.get(lotRef);
+                    let lotData = { pot: 0, tickets: [], nextDraw: Date.now() + 86400000 };
+                    
+                    if (lotSnap.exists()) lotData = lotSnap.data();
+                    else transaction.set(lotRef, lotData); // Init if missing
+
+                    // 2. Check for Draw
+                    if (Date.now() > lotData.nextDraw && lotData.tickets.length > 0) {
+                        const winnerUid = lotData.tickets[Math.floor(Math.random() * lotData.tickets.length)];
+                        const pot = lotData.pot;
+                        
+                        // Pay Winner (Need to fetch winner doc inside transaction or just update blind)
+                        // Note: To be perfectly safe we should get winner ref, but for simplicity in single transaction:
+                        const winnerRef = doc(db, "users", winnerUid);
+                        const winnerSnap = await transaction.get(winnerRef);
+                        if (winnerSnap.exists()) {
+                            const wData = winnerSnap.data();
+                            transaction.update(winnerRef, { coins: (wData.coins || 0) + pot });
+                            
+                            // Announce Winner via special message (done outside transaction usually, but we can't await here)
+                            // We will flag to send message after.
+                            // Reset Lottery
+                            lotData.pot = 0;
+                            lotData.tickets = [];
+                            lotData.nextDraw = Date.now() + 86400000;
+                            
+                            // Hack: Add message to db directly
+                            const msgRef = doc(collection(db, "messages"));
+                            transaction.set(msgRef, {
+                                type: 'lottery_win',
+                                uid: winnerUid,
+                                username: wData.username,
+                                pfpUrl: wData.pfpUrl,
+                                amount: pot,
+                                createdAt: serverTimestamp()
+                            });
+                        }
+                    } else if (Date.now() > lotData.nextDraw) {
+                        // No tickets, just reset timer
+                        lotData.nextDraw = Date.now() + 86400000;
+                    }
+
+                    // 3. Process Purchase
+                    const userRef = doc(db, "users", currentUser.uid);
+                    const userSnap = await transaction.get(userRef);
+                    if (userSnap.data().coins < totalCost) throw "Insufficient funds";
+                    
+                    transaction.update(userRef, { coins: userSnap.data().coins - totalCost });
+                    
+                    const newTickets = Array(count).fill(currentUser.uid);
+                    lotData.tickets.push(...newTickets);
+                    lotData.pot += totalCost;
+
+                    transaction.set(lotRef, lotData);
+                });
+                
+                showToast(`Bought ${count} ticket(s)!`, 'success');
+
+             } catch (e) {
+                 console.error(e);
+                 showToast("Transaction failed", 'error');
+             }
         }
 
         async function executePay(targetName, amountStr, currStr) {
@@ -1047,6 +1232,7 @@
         function renderUserInList(user, status) {
             const div = document.createElement('div');
             div.className = "flex items-center gap-3 p-2 rounded hover:bg-[#35373c] cursor-pointer group opacity-90 hover:opacity-100 transition";
+            div.onclick = () => app.openProfile(user.uid);
             if (status === 'offline') div.classList.add('opacity-50');
 
             let statusColor = 'bg-gray-500';
