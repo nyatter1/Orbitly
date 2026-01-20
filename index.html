@@ -119,6 +119,7 @@
 
     <!-- Chat Container -->
     <div id="chat-view" class="hidden flex-1 flex flex-col md:flex-row h-full">
+        <!-- Sidebar -->
         <div class="hidden md:flex w-64 bg-slate-800 border-r border-slate-700 flex-col">
             <div class="p-4 border-b border-slate-700">
                 <h2 class="text-xl font-bold text-white flex items-center gap-2">
@@ -147,6 +148,7 @@
             </div>
         </div>
 
+        <!-- Mobile Header -->
         <div class="md:hidden bg-slate-800 border-b border-slate-700 p-4 flex justify-between items-center z-10 shadow-md">
             <h2 class="text-lg font-bold text-white flex items-center gap-2">
                 <i class="fas fa-satellite-dish text-blue-400"></i> Orbitly
@@ -156,6 +158,7 @@
             </button>
         </div>
 
+        <!-- Main Chat -->
         <div class="flex-1 flex flex-col bg-slate-900 relative">
             <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-default">
                 <!-- Messages injected here -->
@@ -238,6 +241,7 @@
 
         let currentUserProfile = null;
         let messagesUnsubscribe = null;
+        let isSigningUp = false; // Flag to handle race conditions
 
         function showError(msg) {
             authError.textContent = msg;
@@ -282,25 +286,19 @@
             if (!file) return showError("Please upload a profile picture.");
 
             toggleLoading(true);
+            isSigningUp = true;
 
             try {
-                // 1. Create Auth
+                // 1. Create Auth User
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 
-                // Fallback PFP
+                // Fallback PFP (used initially to ensure fast DB write)
                 let pfpUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=random`;
 
-                // 2. Try Upload (Catch Errors)
-                try {
-                    const storageRef = ref(storage, `profileImages/${user.uid}`);
-                    await uploadBytes(storageRef, file);
-                    pfpUrl = await getDownloadURL(storageRef);
-                } catch (err) {
-                    console.warn("Storage upload failed (CORS/Rules). Using fallback.", err);
-                }
-
-                // 3. Try Firestore Write (Catch Errors)
+                // 2. IMMEDIATE Firestore Write (Optimistic)
+                // We write basic data first so onAuthStateChanged finds it.
+                // We'll update it with the real PFP url later.
                 const profileData = {
                     uid: user.uid,
                     username: username,
@@ -313,15 +311,27 @@
 
                 try {
                     await setDoc(doc(db, "users", user.uid), profileData);
-                } catch (err) {
-                    console.error("Firestore write failed (Rules/Permission).", err);
-                    // We continue anyway so the user can use the app with Auth profile only
+                } catch (dbErr) {
+                    console.error("Initial DB write failed", dbErr);
+                    // Continue anyway
                 }
 
-                // 4. Update Auth Profile (Most reliable)
+                // 3. Upload Image (Async)
                 try {
+                    const storageRef = ref(storage, `profileImages/${user.uid}`);
+                    await uploadBytes(storageRef, file);
+                    pfpUrl = await getDownloadURL(storageRef);
+                    
+                    // Update DB with real URL
+                    await setDoc(doc(db, "users", user.uid), { ...profileData, pfpUrl: pfpUrl });
+                    
+                    // Update Auth Profile
                     await updateProfile(user, { displayName: username, photoURL: pfpUrl });
-                } catch(e) { console.error("Auth update failed", e); }
+                } catch (uploadErr) {
+                    console.warn("Image upload failed, using fallback.", uploadErr);
+                    // Use fallback, but ensure Auth profile is at least set with name
+                    await updateProfile(user, { displayName: username, photoURL: pfpUrl });
+                }
 
                 forms.signup.reset();
                 fileNameDisplay.textContent = "Upload Image";
@@ -331,7 +341,12 @@
                 let msg = error.message.replace('Firebase: ', '');
                 if (error.code === 'auth/email-already-in-use') msg = "Email already in use. Log in.";
                 showError(msg);
-                toggleLoading(false); // Stop loading on fatal auth error
+                // Only if FATAL auth error (like email in use) do we stop loading/flag.
+                // If it was just a storage error, we fell through and isSigningUp is still true (or handled by auth change)
+                if (error.code) {
+                     toggleLoading(false);
+                     isSigningUp = false;
+                }
             }
         });
 
@@ -366,7 +381,6 @@
             const text = inputs.message.value.trim();
             if (!text || !auth.currentUser) return;
             
-            // Use local profile or auth fallback
             const username = currentUserProfile?.username || auth.currentUser.displayName || 'Anonymous';
             const pfpUrl = currentUserProfile?.pfpUrl || auth.currentUser.photoURL || 'https://picsum.photos/50';
             const gender = currentUserProfile?.gender || 'Unknown';
@@ -384,7 +398,7 @@
             } catch (error) {
                 console.error("Msg send error:", error);
                 inputs.message.value = text;
-                alert("Failed to send: " + error.code);
+                alert("Message failed to send. Permissions?");
             }
         });
 
@@ -438,11 +452,7 @@
                     messagesContainer.scrollTop = messagesContainer.scrollHeight;
                 }, (error) => {
                     console.error("Snapshot error:", error);
-                    messagesContainer.innerHTML = `<div class="p-4 text-center text-red-400 bg-red-900/20 rounded border border-red-500/50 mt-10">
-                        <i class="fas fa-exclamation-triangle text-2xl mb-2"></i><br>
-                        <strong>Access Denied</strong><br>
-                        <span class="text-xs">Database rules are blocking messages. Check Firebase Console > Firestore > Rules.</span>
-                    </div>`;
+                    messagesContainer.innerHTML = `<div class="p-4 text-center text-red-400 bg-red-900/20 rounded border border-red-500/50 mt-10"><i class="fas fa-lock text-2xl mb-2"></i><br>Chat Access Denied</div>`;
                 });
             } catch (e) {
                 console.error("Query creation failed", e);
@@ -452,39 +462,45 @@
         // --- AUTH STATE MONITOR ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // User Logged In
                 try {
-                    // Try to fetch profile, but DON'T block if it fails
                     const userRef = doc(db, "users", user.uid);
                     let userDoc = null;
-                    
-                    try {
-                        userDoc = await getDoc(userRef);
-                    } catch (e) {
-                        console.warn("Profile fetch denied/failed:", e);
+                    let retries = 3;
+
+                    // Retry logic to give Signup time to write
+                    while (retries > 0) {
+                        try {
+                            userDoc = await getDoc(userRef);
+                            if (userDoc.exists()) break;
+                        } catch (e) { console.warn("Fetch attempt failed", e); }
+                        
+                        if (isSigningUp) await new Promise(r => setTimeout(r, 800)); // Wait longer if signing up
+                        else await new Promise(r => setTimeout(r, 200));
+                        retries--;
                     }
 
                     if (userDoc && userDoc.exists()) {
                         currentUserProfile = userDoc.data();
                     } else {
-                        // Profile missing or can't read. Self-heal if possible, otherwise use memory fallback.
-                        console.log("Using fallback/memory profile.");
-                        const fallback = {
-                            username: user.displayName || "Explorer",
-                            pfpUrl: user.photoURL || `https://ui-avatars.com/api/?name=User&background=random`,
+                        // Profile still missing?
+                        console.log("Profile not found in DB. Constructing fallback.");
+                        currentUserProfile = {
+                            username: user.displayName || "User",
+                            pfpUrl: user.photoURL || "https://picsum.photos/200",
                             age: '?',
                             gender: 'Unknown'
                         };
-
-                        // Try to create it (self-healing)
+                        
+                        // Try one last time to heal it
                         try {
-                            const newProfile = { ...fallback, uid: user.uid, email: user.email, createdAt: serverTimestamp() };
-                            await setDoc(userRef, newProfile);
-                            currentUserProfile = newProfile;
-                        } catch (err) {
-                            console.warn("Self-heal failed (permission). Using memory-only profile.");
-                            currentUserProfile = fallback;
-                        }
+                            const healProfile = {
+                                uid: user.uid,
+                                email: user.email,
+                                ...currentUserProfile,
+                                createdAt: serverTimestamp()
+                            };
+                            await setDoc(userRef, healProfile);
+                        } catch (e) { console.warn("Self-heal failed", e); }
                     }
 
                     // Update UI
@@ -500,8 +516,8 @@
                     console.error("Critical Auth State Error:", err);
                 }
             } else {
-                // User Logged Out
                 currentUserProfile = null;
+                isSigningUp = false;
                 views.chat.classList.add('hidden');
                 views.auth.classList.remove('hidden');
                 switchAuthTab('login');
@@ -510,6 +526,7 @@
             toggleLoading(false);
         });
 
+        // Initial Load
         toggleLoading(true);
     </script>
 </body>
