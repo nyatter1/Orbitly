@@ -518,29 +518,43 @@
             if (user) {
                 // User is signed in
                 try {
-                    // Fetch user profile from Firestore to get custom fields
-                    // Wrap in try/catch to handle permissions errors gracefully
+                    const userRef = doc(db, "users", user.uid);
+                    let userDoc;
+                    
                     try {
-                        const userDoc = await getDoc(doc(db, "users", user.uid));
-                        if (userDoc.exists()) {
-                            currentUserProfile = userDoc.data();
-                        } else {
-                            // If doc doesn't exist (e.g. signup created auth but failed firestore), reconstruct basic profile
-                            throw new Error("Profile missing");
-                        }
-                    } catch (e) {
-                         console.warn("Could not fetch full profile (permissions or missing doc):", e);
-                         currentUserProfile = {
-                            username: user.displayName || "Unknown",
-                            pfpUrl: user.photoURL || "https://picsum.photos/50",
-                            gender: 'Unknown',
-                            age: '?'
-                        };
+                        userDoc = await getDoc(userRef);
+                    } catch (fetchErr) {
+                         console.error("Error fetching user doc:", fetchErr);
                     }
 
-                    // Update UI
+                    if (!userDoc || !userDoc.exists()) {
+                        console.log("Profile missing in Firestore, creating default...");
+                        // Create a default profile if it's missing (self-healing)
+                        const defaultProfile = {
+                            uid: user.uid,
+                            username: user.displayName || "Explorer",
+                            email: user.email,
+                            age: 18, // Default
+                            gender: "Alien", // Default
+                            pfpUrl: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || "User")}&background=random`,
+                            createdAt: serverTimestamp()
+                        };
+                        
+                        try {
+                            await setDoc(userRef, defaultProfile);
+                            currentUserProfile = defaultProfile; // Use local version immediately
+                        } catch (writeErr) {
+                            console.error("Failed to create default profile:", writeErr);
+                            // Fallback to local-only object so UI doesn't break
+                             currentUserProfile = defaultProfile;
+                        }
+                    } else {
+                        currentUserProfile = userDoc.data();
+                    }
+
+                    // Update UI with whatever profile data we have
                     sidebar.username.textContent = currentUserProfile.username;
-                    sidebar.details.textContent = `${currentUserProfile.age} • ${currentUserProfile.gender}`;
+                    sidebar.details.textContent = `${currentUserProfile.age || '?'} • ${currentUserProfile.gender || 'Unknown'}`;
                     sidebar.avatar.src = currentUserProfile.pfpUrl;
 
                     views.auth.classList.add('hidden');
