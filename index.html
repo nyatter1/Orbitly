@@ -1,4 +1,57 @@
-<!-- Auth View -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbitly Chat</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #2b2d31; }
+::-webkit-scrollbar-thumb { background: #1a1b1e; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #3f4147; }
+    .loader {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #5865F2;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .animate-fade-in { animation: fadeIn 0.2s ease-out; }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .toast-enter { animation: toastIn 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
+    .toast-exit { animation: toastOut 0.3s ease-in forwards; }
+
+    @keyframes toastIn {
+        from { transform: translate(-50%, 50px); opacity: 0; }
+        to { transform: translate(-50%, 0); opacity: 1; }
+    }
+    @keyframes toastOut {
+        from { transform: translate(-50%, 0); opacity: 1; }
+        to { transform: translate(-50%, 50px); opacity: 0; }
+    }
+
+    /* Status colors */
+    .status-online { background-color: #23a559; }
+    .status-busy { background-color: #f0b232; }
+    .status-dnd { background-color: #f23f43; }
+    .status-offline { background-color: #80848e; }
+    .status-invisible { background-color: #80848e; }
+
+    /* Profile Modal Gradient */
+    .profile-header { background: linear-gradient(135deg, #5865F2, #9b59b6); }
+</style>
+</head>
+<body class="bg-[#313338] text-gray-100 font-sans antialiased h-screen flex flex-col overflow-hidden">
+    <!-- Auth View -->
 <div id="auth-view" class="flex-1 flex flex-col justify-center items-center p-4 bg-[url('https://picsum.photos/1920/1080?blur=10')] bg-cover bg-center relative z-50">
     <div class="absolute inset-0 bg-gray-900/80 backdrop-blur-sm"></div>
     
