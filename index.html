@@ -6,12 +6,23 @@
     <title>Orbitly Chat</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #2b2d31; }
-        ::-webkit-scrollbar-thumb { background: #1a1b1e; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #3f4147; }
+        /* --- Custom Scrollbar --- */
+        ::-webkit-scrollbar { 
+            width: 8px; 
+            height: 8px; 
+        }
+        ::-webkit-scrollbar-track { 
+            background: #2b2d31; 
+        }
+        ::-webkit-scrollbar-thumb { 
+            background: #1a1b1e; 
+            border-radius: 4px; 
+        }
+        ::-webkit-scrollbar-thumb:hover { 
+            background: #3f4147; 
+        }
         
+        /* --- Loader Animation --- */
         .loader {
             border: 3px solid #f3f3f3;
             border-top: 3px solid #5865F2;
@@ -20,16 +31,27 @@
             height: 20px;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
 
-        .animate-fade-in { animation: fadeIn 0.2s ease-out; }
+        /* --- Fade In Animation --- */
+        .animate-fade-in { 
+            animation: fadeIn 0.2s ease-out; 
+        }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .toast-enter { animation: toastIn 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
-        .toast-exit { animation: toastOut 0.3s ease-in forwards; }
+        /* --- Toast Animations --- */
+        .toast-enter { 
+            animation: toastIn 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55); 
+        }
+        .toast-exit { 
+            animation: toastOut 0.3s ease-in forwards; 
+        }
 
         @keyframes toastIn {
             from { transform: translate(-50%, 50px); opacity: 0; }
@@ -40,39 +62,46 @@
             to { transform: translate(-50%, 50px); opacity: 0; }
         }
 
-        /* Mention Highlight */
+        /* --- Mention Styling --- */
         .mention-message {
             background: rgba(250, 204, 21, 0.1);
             border-left: 2px solid #facc15;
         }
 
-        /* Rain Animation */
+        /* --- Rain Animation --- */
         .rain-item {
             position: absolute;
             top: -50px;
             animation: fall linear forwards;
             pointer-events: none;
-            z-index: 100;
+            z-index: 9999;
         }
         @keyframes fall {
             to { transform: translateY(110vh) rotate(360deg); }
         }
 
-        /* Status colors */
+        /* --- Status Indicators --- */
         .status-online { background-color: #23a559; }
         .status-busy { background-color: #f0b232; }
         .status-dnd { background-color: #f23f43; }
         .status-offline { background-color: #80848e; }
         .status-invisible { background-color: #80848e; }
 
-        /* Profile Modal Gradient */
+        /* --- Profile Modal Header --- */
         .profile-header { background: linear-gradient(135deg, #5865F2, #9b59b6); }
+
+        /* --- Z-Index Layers --- 
+           Rain: 10 (Background effect, doesn't block)
+           Header: 30
+           Modals: 100
+           Toasts: 110
+        */
     </style>
 </head>
 <body class="bg-[#313338] text-gray-100 font-sans antialiased h-screen flex flex-col overflow-hidden">
 
     <!-- Auth View -->
-    <div id="auth-view" class="flex-1 flex flex-col justify-center items-center p-4 bg-[url('https://picsum.photos/1920/1080?blur=10')] bg-cover bg-center relative z-40">
+    <div id="auth-view" class="flex-1 flex flex-col justify-center items-center p-4 bg-[url('https://picsum.photos/1920/1080?blur=10')] bg-cover bg-center relative z-50">
         <div class="absolute inset-0 bg-gray-900/80 backdrop-blur-sm"></div>
         
         <div class="relative w-full max-w-md bg-[#2b2d31] rounded-lg shadow-2xl overflow-hidden">
@@ -162,14 +191,13 @@
     <!-- Main Application View -->
     <div id="chat-view" class="hidden h-full w-full relative">
         
-        <!-- Main Chat Area -->
-        <div class="flex-1 flex flex-col min-w-0 bg-[#313338] relative overflow-hidden">
-            
-            <!-- Rain Container -->
-            <div id="rain-container" class="absolute inset-0 pointer-events-none overflow-hidden z-[10]"></div>
+        <!-- Rain Container (Pointer events none to avoid blocking clicks, lower z-index) -->
+        <div id="rain-container" class="absolute inset-0 pointer-events-none overflow-hidden z-10"></div>
 
+        <!-- Main Chat Area -->
+        <div class="flex-1 flex flex-col min-w-0 bg-[#313338] relative overflow-hidden z-0">
             <!-- Header -->
-            <header class="bg-[#313338] border-b border-[#26272d] p-3 shadow-sm flex justify-between items-center h-16 shrink-0 z-20 relative">
+            <header class="bg-[#313338] border-b border-[#26272d] p-3 shadow-sm flex justify-between items-center h-16 shrink-0 z-30 relative">
                 <div class="flex items-center gap-2 px-2">
                     <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExMXBhNjNycTQweDFkY214NjMxYWtiZWs1ZjZ3dTJxb254d21ldHIyOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/HPbuRgMPF2vL2/giphy.gif" alt="Logo" class="h-10 object-contain">
                 </div>
@@ -183,7 +211,7 @@
                     </button>
 
                     <!-- User Profile & Status -->
-                    <div class="flex items-center gap-3 bg-[#2b2d31] py-1.5 px-3 rounded hover:bg-[#35373c] transition relative group">
+                    <div class="flex items-center gap-3 bg-[#2b2d31] py-1.5 px-3 rounded hover:bg-[#35373c] transition relative group" id="user-menu-trigger">
                         
                         <!-- Avatar: Click to Open Profile -->
                         <div class="relative cursor-pointer hover:opacity-80 transition" onclick="app.openMyProfile()">
@@ -198,7 +226,7 @@
                         </div>
 
                         <!-- Status Dropdown -->
-                        <div id="status-dropdown" class="hidden absolute top-full right-0 mt-2 w-48 bg-[#111214] rounded shadow-xl border border-[#1e1f22] overflow-hidden z-[60]">
+                        <div id="status-dropdown" class="hidden absolute top-full right-0 mt-2 w-48 bg-[#111214] rounded shadow-xl border border-[#1e1f22] overflow-hidden z-50">
                             <div class="p-2 space-y-1">
                                 <button onclick="app.openMyProfile(); document.getElementById('status-dropdown').classList.add('hidden')" class="w-full text-left px-2 py-1.5 rounded hover:bg-[#4752c4] hover:text-white text-gray-300 text-sm flex items-center gap-2 group mb-1 border-b border-gray-800 pb-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
@@ -207,7 +235,6 @@
                                 <button onclick="app.toggleMute()" class="w-full text-left px-2 py-1.5 rounded hover:bg-[#4752c4] hover:text-white text-gray-300 text-sm flex items-center gap-2 group mb-1 border-b border-gray-800 pb-2">
                                     <span id="mute-icon">🔊</span> <span id="mute-text">Sound On</span>
                                 </button>
-
                                 <button onclick="app.setStatus('online')" class="w-full text-left px-2 py-1.5 rounded hover:bg-[#4752c4] hover:text-white text-gray-300 text-sm flex items-center gap-2 group">
                                     <div class="w-2.5 h-2.5 rounded-full status-online"></div> Online
                                 </button>
@@ -231,12 +258,12 @@
             </header>
 
             <!-- Messages List -->
-            <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-1 scroll-smooth z-0">
+            <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-1 scroll-smooth z-20">
                 <!-- Messages injected here -->
             </div>
 
             <!-- Input Area -->
-            <div class="px-4 pb-4 bg-[#313338] z-20 relative">
+            <div class="px-4 pb-4 bg-[#313338] z-30 relative">
                 <form id="message-form" class="bg-[#383a40] rounded-lg px-4 py-3 flex items-center w-full shadow-sm">
                     <input type="text" id="message-input" autocomplete="off" placeholder="Message #general-chat (Type /cmds for help)" class="flex-1 bg-transparent border-none text-gray-100 placeholder-gray-500 focus:ring-0 focus:outline-none">
                 </form>
@@ -244,7 +271,7 @@
         </div>
 
         <!-- Sidebar (Online Players) -->
-        <div class="w-60 bg-[#2b2d31] flex flex-col shrink-0 border-l border-[#1e1f22] z-20">
+        <div class="w-60 bg-[#2b2d31] flex flex-col shrink-0 border-l border-[#1e1f22] z-30">
             <div class="p-4 border-b border-[#1e1f22] h-16 flex items-center justify-center">
                  <h2 class="font-bold text-gray-400 text-xs uppercase tracking-wide">Players</h2>
             </div>
@@ -294,7 +321,7 @@
                         <p id="profile-joined" class="text-xs text-gray-400 mt-1">Joined Dec 2023</p>
                     </div>
 
-                    <!-- Color Picker (Hidden unless own profile) -->
+                    <!-- Color Picker -->
                     <div id="color-picker-container" class="mb-4 hidden">
                         <label class="text-[10px] uppercase text-gray-500 font-bold mb-1 block">Name Color</label>
                         <div class="flex gap-2">
@@ -408,7 +435,6 @@
             win: new Audio('https://cdn.freesound.org/previews/351/351239_3306822-lq.mp3') // Simple ching/coin sound
         };
         let isMuted = localStorage.getItem('orbitly_mute') === 'true';
-        updateMuteUI();
 
         // State
         let currentUser = null;
@@ -481,7 +507,7 @@
             });
         }
 
-        // Global App Methods
+        // Global App Methods (Available to HTML onclick)
         window.app = {
             switchTab: (tab) => {
                 els.displays.feedback.classList.add('hidden');
@@ -575,13 +601,14 @@
 
         function updateMuteUI() {
             if (isMuted) {
-                els.displays.muteIcon.textContent = '🔇';
-                els.displays.muteText.textContent = 'Sound Off';
+                if(els.displays.muteIcon) els.displays.muteIcon.textContent = '🔇';
+                if(els.displays.muteText) els.displays.muteText.textContent = 'Sound Off';
             } else {
-                els.displays.muteIcon.textContent = '🔊';
-                els.displays.muteText.textContent = 'Sound On';
+                if(els.displays.muteIcon) els.displays.muteIcon.textContent = '🔊';
+                if(els.displays.muteText) els.displays.muteText.textContent = 'Sound On';
             }
         }
+        updateMuteUI();
 
         function playSound(type) {
             if (isMuted) return;
@@ -607,26 +634,11 @@
             }
         }
 
-        // --- Toast System ---
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            const bgClass = type === 'success' ? 'bg-green-500/90' : 'bg-red-500/90';
-            toast.className = `px-6 py-2 rounded-full text-white font-bold shadow-lg mb-2 text-sm text-center toast-enter backdrop-blur-md ${bgClass}`;
-            toast.textContent = message;
-            
-            els.displays.toastContainer.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.remove('toast-enter');
-                toast.classList.add('toast-exit');
-                setTimeout(() => toast.remove(), 300);
-            }, 2500);
-        }
-
         // --- Event Listeners ---
         document.addEventListener('click', (e) => {
             const dropdown = els.displays.statusDropdown;
             const trigger = document.getElementById('user-menu-trigger'); 
+            // Close dropdown if clicked outside
             if (dropdown && !dropdown.contains(e.target) && !trigger.contains(e.target) && !dropdown.classList.contains('hidden')) {
                  dropdown.classList.add('hidden');
             }
@@ -761,13 +773,6 @@
             });
         }
 
-        async function resolveUserColor(uid) {
-            // Optimization: In real app, cache this. Here we fetch or rely on message data if available.
-            // For now, assume messageSender has color attached or default.
-            // We can update the message data model to include nameColor to avoid extra reads.
-            return '#FFFFFF'; 
-        }
-
         async function renderMessage(msg) {
             const div = document.createElement('div');
             
@@ -857,17 +862,6 @@
                         ${rows}
                     </div>
                  `;
-            } else if (msg.type === 'lottery_win') {
-                div.className = "flex justify-center my-4 animate-fade-in";
-                div.innerHTML = `
-                    <div class="relative flex flex-col items-center p-6 rounded-xl border border-purple-500/50 bg-gradient-to-br from-purple-900/40 to-transparent max-w-sm w-full backdrop-blur-sm animate-bounce">
-                         <div class="absolute -top-3 bg-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase">Lottery Winner</div>
-                        <img src="${msg.pfpUrl}" onclick="app.openProfile('${msg.uid}')" class="w-20 h-20 rounded-full border-4 border-yellow-400 shadow-xl mb-2 object-cover cursor-pointer">
-                        <div class="text-yellow-400 font-black text-2xl mb-1">${escapeHtml(msg.username)}</div>
-                        <div class="text-white text-sm">Won the Daily Pot!</div>
-                        <div class="text-4xl font-black text-yellow-300 mt-2 tracking-tighter">+${formatNumber(msg.amount)} 🪙</div>
-                    </div>
-                `;
             } else {
                 // Normal Chat Message
                 div.className = `flex gap-4 pl-2 pr-4 py-1 hover:bg-[#2e3035] -mx-2 rounded group animate-fade-in ${isMention ? 'mention-message' : ''}`;
@@ -924,13 +918,6 @@
             if (command === '/cmds') { showHelp(); return; }
             if (command === '/prefixs' || command === '/prefixes') { showPrefixes(); return; }
             if (command === '/top') { await executeTop(); return; }
-            if (command === '/lottery') {
-                const countStr = args[0] || '1';
-                const count = parseAbbreviatedNumber(countStr);
-                if (isNaN(count) || count < 1) return showToast("Invalid ticket count", 'error');
-                await executeLottery(count);
-                return;
-            }
             if (command === '/daily') { await executeDaily(); return; }
             if (command === '/pay') {
                 if (args.length < 3) return showToast("Usage: /pay {username} {amount} {c/g}", 'error');
@@ -963,7 +950,6 @@
                             <li><span class="text-white font-mono">/bank</span> - View your balance</li>
                             <li><span class="text-white font-mono">/pay [user] [amt] [c/g]</span> - Pay someone</li>
                             <li><span class="text-white font-mono">/top</span> - Leaderboard (Public)</li>
-                            <li><span class="text-white font-mono">/lottery [tickets]</span> - Buy ticket (100c)</li>
                             <li><span class="text-white font-mono">/prefixs</span> - List number shortcuts</li>
                         </ul>
                     </div>
@@ -1025,64 +1011,6 @@
                 });
             });
             await addDoc(collection(db, "messages"), { type: 'leaderboard', topUsers, createdAt: serverTimestamp() });
-        }
-
-        async function executeLottery(count) {
-             const TICKET_PRICE = 100;
-             const totalCost = count * TICKET_PRICE;
-             if (!currentUserProfile) return;
-             if ((currentUserProfile.coins || 0) < totalCost) return showToast(`Need ${totalCost} coins`, 'error');
-
-             try {
-                let winnerAnnouncement = null;
-                await runTransaction(db, async (transaction) => {
-                    const lotRef = doc(db, "system", "lottery");
-                    const userRef = doc(db, "users", currentUser.uid);
-                    const lotSnap = await transaction.get(lotRef);
-                    const userSnap = await transaction.get(userRef);
-                    if (!userSnap.exists()) throw "User does not exist";
-                    const userData = userSnap.data();
-                    if ((userData.coins || 0) < totalCost) throw "Insufficient funds";
-                    let lotData = { pot: 0, tickets: [], nextDraw: Date.now() + 86400000 };
-                    if (lotSnap.exists()) {
-                        lotData = lotSnap.data();
-                        lotData.pot = lotData.pot || 0;
-                        lotData.tickets = lotData.tickets || [];
-                        lotData.nextDraw = lotData.nextDraw || (Date.now() + 86400000);
-                    }
-                    let drawHappened = false, winnerRef = null, winnerSnap = null, potWon = 0;
-                    if (Date.now() > lotData.nextDraw && lotData.tickets.length > 0) {
-                        const winnerUid = lotData.tickets[Math.floor(Math.random() * lotData.tickets.length)];
-                        winnerRef = doc(db, "users", winnerUid);
-                        winnerSnap = await transaction.get(winnerRef);
-                        potWon = lotData.pot;
-                        drawHappened = true;
-                    } else if (Date.now() > lotData.nextDraw) {
-                        lotData.nextDraw = Date.now() + 86400000;
-                    }
-                    transaction.update(userRef, { coins: userData.coins - totalCost });
-                    if (drawHappened && winnerSnap && winnerSnap.exists()) {
-                        const wData = winnerSnap.data();
-                        transaction.update(winnerRef, { coins: (wData.coins || 0) + potWon });
-                        winnerAnnouncement = {
-                            type: 'lottery_win', uid: winnerSnap.id, username: wData.username, pfpUrl: wData.pfpUrl, amount: potWon, createdAt: serverTimestamp()
-                        };
-                    }
-                    if (drawHappened) { lotData.pot = 0; lotData.tickets = []; lotData.nextDraw = Date.now() + 86400000; }
-                    const newTickets = Array(count).fill(currentUser.uid);
-                    lotData.tickets.push(...newTickets);
-                    lotData.pot += totalCost;
-                    if (lotSnap.exists()) transaction.update(lotRef, lotData); else transaction.set(lotRef, lotData);
-                });
-                if (winnerAnnouncement) {
-                    await addDoc(collection(db, "messages"), winnerAnnouncement);
-                    triggerRain(); 
-                }
-                showToast(`Bought ${count} ticket(s)!`, 'success');
-             } catch (e) {
-                 const msg = typeof e === 'string' ? e : "Transaction failed";
-                 showToast(msg, 'error');
-             }
         }
 
         async function executePay(targetName, amountStr, currStr) {
