@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Orbitly Chat</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<!-- Import Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@700&family=Creepster&family=Inconsolata:wght@700&family=Lato:wght@700&family=Lobster&family=Merriweather:wght@700&family=Montserrat:wght@700&family=Nunito:wght@700&family=Open+Sans:wght@700&family=Orbitron:wght@700&family=Oswald:wght@700&family=Pacifico&family=Playfair+Display:wght@700&family=Press+Start+2P&family=Raleway:wght@700&family=Roboto:wght@700&family=Special+Elite&family=Ubuntu:wght@700&display=swap" rel="stylesheet">
+
 <style>
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -49,19 +52,73 @@
     /* Profile Styles */
     .profile-header-gradient { background: linear-gradient(135deg, #5865F2, #9b59b6); }
     
-    /* Username Effects */
-    .name-glow { text-shadow: 0 0 10px currentColor; }
-    .name-gradient-gold { background: linear-gradient(to right, #FFD700, #FFA500); -webkit-background-clip: text; color: transparent !important; }
-    .name-gradient-ocean { background: linear-gradient(to right, #00BFFF, #1E90FF); -webkit-background-clip: text; color: transparent !important; }
-    .name-gradient-sunset { background: linear-gradient(to right, #FF4500, #FF69B4); -webkit-background-clip: text; color: transparent !important; }
-    .name-rainbow { background: linear-gradient(to right, #ff0000, #ffa500, #ffff00, #008000, #0000ff, #4b0082, #ee82ee); -webkit-background-clip: text; color: transparent !important; }
+    /* --- FONTS --- */
+    .font-default { font-family: ui-sans-serif, system-ui, sans-serif; }
+    .font-roboto { font-family: 'Roboto', sans-serif; }
+    .font-opensans { font-family: 'Open Sans', sans-serif; }
+    .font-lato { font-family: 'Lato', sans-serif; }
+    .font-montserrat { font-family: 'Montserrat', sans-serif; }
+    .font-oswald { font-family: 'Oswald', sans-serif; }
+    .font-raleway { font-family: 'Raleway', sans-serif; }
+    .font-merriweather { font-family: 'Merriweather', serif; }
+    .font-playfair { font-family: 'Playfair Display', serif; }
+    .font-nunito { font-family: 'Nunito', sans-serif; }
+    .font-ubuntu { font-family: 'Ubuntu', sans-serif; }
+    .font-mono { font-family: 'Inconsolata', monospace; }
+    .font-comic { font-family: 'Comic Neue', cursive; }
+    .font-retro { font-family: 'Press Start 2P', cursive; font-size: 0.8em; } /* Adjust size for retro */
+    .font-lobster { font-family: 'Lobster', cursive; }
+    .font-pacifico { font-family: 'Pacifico', cursive; }
+    .font-orbitron { font-family: 'Orbitron', sans-serif; }
+    .font-creepster { font-family: 'Creepster', cursive; }
+    .font-bangers { font-family: 'Bangers', cursive; letter-spacing: 1px; }
+    .font-elite { font-family: 'Special Elite', cursive; }
+
+    /* --- USERNAME EFFECTS --- */
+    .effect-none { }
+    .effect-glow { text-shadow: 0 0 10px currentColor; }
     
-    /* Fonts */
-    .font-sans { font-family: ui-sans-serif, system-ui, sans-serif; }
-    .font-serif { font-family: ui-serif, Georgia, serif; }
-    .font-mono { font-family: ui-monospace, SFMono-Regular, monospace; }
-    .font-comic { font-family: "Comic Sans MS", "Chalkboard SE", sans-serif; }
-    .font-retro { font-family: "Courier New", Courier, monospace; letter-spacing: -1px; font-weight: 900; }
+    .effect-rainbow {
+        background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+        -webkit-background-clip: text;
+        color: transparent !important;
+        animation: rainbow-anim 5s linear infinite;
+        background-size: 200% auto;
+    }
+    @keyframes rainbow-anim { 0% {background-position: 0% center;} 100% {background-position: 200% center;} }
+
+    .effect-gradient-gold { background: linear-gradient(to bottom, #FFD700, #FFA500); -webkit-background-clip: text; color: transparent !important; }
+    .effect-gradient-ocean { background: linear-gradient(to right, #00BFFF, #1E90FF); -webkit-background-clip: text; color: transparent !important; }
+    .effect-gradient-sunset { background: linear-gradient(to right, #FF4500, #FF69B4); -webkit-background-clip: text; color: transparent !important; }
+    .effect-gradient-fire { background: linear-gradient(to top, #f00, #ff0); -webkit-background-clip: text; color: transparent !important; }
+    
+    .effect-glitch {
+        position: relative;
+        animation: glitch-skew 1s infinite linear alternate-reverse;
+    }
+    .effect-glitch::before, .effect-glitch::after {
+        content: attr(data-text);
+        position: absolute; left: 0; width: 100%; height: 100%;
+        background: #313338; /* Match bg to hide original */
+    }
+    .effect-glitch::before { left: 2px; text-shadow: -1px 0 #ff00c1; clip: rect(44px, 450px, 56px, 0); animation: glitch-anim 5s infinite linear alternate-reverse; }
+    .effect-glitch::after { left: -2px; text-shadow: -1px 0 #00fff9; clip: rect(44px, 450px, 56px, 0); animation: glitch-anim2 5s infinite linear alternate-reverse; }
+    @keyframes glitch-anim { 0% {clip: rect(10px, 9999px, 30px, 0);} 100% {clip: rect(80px, 9999px, 100px, 0);} }
+    @keyframes glitch-anim2 { 0% {clip: rect(60px, 9999px, 80px, 0);} 100% {clip: rect(10px, 9999px, 50px, 0);} }
+
+    .effect-neon { color: #fff; text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #ff00de, 0 0 30px #ff00de, 0 0 40px #ff00de; }
+    .effect-ice { color: #e0ffff; text-shadow: 0 0 10px #00ffff, 0 0 20px #0000ff; }
+
+    /* --- USERCARD THEMES --- */
+    .card-theme-default { background-color: #2b2d31; border: 1px solid #1e1f22; }
+    .card-theme-obsidian { background: linear-gradient(145deg, #000000, #1a1a1a); border: 1px solid #333; }
+    .card-theme-sunset { background: linear-gradient(to bottom right, #2c1a1a, #2b2d31); border: 1px solid #ff4500; }
+    .card-theme-ocean { background: linear-gradient(to bottom right, #0f172a, #1e3a8a); border: 1px solid #3b82f6; }
+    .card-theme-forest { background: linear-gradient(to bottom right, #052e16, #14532d); border: 1px solid #22c55e; }
+    .card-theme-gold { background: linear-gradient(135deg, #1c1917, #451a03); border: 1px solid #fbbf24; }
+    .card-theme-cyber { background: repeating-linear-gradient(45deg, #111 0px, #111 10px, #222 10px, #222 20px); border: 1px solid #0ff; box-shadow: 0 0 15px #0ff2; }
+    .card-theme-matrix { background-color: #000; border: 1px solid #0f0; box-shadow: 0 0 10px #0f02; background-image: radial-gradient(#003300 2px, transparent 2px); background-size: 10px 10px; }
+    
 </style>
 </head>
 <body class="bg-[#313338] text-gray-100 font-sans antialiased h-screen flex flex-col overflow-hidden">
@@ -166,10 +223,18 @@
             </div>
             
             <div class="flex items-center gap-4">
+                
+                 <!-- Customize Button -->
+                 <button onclick="app.openCustomize()" class="text-gray-400 hover:text-pink-400 transition" title="Customize">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                    </svg>
+                </button>
+
                 <!-- Arcade Button -->
                 <button onclick="window.location.href='game.html'" class="text-gray-400 hover:text-purple-400 transition" title="Orbitly Arcade">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
                     </svg>
                 </button>
 
@@ -272,7 +337,8 @@
 
     <!-- User Profile Modal (View) -->
     <div id="profile-modal" class="absolute inset-0 z-50 hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-[#2b2d31] rounded-xl shadow-2xl w-full max-w-sm overflow-hidden border border-[#1e1f22] relative transform transition-all scale-100">
+        <!-- The Card Content Div: This gets theming classes applied -->
+        <div id="profile-card-content" class="card-theme-default rounded-xl shadow-2xl w-full max-w-sm overflow-hidden relative transform transition-all scale-100">
             <!-- Banner -->
             <div class="h-32 bg-gray-700 relative overflow-hidden group">
                 <img id="profile-banner" src="" class="w-full h-full object-cover">
@@ -330,7 +396,7 @@
         </div>
     </div>
 
-    <!-- Edit Profile Modal -->
+    <!-- Edit Profile Modal (Basic Info Only) -->
     <div id="edit-profile-modal" class="absolute inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-[#2b2d31] rounded-xl shadow-2xl w-full max-w-md border border-[#1e1f22] relative flex flex-col max-h-[90vh]">
             <div class="p-4 border-b border-[#1e1f22] flex justify-between items-center">
@@ -389,48 +455,122 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Styling -->
-                <div class="bg-[#1e1f22] p-4 rounded-lg border border-gray-700">
-                    <h4 class="text-sm font-bold text-white mb-3">Username Style</h4>
-                    <div class="grid grid-cols-2 gap-4 mb-3">
-                        <div>
-                            <label class="block text-xs uppercase font-bold text-gray-500 mb-1">Color</label>
-                            <input type="color" id="edit-color" class="w-full h-8 bg-transparent cursor-pointer rounded">
-                        </div>
-                        <div>
-                            <label class="block text-xs uppercase font-bold text-gray-500 mb-1">Font</label>
-                            <select id="edit-font" class="w-full px-2 py-1 bg-[#2b2d31] border border-gray-600 rounded text-white text-sm outline-none">
-                                <option value="font-sans">Default (Sans)</option>
-                                <option value="font-serif">Serif</option>
-                                <option value="font-mono">Monospace</option>
-                                <option value="font-comic">Comic Sans</option>
-                                <option value="font-retro">Retro</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs uppercase font-bold text-gray-500 mb-1">Effect</label>
-                        <select id="edit-effect" class="w-full px-2 py-1 bg-[#2b2d31] border border-gray-600 rounded text-white text-sm outline-none">
-                            <option value="none">None</option>
-                            <option value="name-glow">Glow (Uses Color)</option>
-                            <option value="name-gradient-gold">Golden Gradient</option>
-                            <option value="name-gradient-ocean">Ocean Gradient</option>
-                            <option value="name-gradient-sunset">Sunset Gradient</option>
-                            <option value="name-rainbow">Rainbow</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mt-4 p-3 bg-[#2b2d31] rounded text-center">
-                        <span class="text-xs text-gray-500 block mb-1">Preview</span>
-                        <span id="edit-preview" class="text-xl font-bold">Username</span>
-                    </div>
-                </div>
             </div>
 
             <div class="p-4 border-t border-[#1e1f22] flex justify-end gap-3">
                 <button onclick="app.closeEditProfile()" class="px-4 py-2 rounded text-gray-300 hover:text-white hover:bg-[#3f4147] transition">Cancel</button>
                 <button onclick="app.saveProfile()" class="px-4 py-2 rounded bg-[#5865F2] hover:bg-[#4752c4] text-white font-bold transition">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customize Menu Modal (New) -->
+    <div id="customize-modal" class="absolute inset-0 z-50 hidden bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#2b2d31] rounded-xl shadow-2xl w-full max-w-2xl border border-[#1e1f22] relative flex flex-col h-[80vh]">
+            <div class="p-4 border-b border-[#1e1f22] flex justify-between items-center bg-[#202225] rounded-t-xl">
+                <div class="flex items-center gap-2">
+                    <svg class="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
+                    <h3 class="text-white font-bold text-lg">Appearance</h3>
+                </div>
+                <button onclick="app.closeCustomize()" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex border-b border-[#1e1f22] bg-[#2f3136]">
+                <button onclick="app.switchCustTab('username')" id="cust-tab-username" class="px-6 py-3 text-sm font-bold text-white border-b-2 border-[#5865F2]">Username</button>
+                <button onclick="app.switchCustTab('usercard')" id="cust-tab-usercard" class="px-6 py-3 text-sm font-bold text-gray-400 hover:text-gray-200">Usercard</button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-6 bg-[#313338]">
+                
+                <!-- USERNAME TAB -->
+                <div id="cust-view-username" class="space-y-6">
+                    <div class="bg-[#202225] p-6 rounded-lg text-center border border-[#1e1f22]">
+                        <span class="text-gray-500 text-xs uppercase font-bold mb-2 block">Preview</span>
+                        <span id="cust-username-preview" class="text-4xl">Your Name</span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs uppercase font-bold text-gray-400 mb-2">Color</label>
+                            <input type="color" id="cust-color" class="w-full h-10 bg-[#202225] rounded cursor-pointer">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs uppercase font-bold text-gray-400 mb-2">Font</label>
+                            <select id="cust-font" class="w-full px-3 py-2 bg-[#202225] text-white border border-[#1e1f22] rounded outline-none">
+                                <option value="font-default">Default (Sans)</option>
+                                <option value="font-roboto">Roboto</option>
+                                <option value="font-opensans">Open Sans</option>
+                                <option value="font-lato">Lato</option>
+                                <option value="font-montserrat">Montserrat</option>
+                                <option value="font-oswald">Oswald</option>
+                                <option value="font-raleway">Raleway</option>
+                                <option value="font-merriweather">Merriweather (Serif)</option>
+                                <option value="font-playfair">Playfair (Serif)</option>
+                                <option value="font-nunito">Nunito</option>
+                                <option value="font-ubuntu">Ubuntu</option>
+                                <option value="font-mono">Inconsolata (Mono)</option>
+                                <option value="font-comic">Comic Neue</option>
+                                <option value="font-retro">Press Start 2P (Retro)</option>
+                                <option value="font-lobster">Lobster</option>
+                                <option value="font-pacifico">Pacifico</option>
+                                <option value="font-orbitron">Orbitron</option>
+                                <option value="font-creepster">Creepster</option>
+                                <option value="font-bangers">Bangers</option>
+                                <option value="font-elite">Special Elite</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs uppercase font-bold text-gray-400 mb-2">Effects</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                <button onclick="app.setCustEffect('none')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20">None</button>
+                                <button onclick="app.setCustEffect('effect-glow')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 effect-glow">Glow</button>
+                                <button onclick="app.setCustEffect('effect-rainbow')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 effect-rainbow">Rainbow</button>
+                                <button onclick="app.setCustEffect('effect-gradient-gold')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 effect-gradient-gold">Gold</button>
+                                <button onclick="app.setCustEffect('effect-gradient-ocean')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 effect-gradient-ocean">Ocean</button>
+                                <button onclick="app.setCustEffect('effect-gradient-sunset')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 effect-gradient-sunset">Sunset</button>
+                                <button onclick="app.setCustEffect('effect-gradient-fire')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 effect-gradient-fire">Fire</button>
+                                <button onclick="app.setCustEffect('effect-neon')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 effect-neon">Neon</button>
+                                <button onclick="app.setCustEffect('effect-ice')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 effect-ice">Ice</button>
+                                <button onclick="app.setCustEffect('effect-glitch')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 effect-glitch" data-text="Glitch">Glitch</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- USERCARD TAB -->
+                <div id="cust-view-usercard" class="space-y-6 hidden">
+                    <div id="cust-card-preview-box" class="card-theme-default p-6 rounded-xl border h-40 flex items-center justify-center relative overflow-hidden transition-all">
+                        <div class="text-center z-10">
+                            <h4 class="text-white font-bold text-xl">Preview Card</h4>
+                            <p class="text-gray-400 text-sm">This is how your profile looks.</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs uppercase font-bold text-gray-400 mb-2">Card Theme</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="app.setCustCard('card-theme-default')" class="h-12 rounded card-theme-default text-gray-300 text-xs font-bold">Default</button>
+                            <button onclick="app.setCustCard('card-theme-obsidian')" class="h-12 rounded card-theme-obsidian text-white text-xs font-bold">Obsidian</button>
+                            <button onclick="app.setCustCard('card-theme-sunset')" class="h-12 rounded card-theme-sunset text-white text-xs font-bold">Sunset</button>
+                            <button onclick="app.setCustCard('card-theme-ocean')" class="h-12 rounded card-theme-ocean text-white text-xs font-bold">Ocean</button>
+                            <button onclick="app.setCustCard('card-theme-forest')" class="h-12 rounded card-theme-forest text-white text-xs font-bold">Forest</button>
+                            <button onclick="app.setCustCard('card-theme-gold')" class="h-12 rounded card-theme-gold text-white text-xs font-bold">Gold</button>
+                            <button onclick="app.setCustCard('card-theme-cyber')" class="h-12 rounded card-theme-cyber text-white text-xs font-bold">Cyberpunk</button>
+                            <button onclick="app.setCustCard('card-theme-matrix')" class="h-12 rounded card-theme-matrix text-green-500 text-xs font-bold">Matrix</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="p-4 border-t border-[#1e1f22] flex justify-end gap-3 bg-[#202225] rounded-b-xl">
+                <button onclick="app.closeCustomize()" class="px-4 py-2 rounded text-gray-300 hover:text-white hover:bg-[#3f4147] transition">Cancel</button>
+                <button onclick="app.saveCustomization()" class="px-4 py-2 rounded bg-pink-500 hover:bg-pink-600 text-white font-bold transition shadow-lg">Save Styles</button>
             </div>
         </div>
     </div>
@@ -507,6 +647,14 @@
     let unsubscribeMessages = null;
     let unsubscribeUsers = null;
 
+    // Temporary Customization State
+    let tempCustState = {
+        color: '#ffffff',
+        font: 'font-default',
+        effect: 'none',
+        cardTheme: 'card-theme-default'
+    };
+
     // Elements
     const els = {
         authView: document.getElementById('auth-view'),
@@ -539,7 +687,9 @@
             editPfpInput: document.getElementById('edit-pfp-input'),
             editBannerInput: document.getElementById('edit-banner-input'),
             editPfpPreview: document.getElementById('edit-pfp-preview'),
-            editBannerPreview: document.getElementById('edit-banner-preview')
+            editBannerPreview: document.getElementById('edit-banner-preview'),
+
+            custModal: document.getElementById('customize-modal')
         }
     };
 
@@ -554,7 +704,7 @@
                 img.src = event.target.result;
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    const MAX_SIZE = 300; // Increased size for better quality
+                    const MAX_SIZE = 300; 
                     let width = img.width;
                     let height = img.height;
 
@@ -656,6 +806,13 @@
                     nameEl.textContent = data.username;
                     applyUsernameStyle(nameEl, data.usernameStyle);
 
+                    // Usercard Theme
+                    const cardEl = document.getElementById('profile-card-content');
+                    // Reset classes
+                    cardEl.className = "rounded-xl shadow-2xl w-full max-w-sm overflow-hidden relative transform transition-all scale-100";
+                    // Apply
+                    cardEl.classList.add(data.usercardStyle || 'card-theme-default');
+
                     // Bio
                     const bioEl = document.getElementById('profile-bio');
                     const bioCont = document.getElementById('profile-bio-container');
@@ -702,17 +859,9 @@
             document.getElementById('edit-gender').value = currentUserProfile.gender;
             
             els.displays.editPfpPreview.src = currentUserProfile.pfpUrl || 'https://ui-avatars.com/api/?name=?';
-            els.displays.editBannerPreview.src = currentUserProfile.bannerUrl || ''; // If empty, img might show broken, handled via logic or let it be
-
-            // Styling Inputs
-            const style = currentUserProfile.usernameStyle || {};
-            document.getElementById('edit-color').value = style.color || '#ffffff';
-            document.getElementById('edit-font').value = style.font || 'font-sans';
-            document.getElementById('edit-effect').value = style.effect || 'none';
+            els.displays.editBannerPreview.src = currentUserProfile.bannerUrl || ''; 
             
-            updateEditPreview(); // Refresh preview text
-            
-            els.displays.profileModal.classList.add('hidden'); // Close view modal
+            els.displays.profileModal.classList.add('hidden'); 
             els.displays.editModal.classList.remove('hidden');
         },
         closeEditProfile: () => {
@@ -724,13 +873,6 @@
             const newBio = document.getElementById('edit-bio').value.trim();
             const newAge = parseInt(document.getElementById('edit-age').value);
             const newGender = document.getElementById('edit-gender').value;
-            
-            // Styling
-            const newStyle = {
-                color: document.getElementById('edit-color').value,
-                font: document.getElementById('edit-font').value,
-                effect: document.getElementById('edit-effect').value
-            };
 
             const pfpFile = els.displays.editPfpInput.files[0];
             const bannerFile = els.displays.editBannerInput.files[0];
@@ -752,16 +894,87 @@
                     age: newAge,
                     gender: newGender,
                     pfpUrl: pfpUrl,
-                    bannerUrl: bannerUrl || null,
-                    usernameStyle: newStyle
+                    bannerUrl: bannerUrl || null
                 });
                 
                 showToast("Profile Saved!", 'success');
                 app.closeEditProfile();
-                app.openProfile(currentUser.uid); // Re-open profile view
+                app.openProfile(currentUser.uid); 
             } catch (e) {
                 console.error(e);
                 showToast("Error saving profile", 'error');
+            }
+        },
+        // --- Customization Menu Logic ---
+        openCustomize: () => {
+            if(!currentUserProfile) return;
+            // Load current settings
+            const style = currentUserProfile.usernameStyle || {};
+            tempCustState.color = style.color || '#ffffff';
+            tempCustState.font = style.font || 'font-default';
+            tempCustState.effect = style.effect || 'none';
+            tempCustState.cardTheme = currentUserProfile.usercardStyle || 'card-theme-default';
+
+            // Set UI inputs
+            document.getElementById('cust-color').value = tempCustState.color;
+            document.getElementById('cust-font').value = tempCustState.font;
+            
+            // Render previews
+            updateCustPreview();
+
+            // Defaults to username tab
+            app.switchCustTab('username');
+            els.displays.custModal.classList.remove('hidden');
+        },
+        closeCustomize: () => {
+            els.displays.custModal.classList.add('hidden');
+        },
+        switchCustTab: (tab) => {
+            const uTab = document.getElementById('cust-tab-username');
+            const cTab = document.getElementById('cust-tab-usercard');
+            const uView = document.getElementById('cust-view-username');
+            const cView = document.getElementById('cust-view-usercard');
+
+            if (tab === 'username') {
+                uTab.className = "px-6 py-3 text-sm font-bold text-white border-b-2 border-[#5865F2]";
+                cTab.className = "px-6 py-3 text-sm font-bold text-gray-400 hover:text-gray-200";
+                uView.classList.remove('hidden');
+                cView.classList.add('hidden');
+            } else {
+                cTab.className = "px-6 py-3 text-sm font-bold text-white border-b-2 border-[#5865F2]";
+                uTab.className = "px-6 py-3 text-sm font-bold text-gray-400 hover:text-gray-200";
+                cView.classList.remove('hidden');
+                uView.classList.add('hidden');
+            }
+        },
+        setCustEffect: (effect) => {
+            tempCustState.effect = effect;
+            updateCustPreview();
+        },
+        setCustCard: (theme) => {
+            tempCustState.cardTheme = theme;
+            updateCustPreview();
+        },
+        saveCustomization: async () => {
+            if(!currentUser) return;
+            try {
+                // Update State from Inputs for safety (font/color might have changed without explicit setter)
+                tempCustState.color = document.getElementById('cust-color').value;
+                tempCustState.font = document.getElementById('cust-font').value;
+
+                await updateDoc(doc(db, "users", currentUser.uid), {
+                    usernameStyle: {
+                        color: tempCustState.color,
+                        font: tempCustState.font,
+                        effect: tempCustState.effect
+                    },
+                    usercardStyle: tempCustState.cardTheme
+                });
+                showToast("Styles updated!", "success");
+                app.closeCustomize();
+            } catch(e) {
+                console.error(e);
+                showToast("Failed to save styles", "error");
             }
         }
     };
@@ -769,56 +982,87 @@
     // --- Styling Helpers ---
     function applyUsernameStyle(el, style) {
         if (!style) {
-            el.className = "font-bold text-white text-lg"; // Default
+            el.className = "font-bold text-white text-lg font-default"; 
             el.style.color = "";
             el.style.textShadow = "";
             return;
         }
 
-        // Reset base classes
-        el.className = "font-bold text-lg "; 
+        // Base class + Font
+        el.className = `font-bold text-lg ${style.font || 'font-default'}`;
         
-        // Font
-        el.classList.add(style.font || 'font-sans');
+        // Remove old styles
+        el.style.color = "";
+        el.style.textShadow = "";
 
-        // Color & Effect
-        if (style.effect === 'name-glow') {
-            el.classList.add('name-glow');
+        // Effects
+        const fx = style.effect || 'none';
+        
+        if (fx === 'effect-glow') {
+            el.classList.add('effect-glow');
+            el.style.color = style.color; 
+        } else if (fx.startsWith('effect-gradient') || fx === 'effect-rainbow' || fx === 'effect-fire') {
+            el.classList.add(fx);
+            // Gradients handle color themselves via background-clip
+        } else if (fx === 'effect-glitch') {
+            el.classList.add('effect-glitch');
+            el.setAttribute('data-text', el.textContent); // Needed for glitch attr
             el.style.color = style.color;
-            el.style.textShadow = `0 0 10px ${style.color}`;
-        } else if (style.effect && style.effect.startsWith('name-gradient')) {
-            el.classList.add(style.effect);
-            el.style.color = ""; // Handled by class
-            el.style.textShadow = "";
-        } else if (style.effect === 'name-rainbow') {
-             el.classList.add('name-rainbow');
-             el.style.color = "";
-             el.style.textShadow = "";
+        } else if (fx === 'effect-neon') {
+            el.classList.add('effect-neon');
+        } else if (fx === 'effect-ice') {
+            el.classList.add('effect-ice');
         } else {
-            // Normal Solid Color
+            // Normal
             el.style.color = style.color;
-            el.style.textShadow = "";
         }
     }
 
-    // Live Preview in Edit Modal
-    function updateEditPreview() {
-        const previewEl = document.getElementById('edit-preview');
-        previewEl.textContent = document.getElementById('edit-username').value || "Username";
+    // Live Preview in Customize Modal
+    function updateCustPreview() {
+        // Update Username Preview
+        const namePreview = document.getElementById('cust-username-preview');
+        // Grab values
+        tempCustState.color = document.getElementById('cust-color').value;
+        tempCustState.font = document.getElementById('cust-font').value;
         
-        const style = {
-            color: document.getElementById('edit-color').value,
-            font: document.getElementById('edit-font').value,
-            effect: document.getElementById('edit-effect').value
-        };
-        applyUsernameStyle(previewEl, style);
-        // Force text size in preview
-        previewEl.classList.add('text-xl');
+        // Reset classes
+        namePreview.className = "text-4xl"; // Base size
+        
+        // Apply Style Logic manually for preview
+        namePreview.classList.add(tempCustState.font);
+        
+        // Clear inline
+        namePreview.style.color = "";
+        namePreview.style.textShadow = "";
+        namePreview.removeAttribute('data-text');
+
+        if (tempCustState.effect === 'effect-glow') {
+            namePreview.classList.add('effect-glow');
+            namePreview.style.color = tempCustState.color;
+        } else if (tempCustState.effect.startsWith('effect-gradient') || tempCustState.effect === 'effect-rainbow') {
+            namePreview.classList.add(tempCustState.effect);
+        } else if (tempCustState.effect === 'effect-glitch') {
+            namePreview.classList.add('effect-glitch');
+            namePreview.setAttribute('data-text', "Your Name");
+            namePreview.style.color = tempCustState.color;
+        } else if (tempCustState.effect === 'effect-neon') {
+            namePreview.classList.add('effect-neon');
+        } else if (tempCustState.effect === 'effect-ice') {
+            namePreview.classList.add('effect-ice');
+        } else {
+            namePreview.style.color = tempCustState.color;
+        }
+
+        // Update Card Preview
+        const cardPreview = document.getElementById('cust-card-preview-box');
+        cardPreview.className = `p-6 rounded-xl border h-40 flex items-center justify-center relative overflow-hidden transition-all ${tempCustState.cardTheme}`;
     }
     
-    // Listeners for live preview
-    ['edit-username', 'edit-color', 'edit-font', 'edit-effect'].forEach(id => {
-        document.getElementById(id).addEventListener('input', updateEditPreview);
+    // Listeners for live preview inputs
+    ['cust-color', 'cust-font'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.addEventListener('input', updateCustPreview);
     });
     
     // File Input Previews in Edit Modal
@@ -856,8 +1100,6 @@
         }
         if (e.target === els.displays.walletModal) app.closeWallet();
         if (e.target === els.displays.profileModal) app.closeProfile();
-        // Edit modal close on background click
-        // if (e.target === els.displays.editModal) app.closeEditProfile();
     });
 
     els.inputs.signupPfp.addEventListener('change', (e) => {
@@ -1022,22 +1264,6 @@
     function renderMessage(msg) {
         const div = document.createElement('div');
         
-        // Lookup user to get fresh style?
-        // Note: In a real app we might join data, but here we might rely on msg data.
-        // For dynamic styling updates on old messages, we'd need to fetch user data. 
-        // For now, let's try to get it if possible, or just render simply.
-        // Actually, to make styles apply instantly to old messages, we need to listen to users collection or rely on msg having it.
-        // Let's assume msg stores a snapshot of style at time of sending OR we just render plain text.
-        // BETTER: We'll wrap the name in a span with a unique ID or class and update it? Too complex.
-        // We will just render the message. If the user wants updated styles on old messages, they need to reload or we fetch user.
-        // For simplicity: We fetch the user data for style from cache/list if available?
-        // Actually, let's just use what's in the message if we add it, otherwise standard.
-        // Wait, for `renderUserInList` we have live data. For messages we don't.
-        
-        // Let's stick to simple rendering for messages for now, or just standard bold.
-        // EDIT: To properly support style in chat, we should probably fetch the user doc or store style in msg.
-        // Storing in msg is easier but static. Let's do that for new messages.
-
         if (['allin', 'flip', 'roll', 'slots', 'rps', 'guess'].includes(msg.type)) {
             // ... (Gambling rendering remains same) ...
              const isWin = msg.result === 'WON';
@@ -1185,7 +1411,6 @@
             return;
         }
         if (command === '/pfp' && args[0] === 'change') {
-            // Deprecated by Edit Profile UI but kept for legacy
             app.openEditProfile();
             return;
         }
@@ -1206,8 +1431,6 @@
         }
     }
 
-    // ... (Keep existing command functions: showHelp, showPrefixes, executeDaily, executeConvert, executeTop, executePay, executeBank, executeGamble) ...
-    // Re-implementing briefly for completeness in file output, logic remains identical to previous successful state
     function showHelp() {
         const div = document.createElement('div');
         div.className = "my-4 mx-4 p-4 bg-[#2b2d31] rounded-lg border border-[#1e1f22] text-sm shadow-xl";
