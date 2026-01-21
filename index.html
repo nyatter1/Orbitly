@@ -185,6 +185,7 @@
     
     <!-- Auth View -->
 <div id="auth-view" class="flex-1 flex flex-col justify-center items-center p-4 bg-[url('https://picsum.photos/1920/1080?blur=10')] bg-cover bg-center relative z-50">
+    <!-- ... (Auth view content unchanged) ... -->
     <div class="absolute inset-0 bg-gray-900/80 backdrop-blur-sm"></div>
     
     <div class="relative w-full max-w-md bg-[#2b2d31] rounded-lg shadow-2xl overflow-hidden">
@@ -327,6 +328,7 @@
 
                     <!-- Status Dropdown -->
                     <div id="status-dropdown" class="hidden absolute top-full right-0 mt-2 w-48 bg-[#111214] rounded shadow-xl border border-[#1e1f22] overflow-hidden z-50">
+                        <!-- ... (Status dropdown content unchanged) ... -->
                         <div class="p-2 space-y-1">
                             <button onclick="app.setStatus('online')" class="w-full text-left px-2 py-1.5 rounded hover:bg-[#4752c4] hover:text-white text-gray-300 text-sm flex items-center gap-2 group">
                                 <div class="w-2.5 h-2.5 rounded-full status-online"></div> Online
@@ -375,6 +377,7 @@
 
     <!-- Wallet Modal -->
     <div id="wallet-modal" class="absolute inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center">
+        <!-- ... (Wallet modal content unchanged) ... -->
         <div class="bg-[#2b2d31] rounded-xl shadow-2xl p-6 w-80 transform transition-all scale-100 border border-[#1e1f22] relative">
             <button onclick="app.closeWallet()" class="absolute top-2 right-2 text-gray-400 hover:text-white">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -397,7 +400,7 @@
 
     <!-- User Profile Modal (View) -->
     <div id="profile-modal" class="absolute inset-0 z-50 hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-        <!-- The Card Content Div: This gets theming classes applied -->
+        <!-- ... (Profile modal content unchanged) ... -->
         <div id="profile-card-content" class="card-theme-default rounded-xl shadow-2xl w-full max-w-sm overflow-hidden relative transform transition-all scale-100">
             <!-- Banner -->
             <div class="h-32 bg-gray-700 relative overflow-hidden group">
@@ -458,6 +461,7 @@
 
     <!-- Edit Profile Modal (Basic Info Only) -->
     <div id="edit-profile-modal" class="absolute inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <!-- ... (Edit profile modal content unchanged) ... -->
         <div class="bg-[#2b2d31] rounded-xl shadow-2xl w-full max-w-md border border-[#1e1f22] relative flex flex-col max-h-[90vh]">
             <div class="p-4 border-b border-[#1e1f22] flex justify-between items-center">
                 <h3 class="text-white font-bold text-lg">Edit Profile</h3>
@@ -568,6 +572,23 @@
                         </div>
                     </div>
 
+                    <!-- Message Preview -->
+                    <div class="text-center">
+                        <span class="text-gray-500 text-[10px] uppercase font-bold mb-3 block tracking-widest">Chat Message Preview</span>
+                        <div class="bg-[#313338] p-4 rounded-lg border border-[#1e1f22] text-left">
+                            <div class="flex gap-2">
+                                <div class="w-8 h-8 rounded-full bg-gray-600 flex-shrink-0"></div>
+                                <div>
+                                    <div class="flex items-baseline gap-2">
+                                        <span class="text-white font-medium text-sm">Your Name</span>
+                                        <span class="text-[10px] text-gray-400">Today at 12:00</span>
+                                    </div>
+                                    <p id="cust-message-preview" class="text-sm leading-relaxed">This is how your messages will look!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Card Preview -->
                     <div class="text-center">
                         <span class="text-gray-500 text-[10px] uppercase font-bold mb-3 block tracking-widest">Profile Card Preview</span>
@@ -586,6 +607,7 @@
                     <div class="flex border-b border-[#1e1f22] bg-[#2f3136]">
                         <button onclick="app.switchCustTab('username')" id="cust-tab-username" class="flex-1 py-4 text-sm font-bold text-white border-b-2 border-[#5865F2]">Username</button>
                         <button onclick="app.switchCustTab('list')" id="cust-tab-list" class="flex-1 py-4 text-sm font-bold text-gray-400 hover:text-gray-200">List Style</button>
+                        <button onclick="app.switchCustTab('messages')" id="cust-tab-messages" class="flex-1 py-4 text-sm font-bold text-gray-400 hover:text-gray-200">Messages</button>
                         <button onclick="app.switchCustTab('usercard')" id="cust-tab-usercard" class="flex-1 py-4 text-sm font-bold text-gray-400 hover:text-gray-200">Profile Card</button>
                     </div>
 
@@ -639,9 +661,42 @@
                         <!-- LIST STYLE TAB -->
                         <div id="cust-view-list" class="space-y-6 hidden">
                             <div>
-                                <label class="block text-xs uppercase font-bold text-gray-400 mb-2">List Item Style</label>
-                                <div class="grid grid-cols-2 gap-3" id="list-style-grid">
+                                <label class="block text-xs uppercase font-bold text-gray-400 mb-2">Preset Styles</label>
+                                <div class="grid grid-cols-2 gap-3 mb-4" id="list-style-grid">
                                     <!-- Populated by JS -->
+                                </div>
+                                <button onclick="app.setListStyle('custom')" id="btn-custom-list" class="w-full py-2 bg-[#202225] text-white text-xs font-bold rounded border border-dashed border-gray-600 hover:border-white transition mb-4">
+                                    Create Your Own (Custom)
+                                </button>
+                            </div>
+
+                            <!-- Custom Creator Controls (Hidden by default) -->
+                            <div id="custom-list-creator" class="bg-[#202225] p-4 rounded-lg border border-[#1e1f22] hidden">
+                                <h4 class="text-white font-bold text-sm mb-3 border-b border-gray-700 pb-2">Custom Creator</h4>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs uppercase font-bold text-gray-400 mb-2">Background Color</label>
+                                        <input type="color" id="cust-list-bg" class="w-full h-8 bg-transparent rounded cursor-pointer border border-gray-600">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs uppercase font-bold text-gray-400 mb-2">Border Color</label>
+                                        <input type="color" id="cust-list-border" class="w-full h-8 bg-transparent rounded cursor-pointer border border-gray-600">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs uppercase font-bold text-gray-400 mb-2">Name Color</label>
+                                        <input type="color" id="cust-list-text" class="w-full h-8 bg-transparent rounded cursor-pointer border border-gray-600">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MESSAGES TAB -->
+                        <div id="cust-view-messages" class="space-y-6 hidden">
+                            <div class="bg-[#202225] p-4 rounded-lg border border-[#1e1f22]">
+                                <h4 class="text-white font-bold text-sm mb-3">Message Style</h4>
+                                <div>
+                                    <label class="block text-xs uppercase font-bold text-gray-400 mb-2">Text Color</label>
+                                    <input type="color" id="cust-msg-color" class="w-full h-10 bg-[#1e1f22] rounded cursor-pointer border border-gray-600">
                                 </div>
                             </div>
                         </div>
@@ -679,6 +734,7 @@
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, setDoc, getDoc, updateDoc, where, getDocs, limit, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     
+    // ... (Firebase Config & Helpers same as before) ...
     const firebaseConfig = {
         apiKey: "AIzaSyBz9yOlQFZQZE-GtGcRbJ2sWUYQTb0kBi4",
         authDomain: "orbitly-online.firebaseapp.com",
@@ -689,50 +745,15 @@
         measurementId: "G-9B5458S73M"
     };
 
-    // Rename to fbApp to avoid conflict with window.app
     const fbApp = initializeApp(firebaseConfig);
     const auth = getAuth(fbApp);
     const db = getFirestore(fbApp);
 
-    // --- Abbreviation System ---
-    const SUFFIXES = {
-        'k': 1e3, 'm': 1e6, 'b': 1e9, 't': 1e12, 'qa': 1e15, 'qi': 1e18, 'sx': 1e21, 'sp': 1e24, 'oc': 1e27, 'no': 1e30,
-        'dc': 1e33, 'ud': 1e36, 'dd': 1e39, 'td': 1e42, 'qad': 1e45, 'qid': 1e48, 'sxd': 1e51, 'spd': 1e54, 'ocd': 1e57, 'nod': 1e60,
-        'vg': 1e63, 'uvg': 1e66, 'dvg': 1e69, 'tvg': 1e72, 'qavg': 1e75, 'qivg': 1e78, 'sxvg': 1e81, 'spvg': 1e84, 'ocvg': 1e87, 'novg': 1e90,
-        'tg': 1e93, 'utg': 1e96, 'dtg': 1e99, 'ttg': 1e102, 'qatg': 1e105, 'qitg': 1e108, 'sxtg': 1e111, 'sptg': 1e114, 'octg': 1e117, 'notg': 1e120,
-        'qg': 1e123, 'uqg': 1e126, 'dqg': 1e129, 'tqg': 1e132, 'qaqg': 1e135, 'qiqg': 1e138, 'sxqg': 1e141, 'spqg': 1e144, 'ocqg': 1e147, 'noqg': 1e150
-    };
-
+    const SUFFIXES = { 'k': 1e3, 'm': 1e6, 'b': 1e9, 't': 1e12, 'qa': 1e15, 'qi': 1e18, 'sx': 1e21, 'sp': 1e24, 'oc': 1e27, 'no': 1e30, 'dc': 1e33, 'ud': 1e36, 'dd': 1e39, 'td': 1e42, 'qad': 1e45, 'qid': 1e48, 'sxd': 1e51, 'spd': 1e54, 'ocd': 1e57, 'nod': 1e60, 'vg': 1e63, 'uvg': 1e66, 'dvg': 1e69, 'tvg': 1e72, 'qavg': 1e75, 'qivg': 1e78, 'sxvg': 1e81, 'spvg': 1e84, 'ocvg': 1e87, 'novg': 1e90, 'tg': 1e93, 'utg': 1e96, 'dtg': 1e99, 'ttg': 1e102, 'qatg': 1e105, 'qitg': 1e108, 'sxtg': 1e111, 'sptg': 1e114, 'octg': 1e117, 'notg': 1e120, 'qg': 1e123, 'uqg': 1e126, 'dqg': 1e129, 'tqg': 1e132, 'qaqg': 1e135, 'qiqg': 1e138, 'sxqg': 1e141, 'spqg': 1e144, 'ocqg': 1e147, 'noqg': 1e150 };
     const SORTED_SUFFIXES = Object.entries(SUFFIXES).sort((a, b) => b[1] - a[1]);
 
-    function parseAbbreviatedNumber(input) {
-        if (!input) return NaN;
-        input = input.toLowerCase().replace(/,/g, ''); 
-        if (input === 'all') return 'all';
-        
-        for (const [suffix, value] of SORTED_SUFFIXES) {
-            if (input.endsWith(suffix)) {
-                const numPart = input.slice(0, -suffix.length);
-                const val = parseFloat(numPart);
-                if (isNaN(val)) return NaN;
-                return Math.floor(val * value);
-            }
-        }
-        return Math.floor(parseFloat(input));
-    }
-
-    function formatNumber(num) {
-        if (num === undefined || num === null || isNaN(num)) return "0";
-        if (num < 1000) return Math.floor(num).toLocaleString();
-
-        for (const [suffix, value] of SORTED_SUFFIXES) {
-            if (num >= value) {
-                const formatted = (num / value).toFixed(2).replace(/\.0+$/, '').replace(/(\.[0-9]*[1-9])0+$/, '$1');
-                return formatted + suffix;
-            }
-        }
-        return Math.floor(num).toLocaleString();
-    }
+    function parseAbbreviatedNumber(input) { if (!input) return NaN; input = input.toLowerCase().replace(/,/g, ''); if (input === 'all') return 'all'; for (const [suffix, value] of SORTED_SUFFIXES) { if (input.endsWith(suffix)) { const numPart = input.slice(0, -suffix.length); const val = parseFloat(numPart); if (isNaN(val)) return NaN; return Math.floor(val * value); } } return Math.floor(parseFloat(input)); }
+    function formatNumber(num) { if (num === undefined || num === null || isNaN(num)) return "0"; if (num < 1000) return Math.floor(num).toLocaleString(); for (const [suffix, value] of SORTED_SUFFIXES) { if (num >= value) { const formatted = (num / value).toFixed(2).replace(/\.0+$/, '').replace(/(\.[0-9]*[1-9])0+$/, '$1'); return formatted + suffix; } } return Math.floor(num).toLocaleString(); }
 
     // State
     let currentUser = null;
@@ -740,13 +761,15 @@
     let unsubscribeMessages = null;
     let unsubscribeUsers = null;
 
-    // Temporary Customization State
+    // Customization State
     let tempCustState = {
         color: '#ffffff',
         font: 'font-default',
         effect: 'effect-none',
         listStyle: 'list-style-default',
-        cardTheme: 'card-theme-default'
+        cardTheme: 'card-theme-default',
+        messageColor: '#dbdee1', // Default Gray
+        customList: { bg: '#2b2d31', border: '#1e1f22', text: '#ffffff' }
     };
 
     // Elements
@@ -757,237 +780,31 @@
         tabs: { login: document.getElementById('tab-login'), signup: document.getElementById('tab-signup') },
         inputs: { signupPfp: document.getElementById('signup-pfp'), msg: document.getElementById('message-input') },
         displays: {
-            pfpPreview: document.getElementById('pfp-preview'),
-            pfpPlaceholder: document.getElementById('pfp-placeholder'),
-            error: document.getElementById('auth-error'),
-            loader: document.getElementById('auth-loader'),
-            feedback: document.getElementById('auth-feedback'),
-            msgContainer: document.getElementById('messages-container'),
-            onlineList: document.getElementById('online-list'),
-            
-            headerPfp: document.getElementById('current-user-pfp'),
-            headerName: document.getElementById('current-username'),
-            headerStatusText: document.getElementById('current-status-text'),
-            headerStatusDot: document.getElementById('current-user-status-dot'),
-            statusDropdown: document.getElementById('status-dropdown'),
-            invisibleBtn: document.getElementById('btn-invisible'),
-            walletModal: document.getElementById('wallet-modal'),
-            walletCoins: document.getElementById('wallet-coins'),
-            walletGems: document.getElementById('wallet-gems'),
-            profileModal: document.getElementById('profile-modal'),
-            toastContainer: document.getElementById('toast-container'),
-            
-            editModal: document.getElementById('edit-profile-modal'),
-            editPfpInput: document.getElementById('edit-pfp-input'),
-            editBannerInput: document.getElementById('edit-banner-input'),
-            editPfpPreview: document.getElementById('edit-pfp-preview'),
-            editBannerPreview: document.getElementById('edit-banner-preview'),
-
+            pfpPreview: document.getElementById('pfp-preview'), pfpPlaceholder: document.getElementById('pfp-placeholder'), error: document.getElementById('auth-error'), loader: document.getElementById('auth-loader'), feedback: document.getElementById('auth-feedback'), msgContainer: document.getElementById('messages-container'), onlineList: document.getElementById('online-list'),
+            headerPfp: document.getElementById('current-user-pfp'), headerName: document.getElementById('current-username'), headerStatusText: document.getElementById('current-status-text'), headerStatusDot: document.getElementById('current-user-status-dot'), statusDropdown: document.getElementById('status-dropdown'), invisibleBtn: document.getElementById('btn-invisible'), walletModal: document.getElementById('wallet-modal'), walletCoins: document.getElementById('wallet-coins'), walletGems: document.getElementById('wallet-gems'), profileModal: document.getElementById('profile-modal'), toastContainer: document.getElementById('toast-container'),
+            editModal: document.getElementById('edit-profile-modal'), editPfpInput: document.getElementById('edit-pfp-input'), editBannerInput: document.getElementById('edit-banner-input'), editPfpPreview: document.getElementById('edit-pfp-preview'), editBannerPreview: document.getElementById('edit-banner-preview'),
             custModal: document.getElementById('customize-modal')
         }
     };
 
     // --- Core Functions ---
-
-    function processImage(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = (event) => {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const MAX_SIZE = 300; 
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > height) {
-                        if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
-                    } else {
-                        if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
-                    }
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.85));
-                };
-                img.onerror = (err) => reject(err);
-            };
-            reader.onerror = (err) => reject(err);
-        });
-    }
-    
-    async function processUpload(file) {
-        const limit = 500 * 1024; // 500KB limit for gifs
-        if (file.type === 'image/gif' && file.size < limit) {
-             const reader = new FileReader();
-             return new Promise((resolve) => {
-                reader.onload = (ev) => resolve(ev.target.result);
-                reader.readAsDataURL(file);
-             });
-        }
-        return await processImage(file);
-    }
+    function processImage(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = (event) => { const img = new Image(); img.src = event.target.result; img.onload = () => { const canvas = document.createElement('canvas'); const MAX_SIZE = 300; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); resolve(canvas.toDataURL('image/jpeg', 0.85)); }; img.onerror = (err) => reject(err); }; reader.onerror = (err) => reject(err); }); }
+    async function processUpload(file) { const limit = 500 * 1024; if (file.type === 'image/gif' && file.size < limit) { const reader = new FileReader(); return new Promise((resolve) => { reader.onload = (ev) => resolve(ev.target.result); reader.readAsDataURL(file); }); } return await processImage(file); }
 
     // Global App Methods
     window.app = {
-        switchTab: (tab) => {
-            els.displays.feedback.classList.add('hidden');
-            if (tab === 'login') {
-                els.forms.login.classList.remove('hidden');
-                els.forms.signup.classList.add('hidden');
-                els.tabs.login.className = "flex-1 py-1 text-sm font-medium rounded text-white bg-[#5865F2] transition";
-                els.tabs.signup.className = "flex-1 py-1 text-sm font-medium rounded text-gray-400 hover:text-gray-200 transition";
-            } else {
-                els.forms.login.classList.add('hidden');
-                els.forms.signup.classList.remove('hidden');
-                els.tabs.signup.className = "flex-1 py-1 text-sm font-medium rounded text-white bg-[#5865F2] transition";
-                els.tabs.login.className = "flex-1 py-1 text-sm font-medium rounded text-gray-400 hover:text-gray-200 transition";
-            }
-        },
-        logout: () => {
-            if (currentUser && currentUserProfile && currentUserProfile.status !== 'invisible') {
-                 updateDoc(doc(db, "users", currentUser.uid), { status: 'offline' }).then(() => signOut(auth));
-            } else {
-                signOut(auth);
-            }
-        },
-        setStatus: async (status) => {
-            if (!currentUser) return;
-            try {
-                await updateDoc(doc(db, "users", currentUser.uid), { status: status });
-                els.displays.statusDropdown.classList.add('hidden');
-            } catch (e) {
-                console.error("Status update failed", e);
-            }
-        },
-        openWallet: () => {
-            if (currentUserProfile) {
-                els.displays.walletCoins.textContent = formatNumber(currentUserProfile.coins || 0);
-                els.displays.walletGems.textContent = formatNumber(currentUserProfile.gems || 0);
-            }
-            els.displays.walletModal.classList.remove('hidden');
-        },
-        closeWallet: () => {
-            els.displays.walletModal.classList.add('hidden');
-        },
-        openProfile: async (uid) => {
-            try {
-                const snap = await getDoc(doc(db, "users", uid));
-                if(snap.exists()) {
-                    const data = snap.data();
-                    
-                    document.getElementById('profile-pfp').src = data.pfpUrl || 'https://ui-avatars.com/api/?name=?';
-                    
-                    const bannerEl = document.getElementById('profile-banner');
-                    const bannerPlace = document.getElementById('profile-banner-placeholder');
-                    if (data.bannerUrl) {
-                        bannerEl.src = data.bannerUrl;
-                        bannerEl.classList.remove('hidden');
-                        bannerPlace.classList.add('hidden');
-                    } else {
-                        bannerEl.classList.add('hidden');
-                        bannerPlace.classList.remove('hidden');
-                    }
-
-                    const nameEl = document.getElementById('profile-username');
-                    nameEl.textContent = data.username;
-                    applyUsernameStyle(nameEl, data.usernameStyle);
-
-                    const cardEl = document.getElementById('profile-card-content');
-                    cardEl.className = "rounded-xl shadow-2xl w-full max-w-sm overflow-hidden relative transform transition-all scale-100";
-                    cardEl.classList.add(data.usercardStyle || 'card-theme-default');
-
-                    const bioEl = document.getElementById('profile-bio');
-                    const bioCont = document.getElementById('profile-bio-container');
-                    if (data.bio) {
-                        bioEl.textContent = data.bio;
-                        bioCont.classList.remove('hidden');
-                    } else {
-                        bioCont.classList.add('hidden');
-                    }
-
-                    document.getElementById('profile-age').textContent = data.age || 'N/A';
-                    document.getElementById('profile-gender').textContent = data.gender || 'N/A';
-                    document.getElementById('profile-coins').textContent = formatNumber(data.coins || 0);
-                    document.getElementById('profile-gems').textContent = formatNumber(data.gems || 0);
-                    
-                    const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown';
-                    document.getElementById('profile-joined').textContent = `Joined ${date}`;
-                    
-                    const status = (data.status || 'offline').toUpperCase();
-                    const badge = document.getElementById('profile-status-badge');
-                    badge.textContent = status;
-
-                    const editBtn = document.getElementById('profile-edit-btn');
-                    if (currentUser && currentUser.uid === uid) editBtn.classList.remove('hidden');
-                    else editBtn.classList.add('hidden');
-                    
-                    els.displays.profileModal.classList.remove('hidden');
-                }
-            } catch(e) { console.error(e); }
-        },
-        openMyProfile: () => {
-            if(currentUser) app.openProfile(currentUser.uid);
-        },
-        closeProfile: () => {
-            els.displays.profileModal.classList.add('hidden');
-        },
-        openEditProfile: () => {
-            if (!currentUserProfile) return;
-            document.getElementById('edit-username').value = currentUserProfile.username;
-            document.getElementById('edit-bio').value = currentUserProfile.bio || "";
-            document.getElementById('edit-age').value = currentUserProfile.age;
-            document.getElementById('edit-gender').value = currentUserProfile.gender;
-            
-            els.displays.editPfpPreview.src = currentUserProfile.pfpUrl || 'https://ui-avatars.com/api/?name=?';
-            els.displays.editBannerPreview.src = currentUserProfile.bannerUrl || ''; 
-            
-            els.displays.profileModal.classList.add('hidden'); 
-            els.displays.editModal.classList.remove('hidden');
-        },
-        closeEditProfile: () => {
-             els.displays.editModal.classList.add('hidden');
-        },
-        saveProfile: async () => {
-            if(!currentUser) return;
-            const newUsername = document.getElementById('edit-username').value.trim();
-            const newBio = document.getElementById('edit-bio').value.trim();
-            const newAge = parseInt(document.getElementById('edit-age').value);
-            const newGender = document.getElementById('edit-gender').value;
-
-            const pfpFile = els.displays.editPfpInput.files[0];
-            const bannerFile = els.displays.editBannerInput.files[0];
-
-            let pfpUrl = currentUserProfile.pfpUrl;
-            let bannerUrl = currentUserProfile.bannerUrl;
-
-            if (!newUsername) return showToast("Username required", 'error');
-            if (newUsername.length > 20) return showToast("Username too long", 'error');
-
-            try {
-                if (pfpFile) pfpUrl = await processUpload(pfpFile);
-                if (bannerFile) bannerUrl = await processUpload(bannerFile);
-
-                await updateDoc(doc(db, "users", currentUser.uid), {
-                    username: newUsername,
-                    bio: newBio,
-                    age: newAge,
-                    gender: newGender,
-                    pfpUrl: pfpUrl,
-                    bannerUrl: bannerUrl || null
-                });
-                
-                showToast("Profile Saved!", 'success');
-                app.closeEditProfile();
-                app.openProfile(currentUser.uid); 
-            } catch (e) {
-                console.error(e);
-                showToast("Error saving profile", 'error');
-            }
-        },
+        switchTab: (tab) => { els.displays.feedback.classList.add('hidden'); if (tab === 'login') { els.forms.login.classList.remove('hidden'); els.forms.signup.classList.add('hidden'); els.tabs.login.className = "flex-1 py-1 text-sm font-medium rounded text-white bg-[#5865F2] transition"; els.tabs.signup.className = "flex-1 py-1 text-sm font-medium rounded text-gray-400 hover:text-gray-200 transition"; } else { els.forms.login.classList.add('hidden'); els.forms.signup.classList.remove('hidden'); els.tabs.signup.className = "flex-1 py-1 text-sm font-medium rounded text-white bg-[#5865F2] transition"; els.tabs.login.className = "flex-1 py-1 text-sm font-medium rounded text-gray-400 hover:text-gray-200 transition"; } },
+        logout: () => { if (currentUser && currentUserProfile && currentUserProfile.status !== 'invisible') { updateDoc(doc(db, "users", currentUser.uid), { status: 'offline' }).then(() => signOut(auth)); } else { signOut(auth); } },
+        setStatus: async (status) => { if (!currentUser) return; try { await updateDoc(doc(db, "users", currentUser.uid), { status: status }); els.displays.statusDropdown.classList.add('hidden'); } catch (e) { console.error("Status update failed", e); } },
+        openWallet: () => { if (currentUserProfile) { els.displays.walletCoins.textContent = formatNumber(currentUserProfile.coins || 0); els.displays.walletGems.textContent = formatNumber(currentUserProfile.gems || 0); } els.displays.walletModal.classList.remove('hidden'); },
+        closeWallet: () => { els.displays.walletModal.classList.add('hidden'); },
+        openProfile: async (uid) => { try { const snap = await getDoc(doc(db, "users", uid)); if(snap.exists()) { const data = snap.data(); document.getElementById('profile-pfp').src = data.pfpUrl || 'https://ui-avatars.com/api/?name=?'; const bannerEl = document.getElementById('profile-banner'); const bannerPlace = document.getElementById('profile-banner-placeholder'); if (data.bannerUrl) { bannerEl.src = data.bannerUrl; bannerEl.classList.remove('hidden'); bannerPlace.classList.add('hidden'); } else { bannerEl.classList.add('hidden'); bannerPlace.classList.remove('hidden'); } const nameEl = document.getElementById('profile-username'); nameEl.textContent = data.username; applyUsernameStyle(nameEl, data.usernameStyle); const cardEl = document.getElementById('profile-card-content'); cardEl.className = "rounded-xl shadow-2xl w-full max-w-sm overflow-hidden relative transform transition-all scale-100"; cardEl.classList.add(data.usercardStyle || 'card-theme-default'); const bioEl = document.getElementById('profile-bio'); const bioCont = document.getElementById('profile-bio-container'); if (data.bio) { bioEl.textContent = data.bio; bioCont.classList.remove('hidden'); } else { bioCont.classList.add('hidden'); } document.getElementById('profile-age').textContent = data.age || 'N/A'; document.getElementById('profile-gender').textContent = data.gender || 'N/A'; document.getElementById('profile-coins').textContent = formatNumber(data.coins || 0); document.getElementById('profile-gems').textContent = formatNumber(data.gems || 0); const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown'; document.getElementById('profile-joined').textContent = `Joined ${date}`; const status = (data.status || 'offline').toUpperCase(); const badge = document.getElementById('profile-status-badge'); badge.textContent = status; const editBtn = document.getElementById('profile-edit-btn'); if (currentUser && currentUser.uid === uid) editBtn.classList.remove('hidden'); else editBtn.classList.add('hidden'); els.displays.profileModal.classList.remove('hidden'); } } catch(e) { console.error(e); } },
+        openMyProfile: () => { if(currentUser) app.openProfile(currentUser.uid); },
+        closeProfile: () => { els.displays.profileModal.classList.add('hidden'); },
+        openEditProfile: () => { if (!currentUserProfile) return; document.getElementById('edit-username').value = currentUserProfile.username; document.getElementById('edit-bio').value = currentUserProfile.bio || ""; document.getElementById('edit-age').value = currentUserProfile.age; document.getElementById('edit-gender').value = currentUserProfile.gender; els.displays.editPfpPreview.src = currentUserProfile.pfpUrl || 'https://ui-avatars.com/api/?name=?'; els.displays.editBannerPreview.src = currentUserProfile.bannerUrl || ''; els.displays.profileModal.classList.add('hidden'); els.displays.editModal.classList.remove('hidden'); },
+        closeEditProfile: () => { els.displays.editModal.classList.add('hidden'); },
+        saveProfile: async () => { if(!currentUser) return; const newUsername = document.getElementById('edit-username').value.trim(); const newBio = document.getElementById('edit-bio').value.trim(); const newAge = parseInt(document.getElementById('edit-age').value); const newGender = document.getElementById('edit-gender').value; const pfpFile = els.displays.editPfpInput.files[0]; const bannerFile = els.displays.editBannerInput.files[0]; let pfpUrl = currentUserProfile.pfpUrl; let bannerUrl = currentUserProfile.bannerUrl; if (!newUsername) return showToast("Username required", 'error'); if (newUsername.length > 20) return showToast("Username too long", 'error'); try { if (pfpFile) pfpUrl = await processUpload(pfpFile); if (bannerFile) bannerUrl = await processUpload(bannerFile); await updateDoc(doc(db, "users", currentUser.uid), { username: newUsername, bio: newBio, age: newAge, gender: newGender, pfpUrl: pfpUrl, bannerUrl: bannerUrl || null }); showToast("Profile Saved!", 'success'); app.closeEditProfile(); app.openProfile(currentUser.uid); } catch (e) { console.error(e); showToast("Error saving profile", 'error'); } },
+        
         // --- Customization Menu Logic ---
         openCustomize: () => {
             if(!currentUserProfile) return;
@@ -997,14 +814,29 @@
             tempCustState.effect = style.effect || 'effect-none';
             tempCustState.listStyle = currentUserProfile.listStyle || 'list-style-default';
             tempCustState.cardTheme = currentUserProfile.usercardStyle || 'card-theme-default';
+            tempCustState.messageColor = (currentUserProfile.messageStyle && currentUserProfile.messageStyle.color) ? currentUserProfile.messageStyle.color : '#dbdee1';
+            
+            // Custom List Style logic
+            if (currentUserProfile.customListStyle) {
+                tempCustState.customList = currentUserProfile.customListStyle;
+            } else {
+                tempCustState.customList = { bg: '#2b2d31', border: '#1e1f22', text: '#ffffff' };
+            }
 
             if (!tempCustState.font) tempCustState.font = 'font-default';
 
+            // Set UI inputs
             document.getElementById('cust-color').value = tempCustState.color;
             const fontSelect = document.getElementById('cust-font');
             fontSelect.value = tempCustState.font;
             if (!fontSelect.value) { fontSelect.value = 'font-default'; tempCustState.font = 'font-default'; }
             
+            // Set Custom inputs
+            document.getElementById('cust-list-bg').value = tempCustState.customList.bg;
+            document.getElementById('cust-list-border').value = tempCustState.customList.border;
+            document.getElementById('cust-list-text').value = tempCustState.customList.text;
+            document.getElementById('cust-msg-color').value = tempCustState.messageColor;
+
             generateEffectGrid();
             generateListStyleGrid();
             generateCardThemeGrid();
@@ -1013,11 +845,9 @@
             app.switchCustTab('username');
             els.displays.custModal.classList.remove('hidden');
         },
-        closeCustomize: () => {
-            els.displays.custModal.classList.add('hidden');
-        },
+        closeCustomize: () => { els.displays.custModal.classList.add('hidden'); },
         switchCustTab: (tab) => {
-            const tabs = ['username', 'list', 'usercard'];
+            const tabs = ['username', 'list', 'messages', 'usercard'];
             tabs.forEach(t => {
                 const el = document.getElementById(`cust-tab-${t}`);
                 const view = document.getElementById(`cust-view-${t}`);
@@ -1042,14 +872,32 @@
         },
         setListStyle: (style) => {
             tempCustState.listStyle = style;
+            const creator = document.getElementById('custom-list-creator');
+            if (style === 'custom') {
+                creator.classList.remove('hidden');
+                // Select custom button
+                document.getElementById('btn-custom-list').classList.add('cust-active');
+            } else {
+                creator.classList.add('hidden');
+                document.getElementById('btn-custom-list').classList.remove('cust-active');
+            }
             updateCustPreview();
             renderSelection('list-style-grid', style);
         },
         saveCustomization: async () => {
             if(!currentUser) return;
             try {
+                // Update final state from inputs
                 tempCustState.color = document.getElementById('cust-color').value;
                 tempCustState.font = document.getElementById('cust-font').value || 'font-default';
+                tempCustState.messageColor = document.getElementById('cust-msg-color').value;
+                
+                // If custom list is selected, read values
+                if (tempCustState.listStyle === 'custom') {
+                    tempCustState.customList.bg = document.getElementById('cust-list-bg').value;
+                    tempCustState.customList.border = document.getElementById('cust-list-border').value;
+                    tempCustState.customList.text = document.getElementById('cust-list-text').value;
+                }
 
                 await updateDoc(doc(db, "users", currentUser.uid), {
                     usernameStyle: {
@@ -1058,6 +906,8 @@
                         effect: tempCustState.effect
                     },
                     listStyle: tempCustState.listStyle,
+                    customListStyle: tempCustState.customList,
+                    messageStyle: { color: tempCustState.messageColor },
                     usercardStyle: tempCustState.cardTheme
                 });
                 showToast("Styles updated!", "success");
@@ -1070,93 +920,32 @@
     };
 
     function generateEffectGrid() {
-        const effects = [
-            { id: 'effect-none', label: 'None' },
-            { id: 'effect-outline', label: 'Outline' },
-            { id: 'effect-outline-thick', label: 'Thick Outline' },
-            { id: 'effect-shadow', label: 'Shadow' },
-            { id: 'effect-shadow-soft', label: 'Soft Shadow' },
-            { id: 'effect-glow', label: 'Glow' },
-            { id: 'effect-glow-strong', label: 'Strong Glow' },
-            { id: 'effect-3d', label: '3D Punch' },
-            { id: 'effect-3d-retro', label: '3D Retro' },
-            { id: 'effect-3d-layers', label: '3D Layers' },
-            { id: 'effect-rainbow', label: 'Rainbow' },
-            { id: 'effect-gradient-gold', label: 'Gold' },
-            { id: 'effect-gradient-ocean', label: 'Ocean' },
-            { id: 'effect-gradient-sunset', label: 'Sunset' },
-            { id: 'effect-gradient-fire', label: 'Fire' },
-            { id: 'effect-gradient-neon', label: 'Neon' },
-            { id: 'effect-gradient-berry', label: 'Berry' },
-            { id: 'effect-gradient-mint', label: 'Mint' },
-            { id: 'effect-gradient-plasma', label: 'Plasma' },
-            { id: 'effect-gradient-chrome', label: 'Chrome' },
-            { id: 'effect-anim-shine', label: 'Shine' },
-            { id: 'effect-anim-pulse', label: 'Pulse' },
-            { id: 'effect-anim-bounce', label: 'Bounce' },
-            { id: 'effect-anim-shake', label: 'Shake' },
-            { id: 'effect-anim-flicker', label: 'Flicker' },
-            { id: 'effect-glitch', label: 'Glitch' },
-            { id: 'effect-neon-blue', label: 'Blue Neon' },
-            { id: 'effect-neon-green', label: 'Green Neon' },
-            { id: 'effect-matrix', label: 'Matrix' },
-            { id: 'effect-fire', label: 'Real Fire' },
-            { id: 'effect-ice', label: 'Ice' },
-            { id: 'effect-retro-game', label: '8-Bit' },
-            { id: 'effect-comic-pop', label: 'Comic Pop' },
-            { id: 'effect-mirror', label: 'Mirror' },
-            { id: 'effect-spaced', label: 'Spaced' },
-            { id: 'effect-strikethrough', label: 'Strike' },
-            { id: 'effect-underline-wavy', label: 'Wavy' },
-            { id: 'effect-blur', label: 'Ghost' },
-            { id: 'effect-smoke', label: 'Smoke' },
-        ];
+        const effects = [ { id: 'effect-none', label: 'None' }, { id: 'effect-outline', label: 'Outline' }, { id: 'effect-outline-thick', label: 'Thick Outline' }, { id: 'effect-shadow', label: 'Shadow' }, { id: 'effect-shadow-soft', label: 'Soft Shadow' }, { id: 'effect-glow', label: 'Glow' }, { id: 'effect-glow-strong', label: 'Strong Glow' }, { id: 'effect-3d', label: '3D Punch' }, { id: 'effect-3d-retro', label: '3D Retro' }, { id: 'effect-3d-layers', label: '3D Layers' }, { id: 'effect-rainbow', label: 'Rainbow' }, { id: 'effect-gradient-gold', label: 'Gold' }, { id: 'effect-gradient-ocean', label: 'Ocean' }, { id: 'effect-gradient-sunset', label: 'Sunset' }, { id: 'effect-gradient-fire', label: 'Fire' }, { id: 'effect-gradient-neon', label: 'Neon' }, { id: 'effect-gradient-berry', label: 'Berry' }, { id: 'effect-gradient-mint', label: 'Mint' }, { id: 'effect-gradient-plasma', label: 'Plasma' }, { id: 'effect-gradient-chrome', label: 'Chrome' }, { id: 'effect-anim-shine', label: 'Shine' }, { id: 'effect-anim-pulse', label: 'Pulse' }, { id: 'effect-anim-bounce', label: 'Bounce' }, { id: 'effect-anim-shake', label: 'Shake' }, { id: 'effect-anim-flicker', label: 'Flicker' }, { id: 'effect-glitch', label: 'Glitch' }, { id: 'effect-neon-blue', label: 'Blue Neon' }, { id: 'effect-neon-green', label: 'Green Neon' }, { id: 'effect-matrix', label: 'Matrix' }, { id: 'effect-fire', label: 'Real Fire' }, { id: 'effect-ice', label: 'Ice' }, { id: 'effect-retro-game', label: '8-Bit' }, { id: 'effect-comic-pop', label: 'Comic Pop' }, { id: 'effect-mirror', label: 'Mirror' }, { id: 'effect-spaced', label: 'Spaced' }, { id: 'effect-strikethrough', label: 'Strike' }, { id: 'effect-underline-wavy', label: 'Wavy' }, { id: 'effect-blur', label: 'Ghost' }, { id: 'effect-smoke', label: 'Smoke' } ];
         const grid = document.getElementById('effect-grid');
-        grid.innerHTML = effects.map(e => `
-            <button onclick="app.setCustEffect('${e.id}')" id="btn-${e.id}" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 transition ${e.id === tempCustState.effect ? 'cust-active' : ''}">
-                <span class="${e.id}" data-text="${e.label}">${e.label}</span>
-            </button>
-        `).join('');
+        grid.innerHTML = effects.map(e => ` <button onclick="app.setCustEffect('${e.id}')" id="btn-${e.id}" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 transition ${e.id === tempCustState.effect ? 'cust-active' : ''}"> <span class="${e.id}" data-text="${e.label}">${e.label}</span> </button> `).join('');
     }
 
     function generateListStyleGrid() {
-        const styles = [
-            { id: 'list-style-default', label: 'Default' },
-            { id: 'list-style-glass', label: 'Glass' },
-            { id: 'list-style-neon', label: 'Neon Box' },
-            { id: 'list-style-gold', label: 'Gold Edge' },
-            { id: 'list-style-fire', label: 'Fire Base' },
-            { id: 'list-style-royal', label: 'Royal Purple' },
-            { id: 'list-style-outline', label: 'Dashed Outline' },
-            { id: 'list-style-compact', label: 'Compact' },
-            { id: 'list-style-bubble', label: 'Bubble' }
-        ];
-        document.getElementById('list-style-grid').innerHTML = styles.map(s => `
-            <button onclick="app.setListStyle('${s.id}')" id="btn-${s.id}" class="h-12 rounded bg-[#202225] border border-transparent hover:border-white/20 text-xs font-bold ${s.id === tempCustState.listStyle ? 'cust-active' : ''}">${s.label}</button>
-        `).join('');
+        const styles = [ { id: 'list-style-default', label: 'Default' }, { id: 'list-style-glass', label: 'Glass' }, { id: 'list-style-neon', label: 'Neon Box' }, { id: 'list-style-gold', label: 'Gold Edge' }, { id: 'list-style-fire', label: 'Fire Base' }, { id: 'list-style-royal', label: 'Royal Purple' }, { id: 'list-style-outline', label: 'Dashed Outline' }, { id: 'list-style-compact', label: 'Compact' }, { id: 'list-style-bubble', label: 'Bubble' } ];
+        document.getElementById('list-style-grid').innerHTML = styles.map(s => ` <button onclick="app.setListStyle('${s.id}')" id="btn-${s.id}" class="h-12 rounded bg-[#202225] border border-transparent hover:border-white/20 text-xs font-bold ${s.id === tempCustState.listStyle ? 'cust-active' : ''}">${s.label}</button> `).join('');
+        // Ensure Custom button state on open
+        const customBtn = document.getElementById('btn-custom-list');
+        if (tempCustState.listStyle === 'custom') customBtn.classList.add('cust-active');
+        else customBtn.classList.remove('cust-active');
+        
+        const creator = document.getElementById('custom-list-creator');
+        if (tempCustState.listStyle === 'custom') creator.classList.remove('hidden');
+        else creator.classList.add('hidden');
     }
 
     function generateCardThemeGrid() {
-        const themes = [
-            { id: 'card-theme-default', label: 'Default' },
-            { id: 'card-theme-obsidian', label: 'Obsidian' },
-            { id: 'card-theme-sunset', label: 'Sunset' },
-            { id: 'card-theme-ocean', label: 'Ocean' },
-            { id: 'card-theme-forest', label: 'Forest' },
-            { id: 'card-theme-gold', label: 'Gold' },
-            { id: 'card-theme-cyber', label: 'Cyberpunk' },
-            { id: 'card-theme-matrix', label: 'Matrix' },
-            { id: 'card-theme-royal', label: 'Royal' },
-            { id: 'card-theme-galaxy', label: 'Galaxy' },
-            { id: 'card-theme-minimal', label: 'Minimal Light' }
-        ];
-        document.getElementById('card-theme-grid').innerHTML = themes.map(t => `
-            <button onclick="app.setCustCard('${t.id}')" id="btn-${t.id}" class="h-12 rounded ${t.id} text-xs font-bold border-2 border-transparent hover:border-white/50 ${t.id === tempCustState.cardTheme ? 'cust-active' : ''}">${t.label}</button>
-        `).join('');
+        const themes = [ { id: 'card-theme-default', label: 'Default' }, { id: 'card-theme-obsidian', label: 'Obsidian' }, { id: 'card-theme-sunset', label: 'Sunset' }, { id: 'card-theme-ocean', label: 'Ocean' }, { id: 'card-theme-forest', label: 'Forest' }, { id: 'card-theme-gold', label: 'Gold' }, { id: 'card-theme-cyber', label: 'Cyberpunk' }, { id: 'card-theme-matrix', label: 'Matrix' }, { id: 'card-theme-royal', label: 'Royal' }, { id: 'card-theme-galaxy', label: 'Galaxy' }, { id: 'card-theme-minimal', label: 'Minimal Light' } ];
+        document.getElementById('card-theme-grid').innerHTML = themes.map(t => ` <button onclick="app.setCustCard('${t.id}')" id="btn-${t.id}" class="h-12 rounded ${t.id} text-xs font-bold border-2 border-transparent hover:border-white/50 ${t.id === tempCustState.cardTheme ? 'cust-active' : ''}">${t.label}</button> `).join('');
     }
 
     function renderSelection(containerId, activeId) {
         const container = document.getElementById(containerId);
+        if(!container) return;
         Array.from(container.children).forEach(btn => {
             if (btn.id === `btn-${activeId}`) btn.classList.add('cust-active');
             else btn.classList.remove('cust-active');
@@ -1165,39 +954,15 @@
 
     // --- Styling Helpers ---
     function applyUsernameStyle(el, style) {
-        if (!style) {
-            el.className = "font-bold text-white text-lg font-default"; 
-            el.style.color = "";
-            el.style.textShadow = "";
-            el.style.webkitTextStroke = "";
-            return;
-        }
-
-        el.className = `font-bold text-lg ${style.font || 'font-default'}`;
-        el.style.color = "";
-        el.style.textShadow = "";
-        el.style.webkitTextStroke = "";
-        el.removeAttribute('data-text');
-
+        if (!style) { el.className = "font-bold text-white text-lg font-default"; el.style.color = ""; el.style.textShadow = ""; el.style.webkitTextStroke = ""; return; }
+        el.className = `font-bold text-lg ${style.font || 'font-default'}`; el.style.color = ""; el.style.textShadow = ""; el.style.webkitTextStroke = ""; el.removeAttribute('data-text');
         const fx = style.effect || 'effect-none';
-        
-        // Add effect class
         el.classList.add(fx);
-
-        // Apply dynamic color where needed
-        if (['effect-outline', 'effect-outline-thick', 'effect-glow', 'effect-glow-strong'].includes(fx)) {
-            el.style.color = style.color;
-        } else if (fx.startsWith('effect-gradient') || fx.startsWith('effect-anim') || fx === 'effect-rainbow' || fx === 'effect-fire') {
-            // Gradient/Anim handles color
-        } else if (fx === 'effect-glitch') {
-            el.setAttribute('data-text', el.textContent);
-            el.style.color = style.color;
-        } else if (fx.startsWith('effect-neon') || fx === 'effect-ice') {
-            // Fixed colors
-        } else {
-            // Standard solid color
-            el.style.color = style.color;
-        }
+        if (['effect-outline', 'effect-outline-thick', 'effect-glow', 'effect-glow-strong'].includes(fx)) { el.style.color = style.color; } 
+        else if (fx.startsWith('effect-gradient') || fx.startsWith('effect-anim') || fx === 'effect-rainbow' || fx === 'effect-fire') { /* Gradient/Anim handles color */ } 
+        else if (fx === 'effect-glitch') { el.setAttribute('data-text', el.textContent); el.style.color = style.color; } 
+        else if (fx.startsWith('effect-neon') || fx === 'effect-ice') { /* Fixed colors */ } 
+        else { el.style.color = style.color; }
     }
 
     function updateCustPreview() {
@@ -1207,290 +972,86 @@
         tempCustState.font = document.getElementById('cust-font').value || 'font-default';
         
         namePreview.className = "text-4xl"; 
-        applyUsernameStyle(namePreview, {
-            color: tempCustState.color,
-            font: tempCustState.font,
-            effect: tempCustState.effect
-        });
-        // Override for preview context
+        applyUsernameStyle(namePreview, { color: tempCustState.color, font: tempCustState.font, effect: tempCustState.effect });
         if (tempCustState.effect === 'effect-glitch') namePreview.setAttribute('data-text', "Your Name");
 
         // List Item
         const listPreview = document.getElementById('cust-list-preview');
-        listPreview.className = `flex items-center gap-3 p-2 rounded hover:bg-[#35373c] transition ${tempCustState.listStyle}`;
+        listPreview.style = ""; // Reset inline
+        if (tempCustState.listStyle === 'custom') {
+            tempCustState.customList.bg = document.getElementById('cust-list-bg').value;
+            tempCustState.customList.border = document.getElementById('cust-list-border').value;
+            tempCustState.customList.text = document.getElementById('cust-list-text').value;
+            
+            listPreview.className = "flex items-center gap-3 p-2 rounded hover:brightness-110 transition";
+            listPreview.style.backgroundColor = tempCustState.customList.bg;
+            listPreview.style.border = `1px solid ${tempCustState.customList.border}`;
+            
+            // Name color inside
+            const nameEl = listPreview.querySelector('.text-gray-200');
+            if(nameEl) {
+                nameEl.style.color = tempCustState.customList.text;
+                nameEl.classList.remove('text-gray-200');
+            }
+        } else {
+            listPreview.className = `flex items-center gap-3 p-2 rounded hover:bg-[#35373c] transition ${tempCustState.listStyle}`;
+            const nameEl = listPreview.querySelector('.text-sm');
+            if(nameEl) {
+                nameEl.style.color = "";
+                nameEl.classList.add('text-gray-200');
+            }
+        }
+
+        // Message Preview
+        const msgPreview = document.getElementById('cust-message-preview');
+        tempCustState.messageColor = document.getElementById('cust-msg-color').value;
+        msgPreview.style.color = tempCustState.messageColor;
 
         // Card
         const cardPreview = document.getElementById('cust-card-preview-box');
         cardPreview.className = `p-4 rounded-xl border h-32 flex items-center justify-center relative overflow-hidden transition-all shadow-lg ${tempCustState.cardTheme}`;
     }
     
-    ['cust-color', 'cust-font'].forEach(id => {
+    // Attach listeners
+    ['cust-color', 'cust-font', 'cust-list-bg', 'cust-list-border', 'cust-list-text', 'cust-msg-color'].forEach(id => {
         const el = document.getElementById(id);
         if(el) el.addEventListener('input', updateCustPreview);
     });
     
-    els.displays.editPfpInput.addEventListener('change', (e) => {
-        if(e.target.files[0]) els.displays.editPfpPreview.src = URL.createObjectURL(e.target.files[0]);
-    });
-    els.displays.editBannerInput.addEventListener('change', (e) => {
-        if(e.target.files[0]) els.displays.editBannerPreview.src = URL.createObjectURL(e.target.files[0]);
-    });
-
+    els.displays.editPfpInput.addEventListener('change', (e) => { if(e.target.files[0]) els.displays.editPfpPreview.src = URL.createObjectURL(e.target.files[0]); });
+    els.displays.editBannerInput.addEventListener('change', (e) => { if(e.target.files[0]) els.displays.editBannerPreview.src = URL.createObjectURL(e.target.files[0]); });
 
     // --- Toast System ---
-    function showToast(message, type = 'success') {
-        const toast = document.createElement('div');
-        const bgClass = type === 'success' ? 'bg-green-500/90' : 'bg-red-500/90';
-        toast.className = `px-6 py-2 rounded-full text-white font-bold shadow-lg mb-2 text-sm text-center toast-enter backdrop-blur-md ${bgClass}`;
-        toast.textContent = message;
-        els.displays.toastContainer.appendChild(toast);
-        setTimeout(() => {
-            toast.classList.remove('toast-enter');
-            toast.classList.add('toast-exit');
-            setTimeout(() => toast.remove(), 300);
-        }, 2500);
-    }
+    // (unchanged)
+    function showToast(message, type = 'success') { const toast = document.createElement('div'); const bgClass = type === 'success' ? 'bg-green-500/90' : 'bg-red-500/90'; toast.className = `px-6 py-2 rounded-full text-white font-bold shadow-lg mb-2 text-sm text-center toast-enter backdrop-blur-md ${bgClass}`; toast.textContent = message; els.displays.toastContainer.appendChild(toast); setTimeout(() => { toast.classList.remove('toast-enter'); toast.classList.add('toast-exit'); setTimeout(() => toast.remove(), 300); }, 2500); }
 
     // --- Event Listeners ---
+    document.addEventListener('click', (e) => { const dropdown = els.displays.statusDropdown; const trigger = document.getElementById('user-menu-trigger'); if (!dropdown.contains(e.target) && trigger && !trigger.contains(e.target)) { dropdown.classList.add('hidden'); } if (e.target === els.displays.walletModal) app.closeWallet(); if (e.target === els.displays.profileModal) app.closeProfile(); });
+    els.inputs.signupPfp.addEventListener('change', (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (ev) => { els.displays.pfpPreview.src = ev.target.result; els.displays.pfpPreview.classList.remove('hidden'); els.displays.pfpPlaceholder.classList.add('hidden'); }; reader.readAsDataURL(file); } });
 
-    document.addEventListener('click', (e) => {
-        const dropdown = els.displays.statusDropdown;
-        const trigger = document.getElementById('user-menu-trigger'); 
-        if (!dropdown.contains(e.target) && trigger && !trigger.contains(e.target)) {
-             dropdown.classList.add('hidden');
-        }
-        if (e.target === els.displays.walletModal) app.closeWallet();
-        if (e.target === els.displays.profileModal) app.closeProfile();
-    });
+    // --- Auth Handlers (unchanged) ---
+    els.forms.signup.addEventListener('submit', async (e) => { e.preventDefault(); const username = document.getElementById('signup-username').value; const email = document.getElementById('signup-email').value; const password = document.getElementById('signup-password').value; const age = parseInt(document.getElementById('signup-age').value); const gender = document.getElementById('signup-gender').value; const pfpFile = els.inputs.signupPfp.files[0]; if (age < 11 || age > 1000) return showError("Age must be between 11 and 1000."); toggleLoading(true); try { const userCredential = await createUserWithEmailAndPassword(auth, email, password); const user = userCredential.user; let pfpUrl = `https://ui-avatars.com/api/?name=${username}&background=random`; if (pfpFile) { try { pfpUrl = await processImage(pfpFile); } catch (e) {} } await setDoc(doc(db, "users", user.uid), { uid: user.uid, username, email, age, gender, pfpUrl, status: 'online', coins: 1000, gems: 10, lastDaily: 0, createdAt: serverTimestamp() }); try { await updateProfile(user, { displayName: username }); } catch(e){} } catch (err) { showError(err.message); } finally { toggleLoading(false); } });
+    els.forms.login.addEventListener('submit', async (e) => { e.preventDefault(); const email = document.getElementById('login-email').value; const password = document.getElementById('login-password').value; toggleLoading(true); try { await signInWithEmailAndPassword(auth, email, password); } catch (err) { showError(err.message); } finally { toggleLoading(false); } });
 
-    els.inputs.signupPfp.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                els.displays.pfpPreview.src = ev.target.result;
-                els.displays.pfpPreview.classList.remove('hidden');
-                els.displays.pfpPlaceholder.classList.add('hidden');
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    // --- Auth Handlers ---
-
-    els.forms.signup.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('signup-username').value;
-        const email = document.getElementById('signup-email').value;
-        const password = document.getElementById('signup-password').value;
-        const age = parseInt(document.getElementById('signup-age').value);
-        const gender = document.getElementById('signup-gender').value;
-        const pfpFile = els.inputs.signupPfp.files[0];
-
-        if (age < 11 || age > 1000) return showError("Age must be between 11 and 1000.");
-        
-        toggleLoading(true);
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-
-            let pfpUrl = `https://ui-avatars.com/api/?name=${username}&background=random`;
-            if (pfpFile) {
-                try { pfpUrl = await processImage(pfpFile); } catch (e) {}
-            }
-
-            await setDoc(doc(db, "users", user.uid), {
-                uid: user.uid,
-                username,
-                email,
-                age,
-                gender,
-                pfpUrl,
-                status: 'online', 
-                coins: 1000,
-                gems: 10,
-                lastDaily: 0,
-                createdAt: serverTimestamp()
-            });
-
-            try { await updateProfile(user, { displayName: username }); } catch(e){}
-
-        } catch (err) {
-            showError(err.message);
-        } finally {
-            toggleLoading(false);
-        }
-    });
-
-    els.forms.login.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-
-        toggleLoading(true);
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-        } catch (err) {
-            showError(err.message);
-        } finally {
-            toggleLoading(false);
-        }
-    });
-
-    // --- Main App Logic ---
-
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            currentUser = user;
-            try {
-                const docRef = doc(db, "users", user.uid);
-                
-                onSnapshot(docRef, (docSnap) => {
-                     if (docSnap.exists()) {
-                        currentUserProfile = docSnap.data();
-                        if (currentUserProfile.coins === undefined) updateDoc(docRef, {coins: 1000});
-                        if (currentUserProfile.gems === undefined) updateDoc(docRef, {gems: 10});
-
-                        const s = currentUserProfile.status || 'online';
-                        els.displays.headerStatusText.textContent = s.charAt(0).toUpperCase() + s.slice(1);
-                        
-                        els.displays.headerStatusDot.className = "absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-[3px] border-[#2b2d31]";
-                        if (s === 'online') els.displays.headerStatusDot.classList.add('status-online');
-                        else if (s === 'busy') els.displays.headerStatusDot.classList.add('status-busy');
-                        else if (s === 'dnd') els.displays.headerStatusDot.classList.add('status-dnd');
-                        else els.displays.headerStatusDot.classList.add('status-offline');
-
-                        if (!els.displays.walletModal.classList.contains('hidden')) {
-                            els.displays.walletCoins.textContent = formatNumber(currentUserProfile.coins || 0);
-                            els.displays.walletGems.textContent = formatNumber(currentUserProfile.gems || 0);
-                        }
-                    }
-                });
-
-                const initSnap = await getDoc(docRef);
-                if (initSnap.exists()) {
-                    const data = initSnap.data();
-                    if (data.status === 'offline') await updateDoc(docRef, { status: 'online' });
-                }
-                
-            } catch (e) { console.error(e); }
-
-            renderHeader();
-            
-            if (user.email === 'dev@gmail.com') els.displays.invisibleBtn.classList.remove('hidden');
-            else els.displays.invisibleBtn.classList.add('hidden');
-
-            els.authView.classList.add('hidden');
-            els.chatView.classList.remove('hidden');
-            els.chatView.classList.add('flex');
-            
-            startChatListener();
-            startUsersListener();
-        } else {
-            if (unsubscribeMessages) unsubscribeMessages();
-            if (unsubscribeUsers) unsubscribeUsers();
-            currentUser = null;
-            currentUserProfile = null;
-            els.chatView.classList.add('hidden');
-            els.chatView.classList.remove('flex');
-            els.authView.classList.remove('hidden');
-        }
-    });
-
-    function renderHeader() {
-        if (!currentUserProfile) return;
-        els.displays.headerName.textContent = currentUserProfile.username;
-        if (currentUserProfile.pfpUrl) els.displays.headerPfp.src = currentUserProfile.pfpUrl;
-    }
+    // --- Main App Logic (unchanged) ---
+    onAuthStateChanged(auth, async (user) => { if (user) { currentUser = user; try { const docRef = doc(db, "users", user.uid); onSnapshot(docRef, (docSnap) => { if (docSnap.exists()) { currentUserProfile = docSnap.data(); if (currentUserProfile.coins === undefined) updateDoc(docRef, {coins: 1000}); if (currentUserProfile.gems === undefined) updateDoc(docRef, {gems: 10}); const s = currentUserProfile.status || 'online'; els.displays.headerStatusText.textContent = s.charAt(0).toUpperCase() + s.slice(1); els.displays.headerStatusDot.className = "absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-[3px] border-[#2b2d31]"; if (s === 'online') els.displays.headerStatusDot.classList.add('status-online'); else if (s === 'busy') els.displays.headerStatusDot.classList.add('status-busy'); else if (s === 'dnd') els.displays.headerStatusDot.classList.add('status-dnd'); else els.displays.headerStatusDot.classList.add('status-offline'); if (!els.displays.walletModal.classList.contains('hidden')) { els.displays.walletCoins.textContent = formatNumber(currentUserProfile.coins || 0); els.displays.walletGems.textContent = formatNumber(currentUserProfile.gems || 0); } } }); const initSnap = await getDoc(docRef); if (initSnap.exists()) { const data = initSnap.data(); if (data.status === 'offline') await updateDoc(docRef, { status: 'online' }); } } catch (e) { console.error(e); } renderHeader(); if (user.email === 'dev@gmail.com') els.displays.invisibleBtn.classList.remove('hidden'); else els.displays.invisibleBtn.classList.add('hidden'); els.authView.classList.add('hidden'); els.chatView.classList.remove('hidden'); els.chatView.classList.add('flex'); startChatListener(); startUsersListener(); } else { if (unsubscribeMessages) unsubscribeMessages(); if (unsubscribeUsers) unsubscribeUsers(); currentUser = null; currentUserProfile = null; els.chatView.classList.add('hidden'); els.chatView.classList.remove('flex'); els.authView.classList.remove('hidden'); } });
+    function renderHeader() { if (!currentUserProfile) return; els.displays.headerName.textContent = currentUserProfile.username; if (currentUserProfile.pfpUrl) els.displays.headerPfp.src = currentUserProfile.pfpUrl; }
 
     // --- Chat System ---
-
-    function startChatListener() {
-        els.displays.msgContainer.innerHTML = ''; 
-        const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
-        unsubscribeMessages = onSnapshot(q, (snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === "added") renderMessage(change.doc.data());
-            });
-            requestAnimationFrame(() => els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight);
-        });
-    }
+    function startChatListener() { els.displays.msgContainer.innerHTML = ''; const q = query(collection(db, "messages"), orderBy("createdAt", "asc")); unsubscribeMessages = onSnapshot(q, (snapshot) => { snapshot.docChanges().forEach((change) => { if (change.type === "added") renderMessage(change.doc.data()); }); requestAnimationFrame(() => els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight); }); }
 
     function renderMessage(msg) {
         const div = document.createElement('div');
         
         if (['allin', 'flip', 'roll', 'slots', 'rps', 'guess'].includes(msg.type)) {
-             const isWin = msg.result === 'WON';
-            const colorClass = isWin ? 'text-green-400' : 'text-red-400';
-            const borderColor = isWin ? 'border-green-500/30' : 'border-red-500/30';
-            const bgGradient = isWin ? 'bg-gradient-to-br from-green-900/20 to-transparent' : 'bg-gradient-to-br from-red-900/20 to-transparent';
-
-            let actionText = "";
-            let detailsText = "";
-            
-            if (msg.type === 'allin') actionText = "went ALL IN";
-            if (msg.type === 'flip') actionText = `flipped a coin`;
-            if (msg.type === 'roll') actionText = `rolled the dice`;
-            if (msg.type === 'slots') actionText = `pulled the slots`;
-            if (msg.type === 'rps') actionText = `played Rock Paper Scissors`;
-            if (msg.type === 'guess') actionText = `guessed a number`;
-
-            if (msg.details) detailsText = `<div class="text-sm font-mono text-gray-300 mt-2 bg-[#1e1f22]/50 px-2 py-1 rounded">${msg.details}</div>`;
-
-            div.className = "flex justify-center my-4 animate-fade-in";
-            div.innerHTML = `
-                <div class="relative flex flex-col items-center p-6 rounded-xl border ${borderColor} ${bgGradient} max-w-sm w-full backdrop-blur-sm">
-                    <img src="${msg.pfpUrl}" onclick="app.openProfile('${msg.uid}')" class="w-16 h-16 rounded-full border-2 border-[#2b2d31] shadow-lg mb-2 object-cover cursor-pointer hover:opacity-80 transition">
-                    <div onclick="app.openProfile('${msg.uid}')" class="text-white font-bold text-lg mb-1 cursor-pointer hover:underline">${escapeHtml(msg.username)}</div>
-                    <div class="text-gray-400 text-xs uppercase tracking-widest mb-2">${actionText} with ${msg.currency === 'coins' ? 'Coins' : 'Gems'}</div>
-                    ${detailsText}
-                    <div class="text-3xl font-black ${colorClass} my-2 tracking-tighter">${msg.result}</div>
-                    <div class="flex items-center gap-2 text-sm text-gray-300">
-                        ${isWin ? `<span>Won</span>` : `<span>Lost</span>`}
-                        <span class="font-mono font-bold text-white">${formatNumber(msg.amount)}</span>
-                    </div>
-                </div>
-            `;
+             // ... (Gambling msgs unchanged) ...
+             const isWin = msg.result === 'WON'; const colorClass = isWin ? 'text-green-400' : 'text-red-400'; const borderColor = isWin ? 'border-green-500/30' : 'border-red-500/30'; const bgGradient = isWin ? 'bg-gradient-to-br from-green-900/20 to-transparent' : 'bg-gradient-to-br from-red-900/20 to-transparent'; let actionText = ""; let detailsText = ""; if (msg.type === 'allin') actionText = "went ALL IN"; if (msg.type === 'flip') actionText = `flipped a coin`; if (msg.type === 'roll') actionText = `rolled the dice`; if (msg.type === 'slots') actionText = `pulled the slots`; if (msg.type === 'rps') actionText = `played Rock Paper Scissors`; if (msg.type === 'guess') actionText = `guessed a number`; if (msg.details) detailsText = `<div class="text-sm font-mono text-gray-300 mt-2 bg-[#1e1f22]/50 px-2 py-1 rounded">${msg.details}</div>`; div.className = "flex justify-center my-4 animate-fade-in"; div.innerHTML = ` <div class="relative flex flex-col items-center p-6 rounded-xl border ${borderColor} ${bgGradient} max-w-sm w-full backdrop-blur-sm"> <img src="${msg.pfpUrl}" onclick="app.openProfile('${msg.uid}')" class="w-16 h-16 rounded-full border-2 border-[#2b2d31] shadow-lg mb-2 object-cover cursor-pointer hover:opacity-80 transition"> <div onclick="app.openProfile('${msg.uid}')" class="text-white font-bold text-lg mb-1 cursor-pointer hover:underline">${escapeHtml(msg.username)}</div> <div class="text-gray-400 text-xs uppercase tracking-widest mb-2">${actionText} with ${msg.currency === 'coins' ? 'Coins' : 'Gems'}</div> ${detailsText} <div class="text-3xl font-black ${colorClass} my-2 tracking-tighter">${msg.result}</div> <div class="flex items-center gap-2 text-sm text-gray-300"> ${isWin ? `<span>Won</span>` : `<span>Lost</span>`} <span class="font-mono font-bold text-white">${formatNumber(msg.amount)}</span> </div> </div> `;
         } else if (msg.type === 'bank') {
-             div.className = "flex justify-center my-4 animate-fade-in";
-            div.innerHTML = `
-                <div class="relative flex flex-col items-center p-6 rounded-xl border border-blue-500/30 bg-gradient-to-br from-blue-900/20 to-transparent max-w-sm w-full backdrop-blur-sm">
-                    <img src="${msg.pfpUrl}" onclick="app.openProfile('${msg.uid}')" class="w-16 h-16 rounded-full border-2 border-[#2b2d31] shadow-lg mb-2 object-cover cursor-pointer hover:opacity-80 transition">
-                    <div onclick="app.openProfile('${msg.uid}')" class="text-white font-bold text-lg mb-1 cursor-pointer hover:underline">${escapeHtml(msg.username)}</div>
-                    <div class="text-blue-400 text-xs font-bold uppercase tracking-widest mb-4">Bank Statement</div>
-                    <div class="w-full space-y-2">
-                        <div class="flex justify-between items-center bg-[#1e1f22]/50 p-3 rounded">
-                            <span class="text-yellow-500 font-bold uppercase text-xs">Coins</span>
-                            <span class="text-white font-mono font-bold">${formatNumber(msg.coins)}</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-[#1e1f22]/50 p-3 rounded">
-                            <span class="text-purple-400 font-bold uppercase text-xs">Gems</span>
-                            <span class="text-white font-mono font-bold">${formatNumber(msg.gems)}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
+             // ... (Bank msg unchanged) ...
+             div.className = "flex justify-center my-4 animate-fade-in"; div.innerHTML = ` <div class="relative flex flex-col items-center p-6 rounded-xl border border-blue-500/30 bg-gradient-to-br from-blue-900/20 to-transparent max-w-sm w-full backdrop-blur-sm"> <img src="${msg.pfpUrl}" onclick="app.openProfile('${msg.uid}')" class="w-16 h-16 rounded-full border-2 border-[#2b2d31] shadow-lg mb-2 object-cover cursor-pointer hover:opacity-80 transition"> <div onclick="app.openProfile('${msg.uid}')" class="text-white font-bold text-lg mb-1 cursor-pointer hover:underline">${escapeHtml(msg.username)}</div> <div class="text-blue-400 text-xs font-bold uppercase tracking-widest mb-4">Bank Statement</div> <div class="w-full space-y-2"> <div class="flex justify-between items-center bg-[#1e1f22]/50 p-3 rounded"> <span class="text-yellow-500 font-bold uppercase text-xs">Coins</span> <span class="text-white font-mono font-bold">${formatNumber(msg.coins)}</span> </div> <div class="flex justify-between items-center bg-[#1e1f22]/50 p-3 rounded"> <span class="text-purple-400 font-bold uppercase text-xs">Gems</span> <span class="text-white font-mono font-bold">${formatNumber(msg.gems)}</span> </div> </div> </div> `;
         } else if (msg.type === 'leaderboard') {
-             let rows = '';
-             msg.topUsers.forEach((u, i) => {
-                 rows += `
-                    <div class="flex items-center justify-between py-1 border-b border-white/10 last:border-0">
-                        <div class="flex items-center gap-2">
-                            <span class="font-bold text-gray-400 text-lg">#${i+1}</span>
-                            <img src="${u.pfpUrl}" onclick="app.openProfile('${u.uid}')" class="w-6 h-6 rounded-full cursor-pointer hover:opacity-80">
-                            <span class="text-white font-medium cursor-pointer hover:underline" onclick="app.openProfile('${u.uid}')">${escapeHtml(u.username)}</span>
-                        </div>
-                        <span class="text-yellow-500 font-mono">${formatNumber(u.coins)} 🪙</span>
-                    </div>
-                 `;
-             });
-             div.className = "flex justify-center my-4 animate-fade-in";
-             div.innerHTML = `
-                <div class="w-full max-w-md p-4 bg-gradient-to-r from-yellow-900/40 to-[#2b2d31] rounded-lg border border-yellow-500/30">
-                    <h3 class="text-yellow-400 font-bold uppercase tracking-widest mb-3 text-center">🏆 Richest Players 🏆</h3>
-                    ${rows}
-                </div>
-             `;
+             // ... (Leaderboard msg unchanged) ...
+             let rows = ''; msg.topUsers.forEach((u, i) => { rows += ` <div class="flex items-center justify-between py-1 border-b border-white/10 last:border-0"> <div class="flex items-center gap-2"> <span class="font-bold text-gray-400 text-lg">#${i+1}</span> <img src="${u.pfpUrl}" onclick="app.openProfile('${u.uid}')" class="w-6 h-6 rounded-full cursor-pointer hover:opacity-80"> <span class="text-white font-medium cursor-pointer hover:underline" onclick="app.openProfile('${u.uid}')">${escapeHtml(u.username)}</span> </div> <span class="text-yellow-500 font-mono">${formatNumber(u.coins)} 🪙</span> </div> `; }); div.className = "flex justify-center my-4 animate-fade-in"; div.innerHTML = ` <div class="w-full max-w-md p-4 bg-gradient-to-r from-yellow-900/40 to-[#2b2d31] rounded-lg border border-yellow-500/30"> <h3 class="text-yellow-400 font-bold uppercase tracking-widest mb-3 text-center">🏆 Richest Players 🏆</h3> ${rows} </div> `;
         } else {
             div.className = "flex gap-4 pl-2 pr-4 py-1 hover:bg-[#2e3035] -mx-2 rounded group animate-fade-in";
             const time = msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now';
@@ -1501,6 +1062,12 @@
             nameSpan.onclick = () => app.openProfile(msg.uid);
             if (msg.usernameStyle) applyUsernameStyle(nameSpan, msg.usernameStyle);
 
+            // Message Color Application
+            let msgStyle = "";
+            if (msg.messageStyle && msg.messageStyle.color) {
+                msgStyle = `style="color: ${msg.messageStyle.color}"`;
+            }
+
             div.innerHTML = `
                 <div class="flex-shrink-0 cursor-pointer mt-0.5" onclick="app.openProfile('${msg.uid}')">
                     <img src="${msg.pfpUrl || 'https://ui-avatars.com/api/?name=?'}" class="w-10 h-10 rounded-full hover:opacity-80 transition object-cover">
@@ -1509,7 +1076,7 @@
                     <div class="flex items-baseline gap-2" id="msg-header-${msg.createdAt?.seconds || Date.now()}">
                         <span class="text-[10px] text-gray-400">${time}</span>
                     </div>
-                    <p class="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap break-words">${escapeHtml(msg.text)}</p>
+                    <p class="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap break-words" ${msgStyle}>${escapeHtml(msg.text)}</p>
                 </div>
             `;
             div.querySelector(`div[id^="msg-header-"]`).prepend(nameSpan);
@@ -1523,10 +1090,7 @@
         if (!text) return;
         els.inputs.msg.value = '';
 
-        if (text.startsWith('/')) {
-            handleCommand(text);
-            return;
-        }
+        if (text.startsWith('/')) { handleCommand(text); return; }
 
         try {
             await addDoc(collection(db, "messages"), {
@@ -1535,198 +1099,40 @@
                 username: currentUserProfile.username,
                 pfpUrl: currentUserProfile.pfpUrl,
                 usernameStyle: currentUserProfile.usernameStyle || null,
+                messageStyle: currentUserProfile.messageStyle || { color: '#dbdee1' }, // Save current msg color
                 createdAt: serverTimestamp()
             });
         } catch (err) { console.error(err); }
     });
 
+    // ... (Commands and Utils same as before) ...
     // --- Command System ---
-
-    async function handleCommand(cmdString) {
-        const parts = cmdString.split(' ');
-        const command = parts[0].toLowerCase();
-        const args = parts.slice(1);
-
-        if (command === '/cmds') { showHelp(); return; }
-        if (command === '/prefixs' || command === '/prefixes') { showPrefixes(); return; }
-        if (command === '/top') { await executeTop(); return; }
-        if (command === '/daily') { await executeDaily(); return; }
-        if (command === '/convert') {
-            if (args.length < 2) return showToast("Usage: /convert {c/g} {amount}", 'error');
-            await executeConvert(args[0], args[1]);
-            return;
-        }
-        if (command === '/pfp' && args[0] === 'change') {
-            app.openEditProfile();
-            return;
-        }
-        if (command === '/pay') {
-            if (args.length < 3) return showToast("Usage: /pay {username} {amount} {c/g}", 'error');
-            await executePay(args[0], args[1], args[2]);
-            return;
-        }
-        if (['/allin', '/flip', '/roll', '/slots', '/rps', '/guess', '/bank'].includes(command)) {
-            if (command === '/bank') { await executeBank(); showToast("Action complete", 'success'); return; }
-            let amountIdx = 0; let currIdx = 1; let extraArg = null;
-            if (command === '/rps' || command === '/guess') { amountIdx = 1; currIdx = 2; extraArg = args[0]; }
-            let amountStr = args[amountIdx]; let currencyStr = args[currIdx];
-            if (command === '/allin') { amountStr = 'all'; currencyStr = args[0]; }
-            await executeGamble(command, amountStr, currencyStr, extraArg);
-        } else {
-            showToast("Invalid Command", 'error');
-        }
-    }
-
-    function showHelp() {
-        const div = document.createElement('div');
-        div.className = "my-4 mx-4 p-4 bg-[#2b2d31] rounded-lg border border-[#1e1f22] text-sm shadow-xl";
-        div.innerHTML = `
-            <h3 class="font-bold text-white mb-3 text-lg border-b border-gray-700 pb-2">Orbitly Commands</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <h4 class="text-blue-400 font-bold mb-1 uppercase text-xs">Essentials</h4>
-                    <ul class="space-y-1 text-gray-300">
-                        <li><span class="text-white font-mono">/daily</span> - Claim free reward (24h)</li>
-                        <li><span class="text-white font-mono">/bank</span> - View your balance</li>
-                        <li><span class="text-white font-mono">/pay [user] [amt] [c/g]</span> - Pay someone</li>
-                        <li><span class="text-white font-mono">/top</span> - Leaderboard (Public)</li>
-                        <li><span class="text-white font-mono">/convert [c/g] [amt]</span> - Swap currency</li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-green-400 font-bold mb-1 uppercase text-xs">Gambling</h4>
-                    <ul class="space-y-1 text-gray-300">
-                        <li><span class="text-white font-mono">/allin [c/g]</span> - Bet everything</li>
-                        <li><span class="text-white font-mono">/flip [amt] [c/g]</span> - Coin flip (2x)</li>
-                        <li><span class="text-white font-mono">/roll [amt] [c/g]</span> - Dice roll (>3 wins)</li>
-                        <li><span class="text-white font-mono">/slots [amt] [c/g]</span> - Slot machine</li>
-                        <li><span class="text-white font-mono">/rps [r/p/s] [amt] [c/g]</span> - Rock Paper Scissors</li>
-                        <li><span class="text-white font-mono">/guess [1-10] [amt] [c/g]</span> - Guess number (5x)</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="mt-3 text-xs text-gray-500 italic">Rate: 10 Coins = 1 Gem</div>
-        `;
-        els.displays.msgContainer.appendChild(div);
-        requestAnimationFrame(() => els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight);
-    }
-
-    function showPrefixes() {
-         const keys = Object.keys(SUFFIXES).sort((a,b) => SUFFIXES[a] - SUFFIXES[b]);
-         const list = keys.map(k => `<span class="bg-[#1e1f22] px-1 rounded text-yellow-400 font-mono">${k}</span>`).join(' ');
-         const div = document.createElement('div');
-         div.className = "my-4 mx-4 p-4 bg-[#2b2d31] rounded-lg border border-[#1e1f22] text-sm shadow-xl";
-         div.innerHTML = `<h3 class="font-bold text-white mb-2 text-lg">Number Abbreviations</h3><div class="flex flex-wrap gap-2 leading-relaxed">${list}</div>`;
-         els.displays.msgContainer.appendChild(div);
-         requestAnimationFrame(() => els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight);
-    }
-    async function executeDaily() {
-        if (!currentUserProfile) return;
-        const now = Date.now();
-        const last = currentUserProfile.lastDaily || 0;
-        const oneDay = 24 * 60 * 60 * 1000;
-        if (now - last < oneDay) { const timeLeft = Math.ceil((oneDay - (now - last)) / (1000 * 60 * 60)); showToast(`Daily reward available in ${timeLeft} hours`, 'error'); return; }
-        await updateDoc(doc(db, "users", currentUser.uid), { coins: (currentUserProfile.coins || 0) + 500, gems: (currentUserProfile.gems || 0) + 5, lastDaily: now });
-        showToast("Claimed 500 Coins & 5 Gems!", 'success');
-    }
-    async function executeConvert(currencyArg, amountStr) {
-        const isCoins = ['c', 'coin', 'coins'].includes(currencyArg.toLowerCase());
-        const isGems = ['g', 'gem', 'gems'].includes(currencyArg.toLowerCase());
-        if (!isCoins && !isGems) return showToast("Usage: /convert {c/g} {amount}", 'error');
-        const amount = parseAbbreviatedNumber(amountStr);
-        if (isNaN(amount) || amount <= 0) return showToast("Invalid amount", 'error');
-        const fromCurrency = isCoins ? 'coins' : 'gems';
-        const toCurrency = isCoins ? 'gems' : 'coins';
-        let resultingAmount = 0;
-        if (fromCurrency === 'coins') { if (amount < 10) return showToast("Minimum 10 Coins", 'error'); resultingAmount = Math.floor(amount / 10); } else { resultingAmount = amount * 10; }
-        try { await runTransaction(db, async (transaction) => { const userRef = doc(db, "users", currentUser.uid); const sfDoc = await transaction.get(userRef); if (!sfDoc.exists()) throw "User does not exist!"; const userData = sfDoc.data(); const currentBal = userData[fromCurrency] || 0; if (currentBal < amount) throw `Not enough ${fromCurrency}!`; transaction.update(userRef, { [fromCurrency]: currentBal - amount, [toCurrency]: (userData[toCurrency] || 0) + resultingAmount }); }); showToast(`Converted`, 'success'); } catch (e) { showToast(typeof e === 'string' ? e : "Failed", 'error'); }
-    }
-    async function executeTop() {
-        const q = query(collection(db, "users"), orderBy("coins", "desc"), limit(3));
-        const snap = await getDocs(q);
-        const topUsers = [];
-        snap.forEach(d => { const u = d.data(); topUsers.push({ uid: u.uid, username: u.username, pfpUrl: u.pfpUrl, coins: u.coins || 0 }); });
-        await addDoc(collection(db, "messages"), { type: 'leaderboard', topUsers: topUsers, createdAt: serverTimestamp() });
-    }
-    async function executePay(targetName, amountStr, currStr) {
-        const amount = parseAbbreviatedNumber(amountStr);
-        if (isNaN(amount) || amount <= 0) return showToast("Invalid Amount", 'error');
-        const isCoins = ['c', 'coin', 'coins'].includes(currStr?.toLowerCase());
-        const currency = isCoins ? 'coins' : 'gems';
-        if ((currentUserProfile[currency] || 0) < amount) return showToast("Insufficient funds", 'error');
-        if (currentUserProfile.username === targetName) return showToast("Cannot pay yourself", 'error');
-        const q = query(collection(db, "users"), where("username", "==", targetName));
-        const snap = await getDocs(q);
-        if (snap.empty) return showToast("User not found", 'error');
-        const targetUid = snap.docs[0].id;
-        try { await runTransaction(db, async (transaction) => { const senderRef = doc(db, "users", currentUser.uid); const receiverRef = doc(db, "users", targetUid); const sSnap = await transaction.get(senderRef); const rSnap = await transaction.get(receiverRef); if (!sSnap.exists() || !rSnap.exists()) throw "Error"; if ((sSnap.data()[currency] || 0) < amount) throw "Funds"; transaction.update(senderRef, { [currency]: sSnap.data()[currency] - amount }); transaction.update(receiverRef, { [currency]: (rSnap.data()[currency] || 0) + amount }); }); showToast(`Sent`, 'success'); } catch (e) { showToast("Transaction failed", 'error'); }
-    }
+    async function handleCommand(cmdString) { const parts = cmdString.split(' '); const command = parts[0].toLowerCase(); const args = parts.slice(1); if (command === '/cmds') { showHelp(); return; } if (command === '/prefixs' || command === '/prefixes') { showPrefixes(); return; } if (command === '/top') { await executeTop(); return; } if (command === '/daily') { await executeDaily(); return; } if (command === '/convert') { if (args.length < 2) return showToast("Usage: /convert {c/g} {amount}", 'error'); await executeConvert(args[0], args[1]); return; } if (command === '/pfp' && args[0] === 'change') { app.openEditProfile(); return; } if (command === '/pay') { if (args.length < 3) return showToast("Usage: /pay {username} {amount} {c/g}", 'error'); await executePay(args[0], args[1], args[2]); return; } if (['/allin', '/flip', '/roll', '/slots', '/rps', '/guess', '/bank'].includes(command)) { if (command === '/bank') { await executeBank(); showToast("Action complete", 'success'); return; } let amountIdx = 0; let currIdx = 1; let extraArg = null; if (command === '/rps' || command === '/guess') { amountIdx = 1; currIdx = 2; extraArg = args[0]; } let amountStr = args[amountIdx]; let currencyStr = args[currIdx]; if (command === '/allin') { amountStr = 'all'; currencyStr = args[0]; } await executeGamble(command, amountStr, currencyStr, extraArg); } else { showToast("Invalid Command", 'error'); } }
+    function showHelp() { const div = document.createElement('div'); div.className = "my-4 mx-4 p-4 bg-[#2b2d31] rounded-lg border border-[#1e1f22] text-sm shadow-xl"; div.innerHTML = ` <h3 class="font-bold text-white mb-3 text-lg border-b border-gray-700 pb-2">Orbitly Commands</h3> <div class="grid grid-cols-1 md:grid-cols-2 gap-4"> <div> <h4 class="text-blue-400 font-bold mb-1 uppercase text-xs">Essentials</h4> <ul class="space-y-1 text-gray-300"> <li><span class="text-white font-mono">/daily</span> - Claim free reward (24h)</li> <li><span class="text-white font-mono">/bank</span> - View your balance</li> <li><span class="text-white font-mono">/pay [user] [amt] [c/g]</span> - Pay someone</li> <li><span class="text-white font-mono">/top</span> - Leaderboard (Public)</li> <li><span class="text-white font-mono">/convert [c/g] [amt]</span> - Swap currency</li> </ul> </div> <div> <h4 class="text-green-400 font-bold mb-1 uppercase text-xs">Gambling</h4> <ul class="space-y-1 text-gray-300"> <li><span class="text-white font-mono">/allin [c/g]</span> - Bet everything</li> <li><span class="text-white font-mono">/flip [amt] [c/g]</span> - Coin flip (2x)</li> <li><span class="text-white font-mono">/roll [amt] [c/g]</span> - Dice roll (>3 wins)</li> <li><span class="text-white font-mono">/slots [amt] [c/g]</span> - Slot machine</li> <li><span class="text-white font-mono">/rps [r/p/s] [amt] [c/g]</span> - Rock Paper Scissors</li> <li><span class="text-white font-mono">/guess [1-10] [amt] [c/g]</span> - Guess number (5x)</li> </ul> </div> </div> <div class="mt-3 text-xs text-gray-500 italic">Rate: 10 Coins = 1 Gem</div> `; els.displays.msgContainer.appendChild(div); requestAnimationFrame(() => els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight); }
+    function showPrefixes() { const keys = Object.keys(SUFFIXES).sort((a,b) => SUFFIXES[a] - SUFFIXES[b]); const list = keys.map(k => `<span class="bg-[#1e1f22] px-1 rounded text-yellow-400 font-mono">${k}</span>`).join(' '); const div = document.createElement('div'); div.className = "my-4 mx-4 p-4 bg-[#2b2d31] rounded-lg border border-[#1e1f22] text-sm shadow-xl"; div.innerHTML = `<h3 class="font-bold text-white mb-2 text-lg">Number Abbreviations</h3><div class="flex flex-wrap gap-2 leading-relaxed">${list}</div>`; els.displays.msgContainer.appendChild(div); requestAnimationFrame(() => els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight); }
+    async function executeDaily() { if (!currentUserProfile) return; const now = Date.now(); const last = currentUserProfile.lastDaily || 0; const oneDay = 24 * 60 * 60 * 1000; if (now - last < oneDay) { const timeLeft = Math.ceil((oneDay - (now - last)) / (1000 * 60 * 60)); showToast(`Daily reward available in ${timeLeft} hours`, 'error'); return; } await updateDoc(doc(db, "users", currentUser.uid), { coins: (currentUserProfile.coins || 0) + 500, gems: (currentUserProfile.gems || 0) + 5, lastDaily: now }); showToast("Claimed 500 Coins & 5 Gems!", 'success'); }
+    async function executeConvert(currencyArg, amountStr) { const isCoins = ['c', 'coin', 'coins'].includes(currencyArg.toLowerCase()); const isGems = ['g', 'gem', 'gems'].includes(currencyArg.toLowerCase()); if (!isCoins && !isGems) return showToast("Usage: /convert {c/g} {amount}", 'error'); const amount = parseAbbreviatedNumber(amountStr); if (isNaN(amount) || amount <= 0) return showToast("Invalid amount", 'error'); const fromCurrency = isCoins ? 'coins' : 'gems'; const toCurrency = isCoins ? 'gems' : 'coins'; let resultingAmount = 0; if (fromCurrency === 'coins') { if (amount < 10) return showToast("Minimum 10 Coins", 'error'); resultingAmount = Math.floor(amount / 10); } else { resultingAmount = amount * 10; } try { await runTransaction(db, async (transaction) => { const userRef = doc(db, "users", currentUser.uid); const sfDoc = await transaction.get(userRef); if (!sfDoc.exists()) throw "User does not exist!"; const userData = sfDoc.data(); const currentBal = userData[fromCurrency] || 0; if (currentBal < amount) throw `Not enough ${fromCurrency}!`; transaction.update(userRef, { [fromCurrency]: currentBal - amount, [toCurrency]: (userData[toCurrency] || 0) + resultingAmount }); }); showToast(`Converted`, 'success'); } catch (e) { showToast(typeof e === 'string' ? e : "Failed", 'error'); } }
+    async function executeTop() { const q = query(collection(db, "users"), orderBy("coins", "desc"), limit(3)); const snap = await getDocs(q); const topUsers = []; snap.forEach(d => { const u = d.data(); topUsers.push({ uid: u.uid, username: u.username, pfpUrl: u.pfpUrl, coins: u.coins || 0 }); }); await addDoc(collection(db, "messages"), { type: 'leaderboard', topUsers: topUsers, createdAt: serverTimestamp() }); }
+    async function executePay(targetName, amountStr, currStr) { const amount = parseAbbreviatedNumber(amountStr); if (isNaN(amount) || amount <= 0) return showToast("Invalid Amount", 'error'); const isCoins = ['c', 'coin', 'coins'].includes(currStr?.toLowerCase()); const currency = isCoins ? 'coins' : 'gems'; if ((currentUserProfile[currency] || 0) < amount) return showToast("Insufficient funds", 'error'); if (currentUserProfile.username === targetName) return showToast("Cannot pay yourself", 'error'); const q = query(collection(db, "users"), where("username", "==", targetName)); const snap = await getDocs(q); if (snap.empty) return showToast("User not found", 'error'); const targetUid = snap.docs[0].id; try { await runTransaction(db, async (transaction) => { const senderRef = doc(db, "users", currentUser.uid); const receiverRef = doc(db, "users", targetUid); const sSnap = await transaction.get(senderRef); const rSnap = await transaction.get(receiverRef); if (!sSnap.exists() || !rSnap.exists()) throw "Error"; if ((sSnap.data()[currency] || 0) < amount) throw "Funds"; transaction.update(senderRef, { [currency]: sSnap.data()[currency] - amount }); transaction.update(receiverRef, { [currency]: (rSnap.data()[currency] || 0) + amount }); }); showToast(`Sent`, 'success'); } catch (e) { showToast("Transaction failed", 'error'); } }
     async function executeBank() { if (!currentUserProfile) return; await addDoc(collection(db, "messages"), { type: 'bank', uid: currentUser.uid, username: currentUserProfile.username, pfpUrl: currentUserProfile.pfpUrl, coins: currentUserProfile.coins || 0, gems: currentUserProfile.gems || 0, createdAt: serverTimestamp() }); }
-    async function executeGamble(game, amountStr, currStr, extra) {
-        if (!currentUserProfile) return;
-        const isCoins = ['c', 'coin', 'coins'].includes(currStr?.toLowerCase());
-        const currencyKey = isCoins ? 'coins' : 'gems';
-        let balance = currentUserProfile[currencyKey] || 0;
-        let bet = amountStr === 'all' ? balance : parseAbbreviatedNumber(amountStr);
-        if (isNaN(bet) || bet <= 0) { showToast("Invalid Amount", 'error'); return; }
-        if (balance < bet) { showToast(`Not enough ${currencyKey}`, 'error'); return; }
-        const isDev = currentUser.email === 'dev@gmail.com';
-        let win = false; let multiplier = 0; let details = "";
-        if (game === '/allin') { if (isDev) { win = true; multiplier = 10; } else { win = Math.random() < 0.2; if (win) { const r = Math.random(); multiplier = r<0.5?1:r<0.75?2:r<0.875?3:r<0.975?5:10; } } } 
-        else if (game === '/flip') { const isHeads = Math.random() < 0.5; details = `Coin: ${isHeads?'Heads':'Tails'}`; if(isDev){win=true; multiplier=2;}else{win=Math.random()<0.5; multiplier=2;} }
-        else if (game === '/roll') { let roll = Math.floor(Math.random() * 6) + 1; if(isDev){roll=6;win=true;multiplier=3;}else{if(roll>=4)win=true; multiplier=roll===6?3:1.5;} details=`Rolled ${roll}`; }
-        else if (game === '/slots') { const s=['🍒','🍋','🍇','💎','7️⃣']; let s1=s[Math.floor(Math.random()*5)], s2=s[Math.floor(Math.random()*5)], s3=s[Math.floor(Math.random()*5)]; if(isDev){s1=s2=s3='7️⃣';win=true;multiplier=10;}else{if(s1===s2&&s2===s3){win=true;multiplier=s1==='7️⃣'?10:5;}else if(s1===s2||s2===s3||s1===s3){win=true;multiplier=1.5;}} details=`${s1}|${s2}|${s3}`; }
-        else if (game === '/rps') { const m=['r','p','s']; const u=extra?extra[0]:null; if(!m.includes(u)){showToast("Use r,p,s",'error');return;} let b=m[Math.floor(Math.random()*3)]; if(isDev){b=u==='r'?'s':u==='p'?'r':'p';} details=`You:${u} Bot:${b}`; if(u===b){win=true;multiplier=1;}else if((u==='r'&&b==='s')||(u==='p'&&b==='r')||(u==='s'&&b==='p')){win=true;multiplier=2;} }
-        else if (game === '/guess') { const g=parseInt(extra); if(isNaN(g)){showToast("1-10",'error');return;} let s=Math.floor(Math.random()*10)+1; if(isDev)s=g; details=`Num:${s}`; if(g===s){win=true;multiplier=5;} }
-        const winnings = win ? Math.floor(bet * multiplier) : 0;
-        await updateDoc(doc(db, "users", currentUser.uid), { [currencyKey]: (balance - bet) + winnings });
-        await addDoc(collection(db, "messages"), { type: game.replace('/',''), uid: currentUser.uid, username: currentUserProfile.username, pfpUrl: currentUserProfile.pfpUrl, currency: currencyKey, result: win ? (multiplier === 1 ? 'DRAW' : 'WON') : 'LOST', amount: win ? winnings : bet, multiplier: multiplier, details: details, createdAt: serverTimestamp() });
-        showToast("Done", 'success');
-    }
+    async function executeGamble(game, amountStr, currStr, extra) { if (!currentUserProfile) return; const isCoins = ['c', 'coin', 'coins'].includes(currStr?.toLowerCase()); const currencyKey = isCoins ? 'coins' : 'gems'; let balance = currentUserProfile[currencyKey] || 0; let bet = amountStr === 'all' ? balance : parseAbbreviatedNumber(amountStr); if (isNaN(bet) || bet <= 0) { showToast("Invalid Amount", 'error'); return; } if (balance < bet) { showToast(`Not enough ${currencyKey}`, 'error'); return; } const isDev = currentUser.email === 'dev@gmail.com'; let win = false; let multiplier = 0; let details = ""; if (game === '/allin') { if (isDev) { win = true; multiplier = 10; } else { win = Math.random() < 0.2; if (win) { const r = Math.random(); multiplier = r<0.5?1:r<0.75?2:r<0.875?3:r<0.975?5:10; } } } else if (game === '/flip') { const isHeads = Math.random() < 0.5; details = `Coin: ${isHeads?'Heads':'Tails'}`; if(isDev){win=true; multiplier=2;}else{win=Math.random()<0.5; multiplier=2;} } else if (game === '/roll') { let roll = Math.floor(Math.random() * 6) + 1; if(isDev){roll=6;win=true;multiplier=3;}else{if(roll>=4)win=true; multiplier=roll===6?3:1.5;} details=`Rolled ${roll}`; } else if (game === '/slots') { const s=['🍒','🍋','🍇','💎','7️⃣']; let s1=s[Math.floor(Math.random()*5)], s2=s[Math.floor(Math.random()*5)], s3=s[Math.floor(Math.random()*5)]; if(isDev){s1=s2=s3='7️⃣';win=true;multiplier=10;}else{if(s1===s2&&s2===s3){win=true;multiplier=s1==='7️⃣'?10:5;}else if(s1===s2||s2===s3||s1===s3){win=true;multiplier=1.5;}} details=`${s1}|${s2}|${s3}`; } else if (game === '/rps') { const m=['r','p','s']; const u=extra?extra[0]:null; if(!m.includes(u)){showToast("Use r,p,s",'error');return;} let b=m[Math.floor(Math.random()*3)]; if(isDev){b=u==='r'?'s':u==='p'?'r':'p';} details=`You:${u} Bot:${b}`; if(u===b){win=true;multiplier=1;}else if((u==='r'&&b==='s')||(u==='p'&&b==='r')||(u==='s'&&b==='p')){win=true;multiplier=2;} } else if (game === '/guess') { const g=parseInt(extra); if(isNaN(g)){showToast("1-10",'error');return;} let s=Math.floor(Math.random()*10)+1; if(isDev)s=g; details=`Num:${s}`; if(g===s){win=true;multiplier=5;} } const winnings = win ? Math.floor(bet * multiplier) : 0; await updateDoc(doc(db, "users", currentUser.uid), { [currencyKey]: (balance - bet) + winnings }); await addDoc(collection(db, "messages"), { type: game.replace('/',''), uid: currentUser.uid, username: currentUserProfile.username, pfpUrl: currentUserProfile.pfpUrl, currency: currencyKey, result: win ? (multiplier === 1 ? 'DRAW' : 'WON') : 'LOST', amount: win ? winnings : bet, multiplier: multiplier, details: details, createdAt: serverTimestamp() }); showToast("Done", 'success'); }
 
     // --- Users List System ---
-
-    function startUsersListener() {
-        const q = query(collection(db, "users"), orderBy("username", "asc"));
-        unsubscribeUsers = onSnapshot(q, (snapshot) => {
-            els.displays.onlineList.innerHTML = '';
-            const onlineUsers = [];
-            const offlineUsers = [];
-
-            snapshot.forEach((doc) => {
-                const user = doc.data();
-                const status = user.status || 'offline';
-                if (status === 'invisible' && user.uid !== currentUser.uid) return;
-                
-                let displayStatus = status;
-                if (status === 'invisible') displayStatus = 'offline'; 
-
-                if (displayStatus === 'offline') offlineUsers.push({ ...user, displayStatus });
-                else onlineUsers.push({ ...user, displayStatus });
-            });
-
-            if (onlineUsers.length > 0) {
-                const header = document.createElement('div');
-                header.className = "px-2 py-3 text-xs font-bold text-gray-500 hover:text-gray-400 uppercase tracking-wide mt-2";
-                header.textContent = `Online — ${onlineUsers.length}`;
-                els.displays.onlineList.appendChild(header);
-                onlineUsers.forEach(u => renderUserInList(u, u.displayStatus));
-            }
-
-            if (offlineUsers.length > 0) {
-                const header = document.createElement('div');
-                header.className = "px-2 py-3 text-xs font-bold text-gray-500 hover:text-gray-400 uppercase tracking-wide mt-2";
-                header.textContent = `Offline — ${offlineUsers.length}`;
-                els.displays.onlineList.appendChild(header);
-                offlineUsers.forEach(u => renderUserInList(u, u.displayStatus));
-            }
-        });
-    }
+    function startUsersListener() { const q = query(collection(db, "users"), orderBy("username", "asc")); unsubscribeUsers = onSnapshot(q, (snapshot) => { els.displays.onlineList.innerHTML = ''; const onlineUsers = []; const offlineUsers = []; snapshot.forEach((doc) => { const user = doc.data(); const status = user.status || 'offline'; if (status === 'invisible' && user.uid !== currentUser.uid) return; let displayStatus = status; if (status === 'invisible') displayStatus = 'offline'; if (displayStatus === 'offline') offlineUsers.push({ ...user, displayStatus }); else onlineUsers.push({ ...user, displayStatus }); }); if (onlineUsers.length > 0) { const header = document.createElement('div'); header.className = "px-2 py-3 text-xs font-bold text-gray-500 hover:text-gray-400 uppercase tracking-wide mt-2"; header.textContent = `Online — ${onlineUsers.length}`; els.displays.onlineList.appendChild(header); onlineUsers.forEach(u => renderUserInList(u, u.displayStatus)); } if (offlineUsers.length > 0) { const header = document.createElement('div'); header.className = "px-2 py-3 text-xs font-bold text-gray-500 hover:text-gray-400 uppercase tracking-wide mt-2"; header.textContent = `Offline — ${offlineUsers.length}`; els.displays.onlineList.appendChild(header); offlineUsers.forEach(u => renderUserInList(u, u.displayStatus)); } }); }
 
     function renderUserInList(user, status) {
         const div = document.createElement('div');
-        // Base classes plus dynamic list style
-        div.className = `flex items-center gap-3 p-2 rounded hover:bg-[#35373c] cursor-pointer group opacity-90 hover:opacity-100 transition ${user.listStyle || 'list-style-default'}`;
+        div.className = `flex items-center gap-3 p-2 rounded hover:brightness-110 cursor-pointer group opacity-90 hover:opacity-100 transition`;
+        
+        // Handle Custom vs Preset List Styles
+        if (user.listStyle === 'custom' && user.customListStyle) {
+            div.style.backgroundColor = user.customListStyle.bg;
+            div.style.border = `1px solid ${user.customListStyle.border}`;
+        } else {
+            div.classList.add(user.listStyle || 'list-style-default');
+            div.classList.add('hover:bg-[#35373c]'); // Default hover
+        }
+
         div.onclick = () => window.app.openProfile(user.uid);
         if (status === 'offline') div.classList.add('opacity-50');
 
@@ -1735,11 +1141,22 @@
         if (status === 'busy') statusColor = 'bg-yellow-500';
         if (status === 'dnd') statusColor = 'bg-red-500';
 
-        let nameClass = "text-sm font-medium text-gray-200 truncate group-hover:text-white";
+        let nameClass = "text-sm font-medium truncate";
+        // Default text color logic
+        if (!user.listStyle || user.listStyle !== 'custom') {
+            nameClass += " text-gray-200 group-hover:text-white";
+        }
         
         const nameSpan = document.createElement('div');
         nameSpan.textContent = user.username;
         nameSpan.className = nameClass;
+        
+        // Apply custom list text color if custom
+        if (user.listStyle === 'custom' && user.customListStyle) {
+            nameSpan.style.color = user.customListStyle.text;
+        }
+
+        // Apply username effects on top (override if necessary, but keep base color)
         if (user.usernameStyle) applyUsernameStyle(nameSpan, user.usernameStyle);
 
         div.innerHTML = `
@@ -1758,26 +1175,10 @@
         els.displays.onlineList.appendChild(div);
     }
 
-    // --- Utils ---
-
-    function toggleLoading(active) {
-        if (active) {
-            els.displays.loader.classList.remove('hidden');
-            els.displays.feedback.classList.add('hidden');
-        } else {
-            els.displays.loader.classList.add('hidden');
-        }
-    }
-
-    function showError(msg) {
-        els.displays.error.textContent = msg;
-        els.displays.feedback.classList.remove('hidden');
-    }
-
-    function escapeHtml(text) {
-        if (!text) return '';
-        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    }
+    // --- Utils (unchanged) ---
+    function toggleLoading(active) { if (active) { els.displays.loader.classList.remove('hidden'); els.displays.feedback.classList.add('hidden'); } else { els.displays.loader.classList.add('hidden'); } }
+    function showError(msg) { els.displays.error.textContent = msg; els.displays.feedback.classList.remove('hidden'); }
+    function escapeHtml(text) { if (!text) return ''; return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 </script>
 </body>
 </html>
