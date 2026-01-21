@@ -51,6 +51,10 @@
 </style>
 </head>
 <body class="bg-[#313338] text-gray-100 font-sans antialiased h-screen flex flex-col overflow-hidden">
+    
+    <!-- Hidden Input for /pfp change command -->
+    <input type="file" id="cmd-pfp-input" class="hidden" accept="image/png, image/jpeg, image/gif, image/webp">
+
     <!-- Auth View -->
 <div id="auth-view" class="flex-1 flex flex-col justify-center items-center p-4 bg-[url('https://picsum.photos/1920/1080?blur=10')] bg-cover bg-center relative z-50">
     <div class="absolute inset-0 bg-gray-900/80 backdrop-blur-sm"></div>
@@ -378,7 +382,7 @@
         chatView: document.getElementById('chat-view'),
         forms: { login: document.getElementById('login-form'), signup: document.getElementById('signup-form') },
         tabs: { login: document.getElementById('tab-login'), signup: document.getElementById('tab-signup') },
-        inputs: { signupPfp: document.getElementById('signup-pfp'), msg: document.getElementById('message-input') },
+        inputs: { signupPfp: document.getElementById('signup-pfp'), msg: document.getElementById('message-input'), cmdPfp: document.getElementById('cmd-pfp-input') },
         displays: {
             pfpPreview: document.getElementById('pfp-preview'),
             pfpPlaceholder: document.getElementById('pfp-placeholder'),
@@ -547,6 +551,38 @@
             };
             reader.readAsDataURL(file);
         }
+    });
+    
+    // Command PFP Upload Listener
+    els.inputs.cmdPfp.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        let pfpUrl = '';
+        const limit = 300 * 1024; // 300KB limit for raw upload (GIF support)
+        
+        try {
+            if (file.type === 'image/gif' && file.size < limit) {
+                 // Preserve GIF animation if small enough
+                 const reader = new FileReader();
+                 pfpUrl = await new Promise((resolve) => {
+                    reader.onload = (ev) => resolve(ev.target.result);
+                    reader.readAsDataURL(file);
+                 });
+            } else {
+                 // Compress/Resize
+                 pfpUrl = await processImage(file);
+            }
+            
+            await updateDoc(doc(db, "users", currentUser.uid), { pfpUrl });
+            showToast("Profile picture updated!", 'success');
+        } catch(err) {
+            showToast("Failed to update PFP", 'error');
+            console.error(err);
+        }
+        
+        // Reset input
+        els.inputs.cmdPfp.value = '';
     });
 
     // --- Auth Handlers ---
@@ -865,6 +901,18 @@
             return;
         }
 
+        if (command === '/convert') {
+            // Usage: /convert {c/g} {amount}
+            if (args.length < 2) return showToast("Usage: /convert {c/g} {amount}", 'error');
+            await executeConvert(args[0], args[1]);
+            return;
+        }
+
+        if (command === '/pfp' && args[0] === 'change') {
+            els.inputs.cmdPfp.click();
+            return;
+        }
+
         if (command === '/pay') {
             // Usage: /pay username amount c/g
             if (args.length < 3) return showToast("Usage: /pay {username} {amount} {c/g}", 'error');
@@ -920,7 +968,8 @@
                         <li><span class="text-white font-mono">/bank</span> - View your balance</li>
                         <li><span class="text-white font-mono">/pay [user] [amt] [c/g]</span> - Pay someone</li>
                         <li><span class="text-white font-mono">/top</span> - Leaderboard (Public)</li>
-                        <li><span class="text-white font-mono">/prefixs</span> - List number shortcuts</li>
+                        <li><span class="text-white font-mono">/pfp change</span> - Upload new avatar</li>
+                        <li><span class="text-white font-mono">/convert [c/g] [amt]</span> - Swap currency</li>
                     </ul>
                 </div>
                 <div>
@@ -935,7 +984,7 @@
                     </ul>
                 </div>
             </div>
-            <div class="mt-3 text-xs text-gray-500 italic">Accepts k, m, b, t... (e.g. 100k, 1.5m)</div>
+            <div class="mt-3 text-xs text-gray-500 italic">Rate: 10 Coins = 1 Gem</div>
         `;
         els.displays.msgContainer.appendChild(div);
         requestAnimationFrame(() => els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight);
@@ -977,6 +1026,57 @@
             lastDaily: now
         });
         showToast("Claimed 500 Coins & 5 Gems!", 'success');
+    }
+
+    async function executeConvert(currencyArg, amountStr) {
+        // Normalize currency input
+        const isCoins = ['c', 'coin', 'coins'].includes(currencyArg.toLowerCase());
+        const isGems = ['g', 'gem', 'gems'].includes(currencyArg.toLowerCase());
+        
+        if (!isCoins && !isGems) return showToast("Usage: /convert {c/g} {amount}", 'error');
+        
+        const amount = parseAbbreviatedNumber(amountStr);
+        if (isNaN(amount) || amount <= 0) return showToast("Invalid amount", 'error');
+
+        // Logic: Input is what you want to convert FROM.
+        // If I say "/convert coins 100", I am spending 100 coins to get 10 gems.
+        
+        const fromCurrency = isCoins ? 'coins' : 'gems';
+        const toCurrency = isCoins ? 'gems' : 'coins';
+        
+        // Rate: 10 Coins = 1 Gem
+        let resultingAmount = 0;
+        
+        if (fromCurrency === 'coins') {
+            if (amount < 10) return showToast("Minimum conversion is 10 Coins", 'error');
+            resultingAmount = Math.floor(amount / 10);
+        } else {
+            resultingAmount = amount * 10;
+        }
+
+        try {
+            await runTransaction(db, async (transaction) => {
+                const userRef = doc(db, "users", currentUser.uid);
+                const sfDoc = await transaction.get(userRef);
+                if (!sfDoc.exists()) throw "User does not exist!";
+
+                const userData = sfDoc.data();
+                const currentBal = userData[fromCurrency] || 0;
+
+                if (currentBal < amount) throw `Not enough ${fromCurrency}!`;
+
+                const newFromBal = currentBal - amount;
+                const newToBal = (userData[toCurrency] || 0) + resultingAmount;
+
+                transaction.update(userRef, { 
+                    [fromCurrency]: newFromBal,
+                    [toCurrency]: newToBal
+                });
+            });
+            showToast(`Converted ${formatNumber(amount)} ${fromCurrency} to ${formatNumber(resultingAmount)} ${toCurrency}`, 'success');
+        } catch (e) {
+            showToast(typeof e === 'string' ? e : "Conversion failed", 'error');
+        }
     }
 
     async function executeTop() {
