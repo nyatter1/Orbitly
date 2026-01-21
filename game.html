@@ -6,7 +6,6 @@
 <title>Orbitly Arcade</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-    /* Custom scrollbar */
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #2b2d31; }
     ::-webkit-scrollbar-thumb { background: #1a1b1e; border-radius: 4px; }
@@ -31,8 +30,24 @@
     .memory-front { background-color: #2b2d31; border: 2px solid #5865F2; }
     .memory-back { background-color: #5865F2; transform: rotateY(180deg); color: white; }
 
-    .whack-tile { transition: background 0.1s; }
+    .whack-tile { transition: background 0.05s; }
     .whack-active { background-color: #ef4444 !important; }
+
+    .tile-2 { background: #eee4da; color: #776e65; }
+    .tile-4 { background: #ede0c8; color: #776e65; }
+    .tile-8 { background: #f2b179; color: #f9f6f2; }
+    .tile-16 { background: #f59563; color: #f9f6f2; }
+    .tile-32 { background: #f67c5f; color: #f9f6f2; }
+    .tile-64 { background: #f65e3b; color: #f9f6f2; }
+    .tile-128 { background: #edcf72; color: #f9f6f2; }
+    .tile-256 { background: #edcc61; color: #f9f6f2; }
+    .tile-512 { background: #edc850; color: #f9f6f2; }
+    .tile-1024 { background: #edc53f; color: #f9f6f2; }
+    .tile-2048 { background: #edc22e; color: #f9f6f2; }
+
+    .mine-hidden { background-color: #2b2d31; border: 2px solid #3f4147; }
+    .mine-revealed { background-color: #1e1f22; border: 1px solid #111214; }
+    .mine-bomb { background-color: #ef4444; }
 </style>
 </head>
 <body class="arcade-bg text-gray-100 font-sans antialiased h-screen flex flex-col overflow-hidden">
@@ -66,15 +81,21 @@
             
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 
-                <!-- 1. Snake -->
+                <!-- Action Games -->
+                <div onclick="arcade.launch('flappy')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
+                    <div class="text-4xl mb-3">🐦</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Flappy Orbit</h3>
+                    <p class="text-gray-400 text-xs mb-3">Tap to fly. Dodge the pipes.</p>
+                    <span class="bg-yellow-500/20 text-yellow-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+5 Coins / Pipe</span>
+                </div>
+
                 <div onclick="arcade.launch('snake')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
                     <div class="text-4xl mb-3">🐍</div>
                     <h3 class="text-xl font-bold text-white mb-1">Neon Snake</h3>
-                    <p class="text-gray-400 text-xs mb-3">Eat bits, get long. Don't hit the wall.</p>
+                    <p class="text-gray-400 text-xs mb-3">Eat bits, get long.</p>
                     <span class="bg-green-500/20 text-green-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+2 Coins / Bit</span>
                 </div>
 
-                <!-- 2. Pong -->
                 <div onclick="arcade.launch('pong')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
                     <div class="text-4xl mb-3">🏓</div>
                     <h3 class="text-xl font-bold text-white mb-1">Cyber Pong</h3>
@@ -82,7 +103,6 @@
                     <span class="bg-blue-500/20 text-blue-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Win = 50 Coins</span>
                 </div>
 
-                <!-- 3. Breakout -->
                 <div onclick="arcade.launch('breakout')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
                     <div class="text-4xl mb-3">🧱</div>
                     <h3 class="text-xl font-bold text-white mb-1">Breakout</h3>
@@ -90,7 +110,6 @@
                     <span class="bg-red-500/20 text-red-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+1 Coin / Brick</span>
                 </div>
 
-                <!-- 4. Space Dodge -->
                 <div onclick="arcade.launch('dodge')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
                     <div class="text-4xl mb-3">🚀</div>
                     <h3 class="text-xl font-bold text-white mb-1">Space Dodge</h3>
@@ -98,23 +117,43 @@
                     <span class="bg-purple-500/20 text-purple-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+1 Coin / Sec</span>
                 </div>
 
-                <!-- 5. Dino Jump -->
                 <div onclick="arcade.launch('jump')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
                     <div class="text-4xl mb-3">🦖</div>
                     <h3 class="text-xl font-bold text-white mb-1">Dino Jump</h3>
-                    <p class="text-gray-400 text-xs mb-3">Jump over the cacti.</p>
+                    <p class="text-gray-400 text-xs mb-3">Jump over the obstacles.</p>
                     <span class="bg-yellow-500/20 text-yellow-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+5 Coins / Jump</span>
                 </div>
 
-                <!-- 6. Whack -->
+                <!-- Puzzle & Skill -->
+
+                <div onclick="arcade.launch('2048')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
+                    <div class="text-4xl mb-3">🔢</div>
+                    <h3 class="text-xl font-bold text-white mb-1">2048</h3>
+                    <p class="text-gray-400 text-xs mb-3">Merge tiles to reach 2048.</p>
+                    <span class="bg-orange-500/20 text-orange-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Score / 10 Coins</span>
+                </div>
+
+                <div onclick="arcade.launch('mines')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
+                    <div class="text-4xl mb-3">💣</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Minesweeper</h3>
+                    <p class="text-gray-400 text-xs mb-3">Clear grid without booms.</p>
+                    <span class="bg-gray-500/20 text-gray-400 text-[10px] font-bold px-2 py-1 rounded uppercase">Win = 100 Coins</span>
+                </div>
+
+                <div onclick="arcade.launch('clicker')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
+                    <div class="text-4xl mb-3">👆</div>
+                    <h3 class="text-xl font-bold text-white mb-1">Coin Clicker</h3>
+                    <p class="text-gray-400 text-xs mb-3">Click fast! 10 seconds.</p>
+                    <span class="bg-emerald-500/20 text-emerald-500 text-[10px] font-bold px-2 py-1 rounded uppercase">1 Click = 1 Coin</span>
+                </div>
+
                 <div onclick="arcade.launch('whack')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
                     <div class="text-4xl mb-3">🔨</div>
                     <h3 class="text-xl font-bold text-white mb-1">Whack-a-Tile</h3>
                     <p class="text-gray-400 text-xs mb-3">Click red tiles fast!</p>
-                    <span class="bg-orange-500/20 text-orange-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+2 Coins / Hit</span>
+                    <span class="bg-red-500/20 text-red-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+2 Coins / Hit</span>
                 </div>
 
-                <!-- 7. Math -->
                 <div onclick="arcade.launch('math')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
                     <div class="text-4xl mb-3">➗</div>
                     <h3 class="text-xl font-bold text-white mb-1">Math Sprint</h3>
@@ -122,7 +161,6 @@
                     <span class="bg-indigo-500/20 text-indigo-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+5 Coins / Right</span>
                 </div>
 
-                <!-- 8. Memory -->
                 <div onclick="arcade.launch('memory')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
                     <div class="text-4xl mb-3">🧠</div>
                     <h3 class="text-xl font-bold text-white mb-1">Memory Matrix</h3>
@@ -130,7 +168,6 @@
                     <span class="bg-pink-500/20 text-pink-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Win = 40 Coins</span>
                 </div>
 
-                <!-- 9. Reaction -->
                 <div onclick="arcade.launch('reaction')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
                     <div class="text-4xl mb-3">⚡</div>
                     <h3 class="text-xl font-bold text-white mb-1">Reaction Test</h3>
@@ -138,23 +175,20 @@
                     <span class="bg-cyan-500/20 text-cyan-500 text-[10px] font-bold px-2 py-1 rounded uppercase">Fast = 30 Coins</span>
                 </div>
 
-                <!-- 10. Typing -->
                 <div onclick="arcade.launch('typing')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
                     <div class="text-4xl mb-3">⌨️</div>
                     <h3 class="text-xl font-bold text-white mb-1">Speed Typer</h3>
                     <p class="text-gray-400 text-xs mb-3">Type the words quickly.</p>
-                    <span class="bg-emerald-500/20 text-emerald-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+3 Coins / Word</span>
+                    <span class="bg-teal-500/20 text-teal-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+3 Coins / Word</span>
                 </div>
 
-                <!-- 11. Color -->
                 <div onclick="arcade.launch('color')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
                     <div class="text-4xl mb-3">🎨</div>
                     <h3 class="text-xl font-bold text-white mb-1">Color Hunter</h3>
                     <p class="text-gray-400 text-xs mb-3">Find the different shade.</p>
-                    <span class="bg-teal-500/20 text-teal-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+5 Coins / Level</span>
+                    <span class="bg-lime-500/20 text-lime-500 text-[10px] font-bold px-2 py-1 rounded uppercase">+5 Coins / Level</span>
                 </div>
 
-                <!-- 12. Simon -->
                 <div onclick="arcade.launch('simon')" class="game-card bg-[#2b2d31] rounded-xl p-5 border border-[#1e1f22] cursor-pointer transition relative overflow-hidden group">
                     <div class="text-4xl mb-3">🔔</div>
                     <h3 class="text-xl font-bold text-white mb-1">Simon Says</h3>
@@ -297,9 +331,10 @@
                 
                 // Titles
                 const titles = {
-                    snake: 'Neon Snake', pong: 'Cyber Pong', breakout: 'Breakout', dodge: 'Space Dodge',
+                    flappy: 'Flappy Orbit', snake: 'Neon Snake', pong: 'Cyber Pong', breakout: 'Breakout', dodge: 'Space Dodge',
                     jump: 'Dino Jump', whack: 'Whack-a-Tile', math: 'Math Sprint', memory: 'Memory Matrix',
-                    reaction: 'Reaction Test', typing: 'Speed Typer', color: 'Color Hunter', simon: 'Simon Says'
+                    reaction: 'Reaction Test', typing: 'Speed Typer', color: 'Color Hunter', simon: 'Simon Says',
+                    '2048': '2048', mines: 'Minesweeper', clicker: 'Coin Clicker'
                 };
                 els.gameTitle.textContent = titles[gameId] || 'Game';
 
@@ -311,7 +346,7 @@
                     return showToast("Not enough coins! Need 20.", "error");
                 }
 
-                // Deduct Fee via simplified optimistic update (Server validation happens on secure apps, this is a demo)
+                // Deduct Fee
                 try {
                     await updateDoc(doc(db, "users", currentUser.uid), {
                         coins: (currentUserProfile.coins || 0) - ENTRY_FEE
@@ -331,7 +366,7 @@
                 els.domContainer.innerHTML = '';
 
                 // Route to Logic
-                if (['snake', 'pong', 'breakout', 'dodge', 'jump'].includes(activeGame)) {
+                if (['flappy', 'snake', 'pong', 'breakout', 'dodge', 'jump'].includes(activeGame)) {
                     els.canvas.classList.remove('hidden');
                     initCanvasGame(activeGame);
                 } else {
@@ -379,8 +414,14 @@
             let state = {};
 
             // Init State
-            if (game === 'snake') {
-                state = { snake: [{x:10, y:10}], dir: {x:1, y:0}, food: {x:15, y:15}, gridSize: 20 };
+            if (game === 'flappy') {
+                state = { 
+                    bird: {y: height/2, v:0, r:10}, 
+                    gravity: 0.5, jump: -8, 
+                    pipes: [], gap: 120, timer:0 
+                };
+            } else if (game === 'snake') {
+                state = { snake: [{x:10, y:10}], dir: {x:1, y:0}, nextDir: {x:1, y:0}, food: {x:15, y:15}, gridSize: 20, timer:0, speed: 5 };
             } else if (game === 'pong') {
                 state = { py: height/2, ey: height/2, bx: width/2, by: height/2, bvx: 5, bvy: 2, ph: 80, pw: 10 };
             } else if (game === 'breakout') {
@@ -401,6 +442,7 @@
                 ctx.fillRect(0, 0, width, height);
 
                 // Update & Draw
+                if (game === 'flappy') updateFlappy(state, width, height);
                 if (game === 'snake') updateSnake(state, width, height);
                 if (game === 'pong') updatePong(state, width, height);
                 if (game === 'breakout') updateBreakout(state, width, height);
@@ -414,15 +456,16 @@
 
             // Controls
             window.onkeydown = (e) => {
+                if (game === 'flappy' && e.code === 'Space') state.bird.v = state.jump;
                 if (game === 'snake') {
-                    if (e.key === 'ArrowUp' && state.dir.y===0) state.dir = {x:0, y:-1};
-                    if (e.key === 'ArrowDown' && state.dir.y===0) state.dir = {x:0, y:1};
-                    if (e.key === 'ArrowLeft' && state.dir.x===0) state.dir = {x:-1, y:0};
-                    if (e.key === 'ArrowRight' && state.dir.x===0) state.dir = {x:1, y:0};
+                    if (e.key === 'ArrowUp' && state.dir.y===0) state.nextDir = {x:0, y:-1};
+                    if (e.key === 'ArrowDown' && state.dir.y===0) state.nextDir = {x:0, y:1};
+                    if (e.key === 'ArrowLeft' && state.dir.x===0) state.nextDir = {x:-1, y:0};
+                    if (e.key === 'ArrowRight' && state.dir.x===0) state.nextDir = {x:1, y:0};
                 }
                 if (game === 'breakout') {
-                    if (e.key === 'ArrowLeft') state.px -= 30;
-                    if (e.key === 'ArrowRight') state.px += 30;
+                    if (e.key === 'ArrowLeft') state.px -= 40;
+                    if (e.key === 'ArrowRight') state.px += 40;
                     state.px = Math.max(0, Math.min(width-state.pw, state.px));
                 }
                 if (game === 'jump') {
@@ -437,35 +480,77 @@
                 if (game === 'pong') state.py = e.clientY - rect.top - state.ph/2;
                 if (game === 'dodge') state.px = e.clientX - rect.left;
             };
+            // Touch/Click for Flappy/Jump
+            els.canvas.onclick = () => {
+                if (game === 'flappy') state.bird.v = state.jump;
+                if (game === 'jump' && state.grounded) { state.dy = state.jump; state.grounded = false; }
+            };
         }
 
         // --- SPECIFIC UPDATE LOOPS ---
 
-        function updateSnake(s, w, h) {
-            // Move (slow down slightly)
-            if (Date.now() % 5 !== 0) { /* fake frame limit */ }
+        function updateFlappy(s, w, h) {
+            s.bird.v += s.gravity;
+            s.bird.y += s.bird.v;
             
+            // Generate Pipes
+            s.timer++;
+            if (s.timer % 100 === 0) {
+                const pipeH = Math.random() * (h/2) + 50;
+                s.pipes.push({ x: w, topH: pipeH, passed: false });
+            }
+
+            // Draw Bird
+            ctx.fillStyle = '#yellow';
+            ctx.beginPath(); ctx.arc(50, s.bird.y, s.bird.r, 0, Math.PI*2); ctx.fillStyle='yellow'; ctx.fill();
+
+            // Draw Pipes & Collision
+            ctx.fillStyle = '#22c55e';
+            s.pipes.forEach(p => {
+                p.x -= 3;
+                // Top Pipe
+                ctx.fillRect(p.x, 0, 50, p.topH);
+                // Bottom Pipe
+                ctx.fillRect(p.x, p.topH + s.gap, 50, h - (p.topH + s.gap));
+
+                // Collision
+                if (50 + s.bird.r > p.x && 50 - s.bird.r < p.x + 50) {
+                    if (s.bird.y - s.bird.r < p.topH || s.bird.y + s.bird.r > p.topH + s.gap) {
+                        return arcade.gameOver(score, reward);
+                    }
+                }
+                
+                // Score
+                if (p.x + 50 < 50 && !p.passed) {
+                    p.passed = true;
+                    score++;
+                    reward += 5;
+                }
+            });
+
+            // Bounds
+            if (s.bird.y > h || s.bird.y < 0) return arcade.gameOver(score, reward);
+        }
+
+        function updateSnake(s, w, h) {
+            s.timer++;
+            if (s.timer % s.speed !== 0) return;
+            
+            s.dir = s.nextDir;
             const head = { x: s.snake[0].x + s.dir.x, y: s.snake[0].y + s.dir.y };
             
-            // Wall Hit
-            if (head.x < 0 || head.x >= w/s.gridSize || head.y < 0 || head.y >= h/s.gridSize) {
-                return arcade.gameOver(score, reward);
-            }
-            // Self Hit
+            if (head.x < 0 || head.x >= w/s.gridSize || head.y < 0 || head.y >= h/s.gridSize) return arcade.gameOver(score, reward);
             for(let part of s.snake) if (head.x === part.x && head.y === part.y) return arcade.gameOver(score, reward);
 
             s.snake.unshift(head);
-            
-            // Eat
             if (head.x === s.food.x && head.y === s.food.y) {
-                score++;
-                reward += 2;
+                score++; reward += 2;
+                if (score % 5 === 0 && s.speed > 2) s.speed--; // Speed up
                 s.food = { x: Math.floor(Math.random()*(w/s.gridSize)), y: Math.floor(Math.random()*(h/s.gridSize)) };
             } else {
                 s.snake.pop();
             }
 
-            // Draw
             ctx.fillStyle = '#5865F2';
             s.snake.forEach(p => ctx.fillRect(p.x*s.gridSize, p.y*s.gridSize, s.gridSize-2, s.gridSize-2));
             ctx.fillStyle = '#ef4444';
@@ -473,70 +558,47 @@
         }
 
         function updatePong(s, w, h) {
-            // Ball Move
-            s.bx += s.bvx;
-            s.by += s.bvy;
+            s.bx += s.bvx; s.by += s.bvy;
+            // Improved AI
+            const destY = s.bx > w/2 ? s.by : h/2;
+            s.ey += (destY - s.ey) * 0.1;
 
-            // AI Move (simple tracking)
-            if (s.ey < s.by - 20) s.ey += 3;
-            if (s.ey > s.by + 20) s.ey -= 3;
-
-            // Bounce Walls
             if (s.by < 0 || s.by > h) s.bvy *= -1;
-
-            // Bounce Paddles
-            if (s.bx < 20 && s.by > s.py && s.by < s.py + s.ph) { s.bvx *= -1; s.bvx += 1; }
+            if (s.bx < 20 && s.by > s.py && s.by < s.py + s.ph) { s.bvx *= -1; s.bvx += 1; } // Spin
             if (s.bx > w-20 && s.by > s.ey && s.by < s.ey + s.ph) { s.bvx *= -1; }
 
-            // Score/Lose
-            if (s.bx < 0) return arcade.gameOver(score, 0); // Lose
-            if (s.bx > w) { // Win
-                score = 1; reward = 50;
-                return arcade.gameOver(1, 50);
-            }
+            if (s.bx < 0) return arcade.gameOver(score, 0); 
+            if (s.bx > w) return arcade.gameOver(1, 50);
 
-            // Draw
             ctx.fillStyle = 'white';
-            ctx.fillRect(10, s.py, s.pw, s.ph); // Player
-            ctx.fillRect(w-20, s.ey, s.pw, s.ph); // AI
+            ctx.fillRect(10, s.py, s.pw, s.ph);
+            ctx.fillRect(w-20, s.ey, s.pw, s.ph);
             ctx.beginPath(); ctx.arc(s.bx, s.by, 8, 0, Math.PI*2); ctx.fill();
         }
 
         function updateBreakout(s, w, h) {
-            s.bx += s.bvx;
-            s.by += s.bvy;
-
+            s.bx += s.bvx; s.by += s.bvy;
             if (s.bx < 0 || s.bx > w) s.bvx *= -1;
             if (s.by < 0) s.bvy *= -1;
-            
-            // Paddle Hit
-            if (s.by > h-40 && s.bx > s.px && s.bx < s.px+s.pw) s.bvy *= -1;
+            if (s.by > h-40 && s.bx > s.px && s.bx < s.px+s.pw) { s.bvy *= -1; s.bvy -= 0.5; } // Speed up on paddle hit
 
-            // Brick Hit
             let activeCount = 0;
             s.bricks.forEach(b => {
                 if (b.active) {
                     activeCount++;
                     if (s.bx > b.x && s.bx < b.x+b.w && s.by > b.y && s.by < b.y+b.h) {
-                        b.active = false;
-                        s.bvy *= -1;
-                        score++; reward += 1;
+                        b.active = false; s.bvy *= -1; score++; reward += 1;
                     }
                 }
             });
 
             if (s.by > h) return arcade.gameOver(score, reward);
-            if (activeCount === 0) return arcade.gameOver(score, reward + 20); // Bonus
+            if (activeCount === 0) return arcade.gameOver(score, reward + 50);
 
-            // Draw
-            ctx.fillStyle = '#5865F2';
-            ctx.fillRect(s.px, h-30, s.pw, 10);
+            ctx.fillStyle = '#5865F2'; ctx.fillRect(s.px, h-30, s.pw, 10);
             ctx.beginPath(); ctx.arc(s.bx, s.by, 6, 0, Math.PI*2); ctx.fillStyle='white'; ctx.fill();
             s.bricks.forEach(b => {
-                if (b.active) {
-                    ctx.fillStyle = `hsl(${b.x}, 70%, 50%)`;
-                    ctx.fillRect(b.x, b.y, b.w, b.h);
-                }
+                if (b.active) { ctx.fillStyle = `hsl(${b.x}, 70%, 50%)`; ctx.fillRect(b.x, b.y, b.w, b.h); }
             });
         }
 
@@ -545,58 +607,30 @@
             if (s.timer % 30 === 0) {
                 s.enemies.push({ x: Math.random()*w, y: -20, r: Math.random()*20+10 });
                 score++;
-                if (score % 60 === 0) reward++; // 1 coin per 60 frames (approx 1 sec)
+                if (score % 60 === 0) reward++; 
             }
-
-            ctx.fillStyle = '#5865F2';
-            ctx.beginPath(); ctx.moveTo(s.px, s.py); ctx.lineTo(s.px-15, s.py+30); ctx.lineTo(s.px+15, s.py+30); ctx.fill();
-
+            ctx.fillStyle = '#5865F2'; ctx.beginPath(); ctx.moveTo(s.px, s.py); ctx.lineTo(s.px-15, s.py+30); ctx.lineTo(s.px+15, s.py+30); ctx.fill();
             ctx.fillStyle = '#ef4444';
             for (let i=0; i<s.enemies.length; i++) {
-                let e = s.enemies[i];
-                e.y += 3 + (score/500); // gets faster
+                let e = s.enemies[i]; e.y += 3 + (score/500);
                 ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, Math.PI*2); ctx.fill();
-                
-                // Collision (Simple distance)
-                let dist = Math.hypot(e.x - s.px, e.y - (s.py+15));
-                if (dist < e.r + 10) return arcade.gameOver(score, reward);
+                if (Math.hypot(e.x - s.px, e.y - (s.py+15)) < e.r + 10) return arcade.gameOver(score, reward);
             }
         }
 
         function updateJump(s, w, h) {
-            s.timer++;
-            // Physics
-            s.dy += s.gravity;
-            s.y += s.dy;
+            s.timer++; s.dy += s.gravity; s.y += s.dy;
             if (s.y > h-40) { s.y = h-40; s.dy = 0; s.grounded = true; }
+            if (s.timer % 100 === 0) s.obstacles.push({ x: w, w: 20, h: 40 });
 
-            // Obstacles
-            if (s.timer % 100 === 0) {
-                s.obstacles.push({ x: w, w: 20, h: 40 });
-            }
-
-            // Draw Player
-            ctx.fillStyle = '#5865F2';
-            ctx.fillRect(50, s.y, 30, 30);
-            ctx.fillStyle = '#1e1f22';
-            ctx.fillRect(0, h-10, w, 10); // Floor
-
-            // Draw & Update Obstacles
+            ctx.fillStyle = '#5865F2'; ctx.fillRect(50, s.y, 30, 30);
+            ctx.fillStyle = '#1e1f22'; ctx.fillRect(0, h-10, w, 10);
             ctx.fillStyle = '#ef4444';
             for (let i=0; i<s.obstacles.length; i++) {
-                let o = s.obstacles[i];
-                o.x -= 5;
+                let o = s.obstacles[i]; o.x -= 5;
                 ctx.fillRect(o.x, h-10-o.h, o.w, o.h);
-
-                // Collision
                 if (o.x < 80 && o.x+o.w > 50 && s.y+30 > h-10-o.h) return arcade.gameOver(score, reward);
-                
-                // Pass count
-                if (o.x + o.w < 50 && !o.passed) {
-                    o.passed = true;
-                    score++;
-                    reward += 5;
-                }
+                if (o.x + o.w < 50 && !o.passed) { o.passed = true; score++; reward += 5; }
             }
         }
 
@@ -610,11 +644,16 @@
             if (game === 'typing') startTyping();
             if (game === 'color') startColor();
             if (game === 'simon') startSimon();
+            if (game === '2048') start2048();
+            if (game === 'mines') startMines();
+            if (game === 'clicker') startClicker();
         }
 
+        // ... Existing DOM Games (whack, math, memory, reaction, typing, color, simon) ...
+        // Re-implementing briefly to ensure full file integrity
+        
         function startWhack() {
-            let hits = 0;
-            let time = 20;
+            let hits = 0, time = 20;
             els.domContainer.innerHTML = `<div class="grid grid-cols-4 gap-2 w-full h-full p-4"></div>`;
             const grid = els.domContainer.firstElementChild;
             for(let i=0; i<16; i++) {
@@ -622,70 +661,26 @@
                 btn.className = 'bg-[#2b2d31] rounded-lg whack-tile cursor-pointer h-full';
                 btn.onclick = () => {
                     if (btn.classList.contains('whack-active')) {
-                        btn.classList.remove('whack-active');
-                        hits++;
-                        score = hits;
-                        reward = hits * 2;
-                        updateHUD();
+                        btn.classList.remove('whack-active'); hits++; score = hits; reward = hits * 2; updateHUD();
                     }
                 };
                 grid.appendChild(btn);
             }
-
-            // Timer Loop
-            const timerInt = setInterval(() => {
-                time--;
-                if (time <= 0 || !isPlaying) {
-                    clearInterval(timerInt);
-                    clearInterval(gameInt);
-                    if (isPlaying) arcade.gameOver(score, reward);
-                }
-            }, 1000);
-
-            // Game Loop
-            const gameInt = setInterval(() => {
-                const tiles = document.querySelectorAll('.whack-tile');
-                tiles.forEach(t => t.classList.remove('whack-active'));
-                const r = Math.floor(Math.random()*16);
-                tiles[r].classList.add('whack-active');
-            }, 700);
-            
-            // Cleanup hook
-            window.arcade.stop = () => { isPlaying=false; clearInterval(timerInt); clearInterval(gameInt); els.modal.classList.add('hidden'); };
+            const tInt = setInterval(() => { time--; if(time<=0 || !isPlaying) { clearInterval(tInt); clearInterval(gInt); if(isPlaying) arcade.gameOver(score, reward); } }, 1000);
+            const gInt = setInterval(() => {
+                document.querySelectorAll('.whack-tile').forEach(t => t.classList.remove('whack-active'));
+                grid.children[Math.floor(Math.random()*16)].classList.add('whack-active');
+            }, 600);
+            window.arcade.stop = () => { isPlaying=false; clearInterval(tInt); clearInterval(gInt); els.modal.classList.add('hidden'); };
         }
 
         function startMath() {
             let qCount = 0;
-            const maxQ = 10;
-            
             function nextQ() {
-                if (qCount >= maxQ) return arcade.gameOver(score, reward);
-                const n1 = Math.floor(Math.random()*20);
-                const n2 = Math.floor(Math.random()*20);
-                const ans = n1 + n2;
-                
-                els.domContainer.innerHTML = `
-                    <div class="text-center">
-                        <h2 class="text-4xl font-bold text-white mb-6">${n1} + ${n2} = ?</h2>
-                        <div class="grid grid-cols-2 gap-4">
-                            ${[ans, ans + Math.floor(Math.random()*10)+1, ans - Math.floor(Math.random()*5)-1, ans + 10]
-                                .sort(()=>Math.random()-0.5)
-                                .map(n => `<button class="ans-btn bg-[#2b2d31] hover:bg-[#5865F2] p-4 rounded text-xl font-bold">${n}</button>`)
-                                .join('')}
-                        </div>
-                    </div>
-                `;
-                
-                document.querySelectorAll('.ans-btn').forEach(b => {
-                    b.onclick = () => {
-                        qCount++;
-                        if (parseInt(b.textContent) === ans) {
-                            score++; reward += 5;
-                        }
-                        updateHUD();
-                        nextQ();
-                    };
-                });
+                if (qCount >= 10) return arcade.gameOver(score, reward);
+                const n1 = Math.floor(Math.random()*20), n2 = Math.floor(Math.random()*20), ans = n1+n2;
+                els.domContainer.innerHTML = `<div class="text-center"><h2 class="text-4xl font-bold text-white mb-6">${n1} + ${n2} = ?</h2><div class="grid grid-cols-2 gap-4">${[ans, ans+Math.floor(Math.random()*10)+1, ans-Math.floor(Math.random()*5)-1, ans+10].sort(()=>Math.random()-0.5).map(n=>`<button class="ans-btn bg-[#2b2d31] hover:bg-[#5865F2] p-4 rounded text-xl font-bold">${n}</button>`).join('')}</div></div>`;
+                document.querySelectorAll('.ans-btn').forEach(b => b.onclick = () => { qCount++; if(parseInt(b.textContent)===ans){score++; reward+=5;} updateHUD(); nextQ(); });
             }
             nextQ();
         }
@@ -693,200 +688,183 @@
         function startMemory() {
             const symbols = ['🍎','🍌','🍒','🍇','🍉','🍊','🍍','🥝'];
             const deck = [...symbols, ...symbols].sort(() => Math.random() - 0.5);
-            let flipped = [];
-            let matched = 0;
-
+            let flipped = [], matched = 0;
             els.domContainer.innerHTML = `<div class="grid grid-cols-4 gap-2 w-full max-w-md aspect-square"></div>`;
-            const grid = els.domContainer.firstElementChild;
-
-            deck.forEach((sym, i) => {
-                const card = document.createElement('div');
-                card.className = 'memory-card w-full h-full';
-                card.innerHTML = `
-                    <div class="memory-inner w-full h-full">
-                        <div class="memory-front">?</div>
-                        <div class="memory-back">${sym}</div>
-                    </div>
-                `;
+            deck.forEach(sym => {
+                const card = document.createElement('div'); card.className = 'memory-card w-full h-full';
+                card.innerHTML = `<div class="memory-inner w-full h-full"><div class="memory-front">?</div><div class="memory-back">${sym}</div></div>`;
                 card.onclick = () => {
                     if (flipped.length < 2 && !card.classList.contains('flipped')) {
-                        card.classList.add('flipped');
-                        flipped.push({ el: card, val: sym });
-                        
+                        card.classList.add('flipped'); flipped.push({ el: card, val: sym });
                         if (flipped.length === 2) {
-                            if (flipped[0].val === flipped[1].val) {
-                                matched++;
-                                flipped = [];
-                                if (matched === 8) arcade.gameOver(16, 40);
-                            } else {
-                                setTimeout(() => {
-                                    if(isPlaying) {
-                                        flipped[0].el.classList.remove('flipped');
-                                        flipped[1].el.classList.remove('flipped');
-                                        flipped = [];
-                                    }
-                                }, 1000);
-                            }
+                            if (flipped[0].val === flipped[1].val) { matched++; flipped = []; if (matched === 8) arcade.gameOver(16, 40); } 
+                            else setTimeout(() => { if(isPlaying){ flipped[0].el.classList.remove('flipped'); flipped[1].el.classList.remove('flipped'); flipped = []; } }, 800);
                         }
                     }
                 };
-                grid.appendChild(card);
+                els.domContainer.firstElementChild.appendChild(card);
             });
         }
 
         function startReaction() {
-            els.domContainer.innerHTML = `
-                <div id="react-box" class="w-full h-full bg-red-500 flex items-center justify-center cursor-pointer">
-                    <span class="text-2xl font-bold">WAIT FOR GREEN...</span>
-                </div>
-            `;
+            els.domContainer.innerHTML = `<div id="react-box" class="w-full h-full bg-red-500 flex items-center justify-center cursor-pointer"><span class="text-2xl font-bold">WAIT FOR GREEN...</span></div>`;
             const box = document.getElementById('react-box');
-            let startTime = 0;
-            let ready = false;
-
-            const timeout = setTimeout(() => {
-                if (!isPlaying) return;
-                box.classList.remove('bg-red-500');
-                box.classList.add('bg-green-500');
-                box.innerHTML = '<span class="text-2xl font-bold">CLICK!</span>';
-                startTime = Date.now();
-                ready = true;
-            }, 2000 + Math.random()*3000);
-
-            box.onclick = () => {
-                if (ready) {
-                    const diff = Date.now() - startTime;
-                    score = diff;
-                    if (diff < 300) reward = 30;
-                    else if (diff < 500) reward = 10;
-                    else reward = 1;
-                    arcade.gameOver(score + 'ms', reward);
-                } else {
-                    clearTimeout(timeout);
-                    arcade.gameOver('Too Early', 0);
-                }
-            };
+            let ready = false, start = 0;
+            const t = setTimeout(() => { if(!isPlaying)return; box.classList.replace('bg-red-500','bg-green-500'); box.innerHTML='<span class="text-2xl font-bold">CLICK!</span>'; start=Date.now(); ready=true; }, 2000+Math.random()*3000);
+            box.onclick = () => { if(ready){ const diff=Date.now()-start; score=diff; reward = diff<300?30:diff<500?10:1; arcade.gameOver(score+'ms',reward); } else { clearTimeout(t); arcade.gameOver('Too Early',0); } };
         }
 
         function startTyping() {
-            const words = ['apple', 'banana', 'orbit', 'galaxy', 'rocket', 'code', 'chat', 'game', 'coin', 'gem'];
+            const words = ['apple','banana','orbit','galaxy','rocket','code','chat','game','coin','gem','alien','star','planet','comet'];
             let current = '';
-            
             function nextWord() {
-                if (!isPlaying) return;
-                current = words[Math.floor(Math.random()*words.length)];
-                els.domContainer.innerHTML = `
-                    <div class="text-center">
-                        <p class="text-gray-400 mb-2">Type this word:</p>
-                        <h2 class="text-4xl font-mono font-bold text-[#5865F2] mb-4">${current}</h2>
-                        <input type="text" id="type-input" class="bg-[#1e1f22] border border-gray-600 p-2 text-center text-white text-xl rounded" autofocus>
-                    </div>
-                `;
-                const input = document.getElementById('type-input');
-                input.focus();
-                input.oninput = () => {
-                    if (input.value.toLowerCase() === current) {
-                        score++; reward += 3;
-                        updateHUD();
-                        nextWord();
-                    }
-                };
+                if(!isPlaying)return; current=words[Math.floor(Math.random()*words.length)];
+                els.domContainer.innerHTML = `<div class="text-center"><p class="text-gray-400 mb-2">Type:</p><h2 class="text-4xl font-mono font-bold text-[#5865F2] mb-4">${current}</h2><input type="text" id="type-input" class="bg-[#1e1f22] border border-gray-600 p-2 text-center text-white text-xl rounded" autofocus></div>`;
+                const input = document.getElementById('type-input'); input.focus();
+                input.oninput = () => { if(input.value.toLowerCase()===current) { score++; reward+=3; updateHUD(); nextWord(); } };
             }
-            
-            // 20s Timer
-            setTimeout(() => { if(isPlaying) arcade.gameOver(score, reward); }, 20000);
+            setTimeout(()=>{if(isPlaying)arcade.gameOver(score,reward)}, 20000);
             nextWord();
         }
 
         function startColor() {
-            let level = 1;
-            
-            function nextLevel() {
-                if (!isPlaying) return;
-                const size = Math.min(6, Math.floor(level/2) + 2);
-                const count = size * size;
-                const hue = Math.floor(Math.random()*360);
-                const diff = Math.max(10, 50 - level*5); // Harder as level goes up
-                
+            let level=1;
+            function nextLevel(){
+                if(!isPlaying)return;
+                const size=Math.min(6, Math.floor(level/2)+2), count=size*size, hue=Math.floor(Math.random()*360), diff=Math.max(10,50-level*5);
                 els.domContainer.innerHTML = `<div class="grid gap-2 w-full max-w-md aspect-square" style="grid-template-columns: repeat(${size}, 1fr)"></div>`;
-                const grid = els.domContainer.firstElementChild;
-                
-                const targetIndex = Math.floor(Math.random()*count);
-                
-                for(let i=0; i<count; i++) {
-                    const d = document.createElement('div');
-                    d.className = 'w-full h-full rounded cursor-pointer';
-                    if (i === targetIndex) {
-                        d.style.backgroundColor = `hsl(${hue}, 70%, ${50+diff}%)`;
-                        d.onclick = () => { score++; reward+=5; level++; updateHUD(); nextLevel(); };
-                    } else {
-                        d.style.backgroundColor = `hsl(${hue}, 70%, 50%)`;
-                        d.onclick = () => { arcade.gameOver(score, reward); }; // Wrong click loses
-                    }
-                    grid.appendChild(d);
+                const t=Math.floor(Math.random()*count);
+                for(let i=0;i<count;i++){
+                    const d=document.createElement('div'); d.className='w-full h-full rounded cursor-pointer';
+                    d.style.backgroundColor = i===t ? `hsl(${hue},70%,${50+diff}%)` : `hsl(${hue},70%,50%)`;
+                    d.onclick = i===t ? ()=>{score++; reward+=5; level++; updateHUD(); nextLevel();} : ()=>{arcade.gameOver(score,reward)};
+                    els.domContainer.firstElementChild.appendChild(d);
                 }
             }
             nextLevel();
         }
 
         function startSimon() {
-            const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500'];
-            let seq = [];
-            let playerSeq = [];
+            const cols=['bg-red-500','bg-blue-500','bg-green-500','bg-yellow-500'];
+            let seq=[], pSeq=[];
+            els.domContainer.innerHTML = `<div class="grid grid-cols-2 gap-4 w-64 h-64"><div id="s0" class="bg-red-900 rounded-tl-full cursor-pointer opacity-50"></div><div id="s1" class="bg-blue-900 rounded-tr-full cursor-pointer opacity-50"></div><div id="s2" class="bg-green-900 rounded-bl-full cursor-pointer opacity-50"></div><div id="s3" class="bg-yellow-900 rounded-br-full cursor-pointer opacity-50"></div></div><div id="s-stat" class="mt-4 font-bold">Watch...</div>`;
+            const flash = (i) => { const e=document.getElementById('s'+i); e.classList.remove('opacity-50', 'bg-red-900','bg-blue-900','bg-green-900','bg-yellow-900'); e.classList.add(cols[i]); setTimeout(()=>{e.classList.add('opacity-50'); e.classList.remove(cols[i]);},300); };
+            const play = () => {
+                pSeq=[]; seq.push(Math.floor(Math.random()*4)); document.getElementById('s-stat').textContent='Watch...';
+                let i=0; const iv=setInterval(()=>{ flash(seq[i]); i++; if(i>=seq.length){clearInterval(iv); document.getElementById('s-stat').textContent='Your Turn!';} },600);
+            };
+            for(let i=0;i<4;i++) document.getElementById('s'+i).onclick=()=>{ flash(i); pSeq.push(i); if(pSeq[pSeq.length-1]!==seq[pSeq.length-1]) return arcade.gameOver(score,reward); if(pSeq.length===seq.length){score++; reward+=5; updateHUD(); setTimeout(play,1000);} };
+            setTimeout(play,1000);
+        }
+
+        // --- NEW GAMES ---
+
+        function start2048() {
+            let grid = Array(16).fill(0);
             
-            els.domContainer.innerHTML = `
-                <div class="grid grid-cols-2 gap-4 w-64 h-64">
-                    <div id="simon-0" class="bg-red-900 rounded-tl-full cursor-pointer opacity-50 transition"></div>
-                    <div id="simon-1" class="bg-blue-900 rounded-tr-full cursor-pointer opacity-50 transition"></div>
-                    <div id="simon-2" class="bg-green-900 rounded-bl-full cursor-pointer opacity-50 transition"></div>
-                    <div id="simon-3" class="bg-yellow-900 rounded-br-full cursor-pointer opacity-50 transition"></div>
-                </div>
-                <div id="simon-status" class="mt-4 text-xl font-bold">Watch...</div>
-            `;
-
-            function flash(idx) {
-                const el = document.getElementById(`simon-${idx}`);
-                el.classList.remove('opacity-50');
-                el.classList.add(colors[idx]);
-                setTimeout(() => {
-                    el.classList.add('opacity-50');
-                    el.classList.remove(colors[idx]);
-                }, 300);
+            function render() {
+                els.domContainer.innerHTML = `<div class="grid grid-cols-4 gap-2 bg-[#bbada0] p-2 rounded w-64 h-64">
+                    ${grid.map(v => `<div class="w-full h-full rounded flex items-center justify-center font-bold text-lg tile-${v}">${v||''}</div>`).join('')}
+                </div><div class="mt-4 text-xs">Use Arrow Keys</div>`;
+            }
+            
+            function spawn() {
+                const empties = grid.map((v,i)=>v===0?i:null).filter(v=>v!==null);
+                if(empties.length) grid[empties[Math.floor(Math.random()*empties.length)]] = Math.random()<0.9?2:4;
             }
 
-            function playRound() {
-                playerSeq = [];
-                seq.push(Math.floor(Math.random()*4));
-                document.getElementById('simon-status').textContent = 'Watch...';
-                
-                let i = 0;
-                const interval = setInterval(() => {
-                    flash(seq[i]);
-                    i++;
-                    if (i >= seq.length) {
-                        clearInterval(interval);
-                        document.getElementById('simon-status').textContent = 'Your Turn!';
-                    }
-                }, 600);
+            function slide(row) {
+                let f = row.filter(v=>v);
+                for(let i=0; i<f.length-1; i++) {
+                    if(f[i]===f[i+1]) { f[i]*=2; score+=f[i]; f[i+1]=0; if(f[i]>=16) reward+=Math.floor(f[i]/10); }
+                }
+                f = f.filter(v=>v);
+                while(f.length<4) f.push(0);
+                return f;
             }
 
-            // Click Handlers
-            for(let i=0; i<4; i++) {
-                document.getElementById(`simon-${i}`).onclick = () => {
-                    flash(i);
-                    playerSeq.push(i);
-                    // Check
-                    if (playerSeq[playerSeq.length-1] !== seq[playerSeq.length-1]) {
-                        return arcade.gameOver(score, reward);
+            function move(dir) {
+                let changed = false;
+                if(dir==='Left'||dir==='Right') {
+                    for(let i=0; i<4; i++) {
+                        let r = grid.slice(i*4, i*4+4);
+                        if(dir==='Right') r.reverse();
+                        let n = slide(r);
+                        if(dir==='Right') n.reverse();
+                        if(n.join(',') !== grid.slice(i*4, i*4+4).join(',')) changed=true;
+                        for(let k=0; k<4; k++) grid[i*4+k] = n[k];
                     }
-                    if (playerSeq.length === seq.length) {
-                        score++; reward += 5; updateHUD();
-                        setTimeout(playRound, 1000);
+                } else {
+                    for(let i=0; i<4; i++) {
+                        let c = [grid[i], grid[i+4], grid[i+8], grid[i+12]];
+                        if(dir==='Down') c.reverse();
+                        let n = slide(c);
+                        if(dir==='Down') n.reverse();
+                        if(n.join(',') !== c.join(',')) changed=true;
+                        grid[i] = n[0]; grid[i+4] = n[1]; grid[i+8] = n[2]; grid[i+12] = n[3];
+                    }
+                }
+                if(changed) { spawn(); render(); updateHUD(); if(!grid.includes(0)) setTimeout(()=>arcade.gameOver(score,reward),1000); }
+            }
+
+            window.onkeydown = (e) => { if(e.key.startsWith('Arrow')) move(e.key.replace('Arrow','')); };
+            spawn(); spawn(); render();
+        }
+
+        function startMines() {
+            const size=8, bombs=10;
+            let grid = Array(size*size).fill(0);
+            let bombIndices = new Set();
+            while(bombIndices.size < bombs) bombIndices.add(Math.floor(Math.random()*64));
+            
+            els.domContainer.innerHTML = `<div class="grid grid-cols-8 gap-1 w-64 h-64 bg-[#2b2d31]"></div>`;
+            const container = els.domContainer.firstElementChild;
+            
+            for(let i=0; i<64; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'w-full h-full mine-hidden cursor-pointer flex items-center justify-center font-bold text-xs';
+                cell.onclick = () => {
+                    if(!isPlaying) return;
+                    if(bombIndices.has(i)) {
+                        cell.classList.add('mine-bomb'); cell.innerHTML='💣';
+                        arcade.gameOver(score, 0);
+                    } else {
+                        cell.classList.replace('mine-hidden', 'mine-revealed');
+                        score++; updateHUD();
+                        if(score === 64-bombs) arcade.gameOver(score, 100);
                     }
                 };
+                container.appendChild(cell);
             }
+        }
 
-            setTimeout(playRound, 1000);
+        function startClicker() {
+            let time = 10;
+            els.domContainer.innerHTML = `
+                <div class="text-center">
+                    <div id="clicker-timer" class="text-6xl font-black text-gray-700 mb-4">10</div>
+                    <button id="click-btn" class="bg-yellow-500 hover:bg-yellow-400 text-black font-black text-2xl w-48 h-48 rounded-full shadow-2xl active:scale-95 transition border-8 border-yellow-600">
+                        CLICK!
+                    </button>
+                </div>
+            `;
+            const btn = document.getElementById('click-btn');
+            btn.onclick = () => {
+                score++; reward++; updateHUD();
+                btn.style.transform = `scale(${0.9 + Math.random()*0.2}) rotate(${Math.random()*10 - 5}deg)`;
+            };
+            
+            const int = setInterval(() => {
+                time--;
+                const timerEl = document.getElementById('clicker-timer');
+                if(timerEl) timerEl.textContent = time;
+                if(time <= 0) {
+                    clearInterval(int);
+                    if(isPlaying) arcade.gameOver(score, reward);
+                }
+            }, 1000);
+            
+            window.arcade.stop = () => { isPlaying=false; clearInterval(int); els.modal.classList.add('hidden'); };
         }
 
         // --- Auth Listener ---
