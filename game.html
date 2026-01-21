@@ -255,7 +255,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, doc, updateDoc, onSnapshot, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, updateDoc, onSnapshot, serverTimestamp, runTransaction, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBz9yOlQFZQZE-GtGcRbJ2sWUYQTb0kBi4",
@@ -270,6 +270,30 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
+        // --- Abbreviation System ---
+        const SUFFIXES = {
+            'k': 1e3, 'm': 1e6, 'b': 1e9, 't': 1e12, 'qa': 1e15, 'qi': 1e18, 'sx': 1e21, 'sp': 1e24, 'oc': 1e27, 'no': 1e30,
+            'dc': 1e33, 'ud': 1e36, 'dd': 1e39, 'td': 1e42, 'qad': 1e45, 'qid': 1e48, 'sxd': 1e51, 'spd': 1e54, 'ocd': 1e57, 'nod': 1e60,
+            'vg': 1e63, 'uvg': 1e66, 'dvg': 1e69, 'tvg': 1e72, 'qavg': 1e75, 'qivg': 1e78, 'sxvg': 1e81, 'spvg': 1e84, 'ocvg': 1e87, 'novg': 1e90,
+            'tg': 1e93, 'utg': 1e96, 'dtg': 1e99, 'ttg': 1e102, 'qatg': 1e105, 'qitg': 1e108, 'sxtg': 1e111, 'sptg': 1e114, 'octg': 1e117, 'notg': 1e120,
+            'qg': 1e123, 'uqg': 1e126, 'dqg': 1e129, 'tqg': 1e132, 'qaqg': 1e135, 'qiqg': 1e138, 'sxqg': 1e141, 'spqg': 1e144, 'ocqg': 1e147, 'noqg': 1e150
+        };
+
+        const SORTED_SUFFIXES = Object.entries(SUFFIXES).sort((a, b) => b[1] - a[1]);
+
+        function formatNumber(num) {
+            if (num === undefined || num === null || isNaN(num)) return "0";
+            if (num < 1000) return Math.floor(num).toLocaleString();
+
+            for (const [suffix, value] of SORTED_SUFFIXES) {
+                if (num >= value) {
+                    const formatted = (num / value).toFixed(2).replace(/\.0+$/, '').replace(/(\.[0-9]*[1-9])0+$/, '$1');
+                    return formatted + suffix;
+                }
+            }
+            return Math.floor(num).toLocaleString();
+        }
 
         // State
         let currentUser = null;
@@ -346,10 +370,10 @@
                     return showToast("Not enough coins! Need 20.", "error");
                 }
 
-                // Deduct Fee
+                // Deduct Fee (Atomic)
                 try {
                     await updateDoc(doc(db, "users", currentUser.uid), {
-                        coins: (currentUserProfile.coins || 0) - ENTRY_FEE
+                        coins: increment(-ENTRY_FEE)
                     });
                 } catch(e) { return showToast("Transaction error", "error"); }
 
@@ -386,24 +410,24 @@
                 isPlaying = false;
                 if (gameLoopId) cancelAnimationFrame(gameLoopId);
                 
-                // Update DB with Winnings
+                // Update DB with Winnings (Atomic)
                 if (finalReward > 0) {
                     try {
                         await updateDoc(doc(db, "users", currentUser.uid), {
-                            coins: (currentUserProfile.coins || 0) + finalReward
+                            coins: increment(finalReward)
                         });
                     } catch(e) {}
                 }
 
                 els.finalScore.textContent = finalScore;
-                els.finalReward.textContent = `+${finalReward}`;
+                els.finalReward.textContent = `+${formatNumber(finalReward)}`;
                 els.endOverlay.classList.remove('hidden');
             }
         };
 
         function updateHUD() {
             els.gameScore.textContent = score;
-            els.gameReward.textContent = reward;
+            els.gameReward.textContent = formatNumber(reward);
         }
 
         // --- CANVAS GAMES LOGIC ---
@@ -875,8 +899,8 @@
                 onSnapshot(docRef, (docSnap) => {
                     if (docSnap.exists()) {
                         currentUserProfile = docSnap.data();
-                        els.walletCoins.textContent = `${(currentUserProfile.coins || 0).toLocaleString()} 🪙`;
-                        els.walletGems.textContent = `${(currentUserProfile.gems || 0).toLocaleString()} 💎`;
+                        els.walletCoins.textContent = `${formatNumber(currentUserProfile.coins || 0)} 🪙`;
+                        els.walletGems.textContent = `${formatNumber(currentUserProfile.gems || 0)} 💎`;
                         if(currentUserProfile.pfpUrl) els.userPfp.src = currentUserProfile.pfpUrl;
                     }
                 });
