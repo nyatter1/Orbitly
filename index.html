@@ -6,7 +6,7 @@
 <title>Orbitly Chat</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- Import Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@700&family=Creepster&family=Inconsolata:wght@700&family=Lato:wght@700&family=Lobster&family=Merriweather:wght@700&family=Montserrat:wght@700&family=Nunito:wght@700&family=Open+Sans:wght@700&family=Orbitron:wght@700&family=Oswald:wght@700&family=Pacifico&family=Playfair+Display:wght@700&family=Press+Start+2P&family=Raleway:wght@700&family=Roboto:wght@700&family=Special+Elite&family=Ubuntu:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Black+Ops+One&family=Bungee+Shade&family=Cinzel:wght@700&family=Comic+Neue:wght@700&family=Creepster&family=Faster+One&family=Fontdiner+Swanky&family=Fredoka+One&family=Frijole&family=Inconsolata:wght@700&family=Indie+Flower&family=Lato:wght@700&family=Lobster&family=Merriweather:wght@700&family=Monoton&family=Montserrat:wght@700&family=Mountains+of+Christmas:wght@700&family=Nosifer&family=Nunito:wght@700&family=Open+Sans:wght@700&family=Orbitron:wght@700&family=Oswald:wght@700&family=Pacifico&family=Permanent+Marker&family=Playfair+Display:wght@700&family=Press+Start+2P&family=Raleway:wght@700&family=Righteous&family=Roboto:wght@700&family=Rubik+Glitch&family=Rye&family=Satisfy&family=Special+Elite&family=Ubuntu:wght@700&family=VT323&family=Wallpoet&display=swap" rel="stylesheet">
 
 <style>
 /* Custom scrollbar */
@@ -66,50 +66,93 @@
     .font-ubuntu { font-family: 'Ubuntu', sans-serif; }
     .font-mono { font-family: 'Inconsolata', monospace; }
     .font-comic { font-family: 'Comic Neue', cursive; }
-    .font-retro { font-family: 'Press Start 2P', cursive; font-size: 0.8em; } /* Adjust size for retro */
+    .font-retro { font-family: 'Press Start 2P', cursive; font-size: 0.8em; }
     .font-lobster { font-family: 'Lobster', cursive; }
     .font-pacifico { font-family: 'Pacifico', cursive; }
     .font-orbitron { font-family: 'Orbitron', sans-serif; }
     .font-creepster { font-family: 'Creepster', cursive; }
     .font-bangers { font-family: 'Bangers', cursive; letter-spacing: 1px; }
     .font-elite { font-family: 'Special Elite', cursive; }
+    
+    /* New Fonts */
+    .font-righteous { font-family: 'Righteous', cursive; }
+    .font-fredoka { font-family: 'Fredoka One', cursive; }
+    .font-monoton { font-family: 'Monoton', cursive; }
+    .font-rubik { font-family: 'Rubik Glitch', cursive; }
+    .font-vt323 { font-family: 'VT323', monospace; }
+    .font-wallpoet { font-family: 'Wallpoet', cursive; }
+    .font-permanent { font-family: 'Permanent Marker', cursive; }
+    .font-cinzel { font-family: 'Cinzel', serif; }
+    .font-bungee { font-family: 'Bungee Shade', cursive; }
+    .font-nosifer { font-family: 'Nosifer', cursive; }
 
     /* --- USERNAME EFFECTS --- */
     .effect-none { }
+    
+    /* Basic */
+    .effect-outline { -webkit-text-stroke: 1px currentColor; color: transparent !important; }
+    .effect-outline-thick { -webkit-text-stroke: 2px currentColor; color: transparent !important; }
+    .effect-shadow { text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+    .effect-shadow-soft { text-shadow: 0 4px 8px rgba(0,0,0,0.3); }
     .effect-glow { text-shadow: 0 0 10px currentColor; }
+    .effect-glow-strong { text-shadow: 0 0 5px #fff, 0 0 10px currentColor, 0 0 20px currentColor; }
     
-    .effect-rainbow {
-        background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
-        -webkit-background-clip: text;
-        color: transparent !important;
-        animation: rainbow-anim 5s linear infinite;
-        background-size: 200% auto;
-    }
-    @keyframes rainbow-anim { 0% {background-position: 0% center;} 100% {background-position: 200% center;} }
-
-    .effect-gradient-gold { background: linear-gradient(to bottom, #FFD700, #FFA500); -webkit-background-clip: text; color: transparent !important; }
-    .effect-gradient-ocean { background: linear-gradient(to right, #00BFFF, #1E90FF); -webkit-background-clip: text; color: transparent !important; }
-    .effect-gradient-sunset { background: linear-gradient(to right, #FF4500, #FF69B4); -webkit-background-clip: text; color: transparent !important; }
-    .effect-gradient-fire { background: linear-gradient(to top, #f00, #ff0); -webkit-background-clip: text; color: transparent !important; }
+    /* 3D */
+    .effect-3d { text-shadow: 0 1px 0 #444, 0 2px 0 #333, 0 3px 0 #222, 0 4px 0 #111, 0 5px 0 #000; }
+    .effect-3d-retro { text-shadow: 3px 3px 0px #ff00ff; }
+    .effect-3d-layers { text-shadow: -2px -2px 0 #ff0000, 2px 2px 0 #0000ff; }
     
-    .effect-glitch {
-        position: relative;
-        animation: glitch-skew 1s infinite linear alternate-reverse;
-    }
-    .effect-glitch::before, .effect-glitch::after {
-        content: attr(data-text);
-        position: absolute; left: 0; width: 100%; height: 100%;
-        background: #313338; /* Match bg to hide original */
-    }
+    /* Gradients */
+    .gradient-text { -webkit-background-clip: text; color: transparent !important; background-size: 200% auto; }
+    .effect-rainbow { background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet); -webkit-background-clip: text; color: transparent !important; animation: hue-anim 5s linear infinite; }
+    .effect-gradient-gold { background: linear-gradient(to bottom, #FFD700, #FDB931); -webkit-background-clip: text; color: transparent !important; }
+    .effect-gradient-ocean { background: linear-gradient(to right, #00c6ff, #0072ff); -webkit-background-clip: text; color: transparent !important; }
+    .effect-gradient-sunset { background: linear-gradient(to right, #ff512f, #dd2476); -webkit-background-clip: text; color: transparent !important; }
+    .effect-gradient-fire { background: linear-gradient(to top, #f12711, #f5af19); -webkit-background-clip: text; color: transparent !important; }
+    .effect-gradient-neon { background: linear-gradient(to right, #f83600, #f9d423); -webkit-background-clip: text; color: transparent !important; }
+    .effect-gradient-berry { background: linear-gradient(to right, #833ab4, #fd1d1d, #fcb045); -webkit-background-clip: text; color: transparent !important; }
+    .effect-gradient-mint { background: linear-gradient(to right, #00b09b, #96c93d); -webkit-background-clip: text; color: transparent !important; }
+    .effect-gradient-plasma { background: linear-gradient(to right, #fc00ff, #00dbde); -webkit-background-clip: text; color: transparent !important; }
+    .effect-gradient-chrome { background: linear-gradient(to bottom, #a8c0ff, #3f2b96); -webkit-background-clip: text; color: transparent !important; }
+    
+    /* Animated */
+    .effect-anim-shine { background: linear-gradient(to right, #4d4d4d 0, white 10%, #4d4d4d 20%); -webkit-background-clip: text; color: transparent !important; animation: shine 3s infinite linear; background-size: 200%; }
+    .effect-anim-pulse { animation: pulse-scale 1s infinite; }
+    .effect-anim-bounce { animation: bounce 1s infinite; display: inline-block; }
+    .effect-anim-shake { animation: shake 0.5s infinite; display: inline-block; }
+    .effect-anim-flicker { animation: flicker 2s infinite; }
+    
+    /* Special */
+    .effect-glitch { position: relative; color: white; }
+    .effect-glitch::before, .effect-glitch::after { content: attr(data-text); position: absolute; top:0; left:0; width:100%; height:100%; background: #2b2d31; }
     .effect-glitch::before { left: 2px; text-shadow: -1px 0 #ff00c1; clip: rect(44px, 450px, 56px, 0); animation: glitch-anim 5s infinite linear alternate-reverse; }
     .effect-glitch::after { left: -2px; text-shadow: -1px 0 #00fff9; clip: rect(44px, 450px, 56px, 0); animation: glitch-anim2 5s infinite linear alternate-reverse; }
+    
+    .effect-neon-blue { color: #fff; text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #00ffff, 0 0 30px #00ffff, 0 0 40px #00ffff; }
+    .effect-neon-green { color: #fff; text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #00ff00, 0 0 30px #00ff00, 0 0 40px #00ff00; }
+    .effect-matrix { color: #00ff00; text-shadow: 0 0 5px #00ff00; font-family: 'VT323', monospace; }
+    .effect-fire { color: #f5af19; text-shadow: 0 -2px 4px #fff, 0 -4px 10px #ff3, 0 -10px 20px #f90, 0 -20px 40px #c33; }
+    .effect-ice { color: #e0ffff; text-shadow: 0 0 10px #00ffff, 0 0 20px #0000ff; }
+    .effect-retro-game { font-family: 'Press Start 2P', cursive; color: #ff0000; text-shadow: 2px 2px 0px #ffffff; font-size: 0.7em;}
+    .effect-comic-pop { font-family: 'Bangers', cursive; color: #fff; -webkit-text-stroke: 1px black; text-shadow: 3px 3px 0 #000; letter-spacing: 2px; transform: skew(-5deg); display:inline-block; }
+    .effect-mirror { transform: scaleY(-1); display:inline-block; opacity: 0.5; }
+    .effect-spaced { letter-spacing: 0.2em; }
+    .effect-strikethrough { text-decoration: line-through; text-decoration-color: red; text-decoration-thickness: 3px; }
+    .effect-underline-wavy { text-decoration: underline wavy #ff00ff; }
+    .effect-blur { color: transparent; text-shadow: 0 0 5px rgba(255,255,255,0.8); }
+    .effect-smoke { color: transparent; text-shadow: 0 0 10px #fff; animation: smoke 3s infinite; }
+
+    @keyframes hue-anim { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+    @keyframes shine { to { background-position: 200% center; } }
+    @keyframes pulse-scale { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(1px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
+    @keyframes flicker { 0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; } 20%, 24%, 55% { opacity: 0.5; } }
+    @keyframes smoke { 50% { text-shadow: 0 0 20px #fff; } }
     @keyframes glitch-anim { 0% {clip: rect(10px, 9999px, 30px, 0);} 100% {clip: rect(80px, 9999px, 100px, 0);} }
     @keyframes glitch-anim2 { 0% {clip: rect(60px, 9999px, 80px, 0);} 100% {clip: rect(10px, 9999px, 50px, 0);} }
 
-    .effect-neon { color: #fff; text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #ff00de, 0 0 30px #ff00de, 0 0 40px #ff00de; }
-    .effect-ice { color: #e0ffff; text-shadow: 0 0 10px #00ffff, 0 0 20px #0000ff; }
-
-    /* --- USERCARD THEMES --- */
+    /* --- PROFILE CARD THEMES --- */
     .card-theme-default { background-color: #2b2d31; border: 1px solid #1e1f22; }
     .card-theme-obsidian { background: linear-gradient(145deg, #000000, #1a1a1a); border: 1px solid #333; }
     .card-theme-sunset { background: linear-gradient(to bottom right, #2c1a1a, #2b2d31); border: 1px solid #ff4500; }
@@ -118,7 +161,24 @@
     .card-theme-gold { background: linear-gradient(135deg, #1c1917, #451a03); border: 1px solid #fbbf24; }
     .card-theme-cyber { background: repeating-linear-gradient(45deg, #111 0px, #111 10px, #222 10px, #222 20px); border: 1px solid #0ff; box-shadow: 0 0 15px #0ff2; }
     .card-theme-matrix { background-color: #000; border: 1px solid #0f0; box-shadow: 0 0 10px #0f02; background-image: radial-gradient(#003300 2px, transparent 2px); background-size: 10px 10px; }
-    
+    .card-theme-royal { background: linear-gradient(135deg, #240b36, #c31432); border: 1px solid #c31432; }
+    .card-theme-galaxy { background: radial-gradient(circle, #300030, #000000); border: 1px solid #aa00aa; }
+    .card-theme-minimal { background: #eee; border: 1px solid #ccc; color: #333 !important; }
+    .card-theme-minimal * { color: #333 !important; }
+
+    /* --- LIST STYLE THEMES --- */
+    .list-style-default { /* Default handles by hover class */ }
+    .list-style-glass { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(2px); }
+    .list-style-neon { border: 1px solid #0ff; box-shadow: 0 0 5px #0ff2; background: rgba(0,255,255,0.05); }
+    .list-style-gold { border-left: 3px solid #FFD700; background: linear-gradient(90deg, rgba(255,215,0,0.1), transparent); }
+    .list-style-fire { border-bottom: 2px solid #ff4500; background: linear-gradient(0deg, rgba(255,69,0,0.1), transparent); }
+    .list-style-royal { border: 1px solid #9b59b6; background: rgba(155, 89, 182, 0.1); }
+    .list-style-outline { border: 1px dashed #555; }
+    .list-style-compact { padding-top: 0 !important; padding-bottom: 0 !important; }
+    .list-style-bubble { border-radius: 999px; background: #1e1f22; border: 1px solid #333; }
+
+    /* Active Selection Ring */
+    .cust-active { border-color: #5865F2 !important; box-shadow: 0 0 0 2px #5865F2; }
 </style>
 </head>
 <body class="bg-[#313338] text-gray-100 font-sans antialiased h-screen flex flex-col overflow-hidden">
@@ -464,113 +524,146 @@
         </div>
     </div>
 
-    <!-- Customize Menu Modal (New) -->
+    <!-- Customize Menu Modal (Redesigned) -->
     <div id="customize-modal" class="absolute inset-0 z-50 hidden bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-[#2b2d31] rounded-xl shadow-2xl w-full max-w-2xl border border-[#1e1f22] relative flex flex-col h-[80vh]">
-            <div class="p-4 border-b border-[#1e1f22] flex justify-between items-center bg-[#202225] rounded-t-xl">
+        <div class="bg-[#2b2d31] rounded-xl shadow-2xl w-full max-w-4xl border border-[#1e1f22] relative flex flex-col h-[85vh] overflow-hidden">
+            
+            <!-- Header -->
+            <div class="p-4 border-b border-[#1e1f22] flex justify-between items-center bg-[#202225] shrink-0">
                 <div class="flex items-center gap-2">
                     <svg class="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
-                    <h3 class="text-white font-bold text-lg">Appearance</h3>
+                    <h3 class="text-white font-bold text-lg">Appearance Customization</h3>
                 </div>
                 <button onclick="app.closeCustomize()" class="text-gray-400 hover:text-white">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
 
-            <!-- Tabs -->
-            <div class="flex border-b border-[#1e1f22] bg-[#2f3136]">
-                <button onclick="app.switchCustTab('username')" id="cust-tab-username" class="px-6 py-3 text-sm font-bold text-white border-b-2 border-[#5865F2]">Username</button>
-                <button onclick="app.switchCustTab('usercard')" id="cust-tab-usercard" class="px-6 py-3 text-sm font-bold text-gray-400 hover:text-gray-200">Usercard</button>
-            </div>
-            
-            <div class="flex-1 overflow-y-auto p-6 bg-[#313338]">
-                
-                <!-- USERNAME TAB -->
-                <div id="cust-view-username" class="space-y-6">
-                    <div class="bg-[#202225] p-6 rounded-lg text-center border border-[#1e1f22]">
-                        <span class="text-gray-500 text-xs uppercase font-bold mb-2 block">Preview</span>
-                        <span id="cust-username-preview" class="text-4xl">Your Name</span>
+            <div class="flex flex-1 overflow-hidden">
+                <!-- Left: Persistent Previews -->
+                <div class="w-1/3 bg-[#202225] p-6 border-r border-[#1e1f22] flex flex-col gap-8 overflow-y-auto">
+                    
+                    <!-- Username Preview -->
+                    <div class="text-center">
+                        <span class="text-gray-500 text-[10px] uppercase font-bold mb-3 block tracking-widest">Username Preview</span>
+                        <div class="bg-[#2b2d31] p-8 rounded-lg border border-[#1e1f22] flex items-center justify-center min-h-[100px]">
+                            <span id="cust-username-preview" class="text-4xl">Your Name</span>
+                        </div>
                     </div>
 
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs uppercase font-bold text-gray-400 mb-2">Color</label>
-                            <input type="color" id="cust-color" class="w-full h-10 bg-[#202225] rounded cursor-pointer">
+                    <!-- List Item Preview -->
+                    <div class="text-center">
+                        <span class="text-gray-500 text-[10px] uppercase font-bold mb-3 block tracking-widest">List Style Preview</span>
+                        <div class="bg-[#2b2d31] p-4 rounded-lg border border-[#1e1f22]">
+                            <div id="cust-list-preview" class="flex items-center gap-3 p-2 rounded hover:bg-[#35373c] transition list-style-default">
+                                <div class="relative">
+                                    <img src="https://ui-avatars.com/api/?name=U" class="w-8 h-8 rounded-full object-cover">
+                                    <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 border-[3px] border-[#2b2d31] rounded-full bg-green-500"></div>
+                                </div>
+                                <div class="flex-1 text-left">
+                                    <div class="text-sm font-medium text-gray-200">Your Name</div>
+                                    <div class="text-[10px] text-gray-400 uppercase font-bold">Online</div>
+                                </div>
+                            </div>
                         </div>
-                        
-                        <div>
-                            <label class="block text-xs uppercase font-bold text-gray-400 mb-2">Font</label>
-                            <select id="cust-font" class="w-full px-3 py-2 bg-[#202225] text-white border border-[#1e1f22] rounded outline-none">
-                                <option value="font-default">Default (Sans)</option>
-                                <option value="font-roboto">Roboto</option>
-                                <option value="font-opensans">Open Sans</option>
-                                <option value="font-lato">Lato</option>
-                                <option value="font-montserrat">Montserrat</option>
-                                <option value="font-oswald">Oswald</option>
-                                <option value="font-raleway">Raleway</option>
-                                <option value="font-merriweather">Merriweather (Serif)</option>
-                                <option value="font-playfair">Playfair (Serif)</option>
-                                <option value="font-nunito">Nunito</option>
-                                <option value="font-ubuntu">Ubuntu</option>
-                                <option value="font-mono">Inconsolata (Mono)</option>
-                                <option value="font-comic">Comic Neue</option>
-                                <option value="font-retro">Press Start 2P (Retro)</option>
-                                <option value="font-lobster">Lobster</option>
-                                <option value="font-pacifico">Pacifico</option>
-                                <option value="font-orbitron">Orbitron</option>
-                                <option value="font-creepster">Creepster</option>
-                                <option value="font-bangers">Bangers</option>
-                                <option value="font-elite">Special Elite</option>
-                            </select>
-                        </div>
+                    </div>
 
-                        <div>
-                            <label class="block text-xs uppercase font-bold text-gray-400 mb-2">Effects</label>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                <button onclick="app.setCustEffect('none')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20">None</button>
-                                <button onclick="app.setCustEffect('effect-glow')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 effect-glow">Glow</button>
-                                <button onclick="app.setCustEffect('effect-rainbow')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 effect-rainbow">Rainbow</button>
-                                <button onclick="app.setCustEffect('effect-gradient-gold')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 effect-gradient-gold">Gold</button>
-                                <button onclick="app.setCustEffect('effect-gradient-ocean')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 effect-gradient-ocean">Ocean</button>
-                                <button onclick="app.setCustEffect('effect-gradient-sunset')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 effect-gradient-sunset">Sunset</button>
-                                <button onclick="app.setCustEffect('effect-gradient-fire')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 effect-gradient-fire">Fire</button>
-                                <button onclick="app.setCustEffect('effect-neon')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 effect-neon">Neon</button>
-                                <button onclick="app.setCustEffect('effect-ice')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 effect-ice">Ice</button>
-                                <button onclick="app.setCustEffect('effect-glitch')" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 effect-glitch" data-text="Glitch">Glitch</button>
+                    <!-- Card Preview -->
+                    <div class="text-center">
+                        <span class="text-gray-500 text-[10px] uppercase font-bold mb-3 block tracking-widest">Profile Card Preview</span>
+                        <div id="cust-card-preview-box" class="card-theme-default p-4 rounded-xl border h-32 flex items-center justify-center relative overflow-hidden transition-all shadow-lg">
+                            <div class="text-center z-10">
+                                <h4 class="text-white font-bold">Profile Card</h4>
+                                <p class="text-white/60 text-xs">Theme Applied</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- USERCARD TAB -->
-                <div id="cust-view-usercard" class="space-y-6 hidden">
-                    <div id="cust-card-preview-box" class="card-theme-default p-6 rounded-xl border h-40 flex items-center justify-center relative overflow-hidden transition-all">
-                        <div class="text-center z-10">
-                            <h4 class="text-white font-bold text-xl">Preview Card</h4>
-                            <p class="text-gray-400 text-sm">This is how your profile looks.</p>
-                        </div>
+                <!-- Right: Controls -->
+                <div class="w-2/3 flex flex-col bg-[#313338]">
+                    <!-- Tabs -->
+                    <div class="flex border-b border-[#1e1f22] bg-[#2f3136]">
+                        <button onclick="app.switchCustTab('username')" id="cust-tab-username" class="flex-1 py-4 text-sm font-bold text-white border-b-2 border-[#5865F2]">Username</button>
+                        <button onclick="app.switchCustTab('list')" id="cust-tab-list" class="flex-1 py-4 text-sm font-bold text-gray-400 hover:text-gray-200">List Style</button>
+                        <button onclick="app.switchCustTab('usercard')" id="cust-tab-usercard" class="flex-1 py-4 text-sm font-bold text-gray-400 hover:text-gray-200">Profile Card</button>
                     </div>
 
-                    <div>
-                        <label class="block text-xs uppercase font-bold text-gray-400 mb-2">Card Theme</label>
-                        <div class="grid grid-cols-2 gap-3">
-                            <button onclick="app.setCustCard('card-theme-default')" class="h-12 rounded card-theme-default text-gray-300 text-xs font-bold">Default</button>
-                            <button onclick="app.setCustCard('card-theme-obsidian')" class="h-12 rounded card-theme-obsidian text-white text-xs font-bold">Obsidian</button>
-                            <button onclick="app.setCustCard('card-theme-sunset')" class="h-12 rounded card-theme-sunset text-white text-xs font-bold">Sunset</button>
-                            <button onclick="app.setCustCard('card-theme-ocean')" class="h-12 rounded card-theme-ocean text-white text-xs font-bold">Ocean</button>
-                            <button onclick="app.setCustCard('card-theme-forest')" class="h-12 rounded card-theme-forest text-white text-xs font-bold">Forest</button>
-                            <button onclick="app.setCustCard('card-theme-gold')" class="h-12 rounded card-theme-gold text-white text-xs font-bold">Gold</button>
-                            <button onclick="app.setCustCard('card-theme-cyber')" class="h-12 rounded card-theme-cyber text-white text-xs font-bold">Cyberpunk</button>
-                            <button onclick="app.setCustCard('card-theme-matrix')" class="h-12 rounded card-theme-matrix text-green-500 text-xs font-bold">Matrix</button>
+                    <div class="flex-1 overflow-y-auto p-6">
+                        
+                        <!-- USERNAME TAB -->
+                        <div id="cust-view-username" class="space-y-6">
+                            <!-- Color & Font -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs uppercase font-bold text-gray-400 mb-2">Base Color</label>
+                                    <input type="color" id="cust-color" class="w-full h-10 bg-[#202225] rounded cursor-pointer border border-[#1e1f22]">
+                                </div>
+                                <div>
+                                    <label class="block text-xs uppercase font-bold text-gray-400 mb-2">Font Family</label>
+                                    <select id="cust-font" class="w-full px-3 py-2 bg-[#202225] text-white border border-[#1e1f22] rounded outline-none h-10">
+                                        <option value="font-default">Default (Sans)</option>
+                                        <option value="font-roboto">Roboto</option>
+                                        <option value="font-montserrat">Montserrat</option>
+                                        <option value="font-oswald">Oswald</option>
+                                        <option value="font-playfair">Playfair Display</option>
+                                        <option value="font-mono">Inconsolata (Mono)</option>
+                                        <option value="font-comic">Comic Neue</option>
+                                        <option value="font-retro">Press Start 2P</option>
+                                        <option value="font-lobster">Lobster</option>
+                                        <option value="font-bangers">Bangers</option>
+                                        <option value="font-elite">Special Elite</option>
+                                        <option value="font-righteous">Righteous</option>
+                                        <option value="font-fredoka">Fredoka One</option>
+                                        <option value="font-monoton">Monoton</option>
+                                        <option value="font-rubik">Rubik Glitch</option>
+                                        <option value="font-vt323">VT323</option>
+                                        <option value="font-wallpoet">Wallpoet</option>
+                                        <option value="font-permanent">Permanent Marker</option>
+                                        <option value="font-cinzel">Cinzel</option>
+                                        <option value="font-bungee">Bungee Shade</option>
+                                        <option value="font-nosifer">Nosifer</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Effects Grid -->
+                            <div>
+                                <label class="block text-xs uppercase font-bold text-gray-400 mb-2">Select Effect</label>
+                                <div class="grid grid-cols-3 gap-2" id="effect-grid">
+                                    <!-- Populated by JS for easier management -->
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- LIST STYLE TAB -->
+                        <div id="cust-view-list" class="space-y-6 hidden">
+                            <div>
+                                <label class="block text-xs uppercase font-bold text-gray-400 mb-2">List Item Style</label>
+                                <div class="grid grid-cols-2 gap-3" id="list-style-grid">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CARD TAB -->
+                        <div id="cust-view-usercard" class="space-y-6 hidden">
+                            <div>
+                                <label class="block text-xs uppercase font-bold text-gray-400 mb-2">Card Theme</label>
+                                <div class="grid grid-cols-2 gap-3" id="card-theme-grid">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-
             </div>
 
-            <div class="p-4 border-t border-[#1e1f22] flex justify-end gap-3 bg-[#202225] rounded-b-xl">
-                <button onclick="app.closeCustomize()" class="px-4 py-2 rounded text-gray-300 hover:text-white hover:bg-[#3f4147] transition">Cancel</button>
-                <button onclick="app.saveCustomization()" class="px-4 py-2 rounded bg-pink-500 hover:bg-pink-600 text-white font-bold transition shadow-lg">Save Styles</button>
+            <!-- Footer -->
+            <div class="p-4 border-t border-[#1e1f22] flex justify-end gap-3 bg-[#202225] shrink-0">
+                <button onclick="app.closeCustomize()" class="px-6 py-2 rounded text-gray-300 hover:text-white hover:bg-[#3f4147] transition">Cancel</button>
+                <button onclick="app.saveCustomization()" class="px-6 py-2 rounded bg-pink-500 hover:bg-pink-600 text-white font-bold transition shadow-lg">Save Changes</button>
             </div>
         </div>
     </div>
@@ -651,7 +744,8 @@
     let tempCustState = {
         color: '#ffffff',
         font: 'font-default',
-        effect: 'none',
+        effect: 'effect-none',
+        listStyle: 'list-style-default',
         cardTheme: 'card-theme-default'
     };
 
@@ -725,7 +819,6 @@
         });
     }
     
-    // Allow GIF pass-through if small enough
     async function processUpload(file) {
         const limit = 500 * 1024; // 500KB limit for gifs
         if (file.type === 'image/gif' && file.size < limit) {
@@ -786,10 +879,8 @@
                 if(snap.exists()) {
                     const data = snap.data();
                     
-                    // Populate Main Profile Modal
                     document.getElementById('profile-pfp').src = data.pfpUrl || 'https://ui-avatars.com/api/?name=?';
                     
-                    // Banner Logic
                     const bannerEl = document.getElementById('profile-banner');
                     const bannerPlace = document.getElementById('profile-banner-placeholder');
                     if (data.bannerUrl) {
@@ -801,19 +892,14 @@
                         bannerPlace.classList.remove('hidden');
                     }
 
-                    // Username styling
                     const nameEl = document.getElementById('profile-username');
                     nameEl.textContent = data.username;
                     applyUsernameStyle(nameEl, data.usernameStyle);
 
-                    // Usercard Theme
                     const cardEl = document.getElementById('profile-card-content');
-                    // Reset classes
                     cardEl.className = "rounded-xl shadow-2xl w-full max-w-sm overflow-hidden relative transform transition-all scale-100";
-                    // Apply
                     cardEl.classList.add(data.usercardStyle || 'card-theme-default');
 
-                    // Bio
                     const bioEl = document.getElementById('profile-bio');
                     const bioCont = document.getElementById('profile-bio-container');
                     if (data.bio) {
@@ -835,7 +921,6 @@
                     const badge = document.getElementById('profile-status-badge');
                     badge.textContent = status;
 
-                    // Show Edit Button if own profile
                     const editBtn = document.getElementById('profile-edit-btn');
                     if (currentUser && currentUser.uid === uid) editBtn.classList.remove('hidden');
                     else editBtn.classList.add('hidden');
@@ -852,7 +937,6 @@
         },
         openEditProfile: () => {
             if (!currentUserProfile) return;
-            // Populate Inputs
             document.getElementById('edit-username').value = currentUserProfile.username;
             document.getElementById('edit-bio').value = currentUserProfile.bio || "";
             document.getElementById('edit-age').value = currentUserProfile.age;
@@ -880,7 +964,6 @@
             let pfpUrl = currentUserProfile.pfpUrl;
             let bannerUrl = currentUserProfile.bannerUrl;
 
-            // Simple validation
             if (!newUsername) return showToast("Username required", 'error');
             if (newUsername.length > 20) return showToast("Username too long", 'error');
 
@@ -908,31 +991,25 @@
         // --- Customization Menu Logic ---
         openCustomize: () => {
             if(!currentUserProfile) return;
-            // Load current settings
             const style = currentUserProfile.usernameStyle || {};
             tempCustState.color = style.color || '#ffffff';
             tempCustState.font = style.font || 'font-default';
-            tempCustState.effect = style.effect || 'none';
+            tempCustState.effect = style.effect || 'effect-none';
+            tempCustState.listStyle = currentUserProfile.listStyle || 'list-style-default';
             tempCustState.cardTheme = currentUserProfile.usercardStyle || 'card-theme-default';
 
-            // Ensure valid state
             if (!tempCustState.font) tempCustState.font = 'font-default';
 
-            // Set UI inputs
             document.getElementById('cust-color').value = tempCustState.color;
             const fontSelect = document.getElementById('cust-font');
             fontSelect.value = tempCustState.font;
-
-            // If value wasn't valid, reset to default
-            if (!fontSelect.value) {
-                fontSelect.value = 'font-default';
-                tempCustState.font = 'font-default';
-            }
+            if (!fontSelect.value) { fontSelect.value = 'font-default'; tempCustState.font = 'font-default'; }
             
-            // Render previews
+            generateEffectGrid();
+            generateListStyleGrid();
+            generateCardThemeGrid();
+            
             updateCustPreview();
-
-            // Defaults to username tab
             app.switchCustTab('username');
             els.displays.custModal.classList.remove('hidden');
         },
@@ -940,35 +1017,37 @@
             els.displays.custModal.classList.add('hidden');
         },
         switchCustTab: (tab) => {
-            const uTab = document.getElementById('cust-tab-username');
-            const cTab = document.getElementById('cust-tab-usercard');
-            const uView = document.getElementById('cust-view-username');
-            const cView = document.getElementById('cust-view-usercard');
-
-            if (tab === 'username') {
-                uTab.className = "px-6 py-3 text-sm font-bold text-white border-b-2 border-[#5865F2]";
-                cTab.className = "px-6 py-3 text-sm font-bold text-gray-400 hover:text-gray-200";
-                uView.classList.remove('hidden');
-                cView.classList.add('hidden');
-            } else {
-                cTab.className = "px-6 py-3 text-sm font-bold text-white border-b-2 border-[#5865F2]";
-                uTab.className = "px-6 py-3 text-sm font-bold text-gray-400 hover:text-gray-200";
-                cView.classList.remove('hidden');
-                uView.classList.add('hidden');
-            }
+            const tabs = ['username', 'list', 'usercard'];
+            tabs.forEach(t => {
+                const el = document.getElementById(`cust-tab-${t}`);
+                const view = document.getElementById(`cust-view-${t}`);
+                if (t === tab) {
+                    el.className = "flex-1 py-4 text-sm font-bold text-white border-b-2 border-[#5865F2]";
+                    view.classList.remove('hidden');
+                } else {
+                    el.className = "flex-1 py-4 text-sm font-bold text-gray-400 hover:text-gray-200";
+                    view.classList.add('hidden');
+                }
+            });
         },
         setCustEffect: (effect) => {
             tempCustState.effect = effect;
             updateCustPreview();
+            renderSelection('effect-grid', effect);
         },
         setCustCard: (theme) => {
             tempCustState.cardTheme = theme;
             updateCustPreview();
+            renderSelection('card-theme-grid', theme);
+        },
+        setListStyle: (style) => {
+            tempCustState.listStyle = style;
+            updateCustPreview();
+            renderSelection('list-style-grid', style);
         },
         saveCustomization: async () => {
             if(!currentUser) return;
             try {
-                // Update State from Inputs for safety (font/color might have changed without explicit setter)
                 tempCustState.color = document.getElementById('cust-color').value;
                 tempCustState.font = document.getElementById('cust-font').value || 'font-default';
 
@@ -978,6 +1057,7 @@
                         font: tempCustState.font,
                         effect: tempCustState.effect
                     },
+                    listStyle: tempCustState.listStyle,
                     usercardStyle: tempCustState.cardTheme
                 });
                 showToast("Styles updated!", "success");
@@ -989,95 +1069,166 @@
         }
     };
 
+    function generateEffectGrid() {
+        const effects = [
+            { id: 'effect-none', label: 'None' },
+            { id: 'effect-outline', label: 'Outline' },
+            { id: 'effect-outline-thick', label: 'Thick Outline' },
+            { id: 'effect-shadow', label: 'Shadow' },
+            { id: 'effect-shadow-soft', label: 'Soft Shadow' },
+            { id: 'effect-glow', label: 'Glow' },
+            { id: 'effect-glow-strong', label: 'Strong Glow' },
+            { id: 'effect-3d', label: '3D Punch' },
+            { id: 'effect-3d-retro', label: '3D Retro' },
+            { id: 'effect-3d-layers', label: '3D Layers' },
+            { id: 'effect-rainbow', label: 'Rainbow' },
+            { id: 'effect-gradient-gold', label: 'Gold' },
+            { id: 'effect-gradient-ocean', label: 'Ocean' },
+            { id: 'effect-gradient-sunset', label: 'Sunset' },
+            { id: 'effect-gradient-fire', label: 'Fire' },
+            { id: 'effect-gradient-neon', label: 'Neon' },
+            { id: 'effect-gradient-berry', label: 'Berry' },
+            { id: 'effect-gradient-mint', label: 'Mint' },
+            { id: 'effect-gradient-plasma', label: 'Plasma' },
+            { id: 'effect-gradient-chrome', label: 'Chrome' },
+            { id: 'effect-anim-shine', label: 'Shine' },
+            { id: 'effect-anim-pulse', label: 'Pulse' },
+            { id: 'effect-anim-bounce', label: 'Bounce' },
+            { id: 'effect-anim-shake', label: 'Shake' },
+            { id: 'effect-anim-flicker', label: 'Flicker' },
+            { id: 'effect-glitch', label: 'Glitch' },
+            { id: 'effect-neon-blue', label: 'Blue Neon' },
+            { id: 'effect-neon-green', label: 'Green Neon' },
+            { id: 'effect-matrix', label: 'Matrix' },
+            { id: 'effect-fire', label: 'Real Fire' },
+            { id: 'effect-ice', label: 'Ice' },
+            { id: 'effect-retro-game', label: '8-Bit' },
+            { id: 'effect-comic-pop', label: 'Comic Pop' },
+            { id: 'effect-mirror', label: 'Mirror' },
+            { id: 'effect-spaced', label: 'Spaced' },
+            { id: 'effect-strikethrough', label: 'Strike' },
+            { id: 'effect-underline-wavy', label: 'Wavy' },
+            { id: 'effect-blur', label: 'Ghost' },
+            { id: 'effect-smoke', label: 'Smoke' },
+        ];
+        const grid = document.getElementById('effect-grid');
+        grid.innerHTML = effects.map(e => `
+            <button onclick="app.setCustEffect('${e.id}')" id="btn-${e.id}" class="p-2 bg-[#202225] hover:bg-[#40444b] rounded text-white text-xs border border-transparent hover:border-white/20 transition ${e.id === tempCustState.effect ? 'cust-active' : ''}">
+                <span class="${e.id}" data-text="${e.label}">${e.label}</span>
+            </button>
+        `).join('');
+    }
+
+    function generateListStyleGrid() {
+        const styles = [
+            { id: 'list-style-default', label: 'Default' },
+            { id: 'list-style-glass', label: 'Glass' },
+            { id: 'list-style-neon', label: 'Neon Box' },
+            { id: 'list-style-gold', label: 'Gold Edge' },
+            { id: 'list-style-fire', label: 'Fire Base' },
+            { id: 'list-style-royal', label: 'Royal Purple' },
+            { id: 'list-style-outline', label: 'Dashed Outline' },
+            { id: 'list-style-compact', label: 'Compact' },
+            { id: 'list-style-bubble', label: 'Bubble' }
+        ];
+        document.getElementById('list-style-grid').innerHTML = styles.map(s => `
+            <button onclick="app.setListStyle('${s.id}')" id="btn-${s.id}" class="h-12 rounded bg-[#202225] border border-transparent hover:border-white/20 text-xs font-bold ${s.id === tempCustState.listStyle ? 'cust-active' : ''}">${s.label}</button>
+        `).join('');
+    }
+
+    function generateCardThemeGrid() {
+        const themes = [
+            { id: 'card-theme-default', label: 'Default' },
+            { id: 'card-theme-obsidian', label: 'Obsidian' },
+            { id: 'card-theme-sunset', label: 'Sunset' },
+            { id: 'card-theme-ocean', label: 'Ocean' },
+            { id: 'card-theme-forest', label: 'Forest' },
+            { id: 'card-theme-gold', label: 'Gold' },
+            { id: 'card-theme-cyber', label: 'Cyberpunk' },
+            { id: 'card-theme-matrix', label: 'Matrix' },
+            { id: 'card-theme-royal', label: 'Royal' },
+            { id: 'card-theme-galaxy', label: 'Galaxy' },
+            { id: 'card-theme-minimal', label: 'Minimal Light' }
+        ];
+        document.getElementById('card-theme-grid').innerHTML = themes.map(t => `
+            <button onclick="app.setCustCard('${t.id}')" id="btn-${t.id}" class="h-12 rounded ${t.id} text-xs font-bold border-2 border-transparent hover:border-white/50 ${t.id === tempCustState.cardTheme ? 'cust-active' : ''}">${t.label}</button>
+        `).join('');
+    }
+
+    function renderSelection(containerId, activeId) {
+        const container = document.getElementById(containerId);
+        Array.from(container.children).forEach(btn => {
+            if (btn.id === `btn-${activeId}`) btn.classList.add('cust-active');
+            else btn.classList.remove('cust-active');
+        });
+    }
+
     // --- Styling Helpers ---
     function applyUsernameStyle(el, style) {
         if (!style) {
             el.className = "font-bold text-white text-lg font-default"; 
             el.style.color = "";
             el.style.textShadow = "";
+            el.style.webkitTextStroke = "";
             return;
         }
 
-        // Base class + Font
         el.className = `font-bold text-lg ${style.font || 'font-default'}`;
-        
-        // Remove old styles
         el.style.color = "";
         el.style.textShadow = "";
+        el.style.webkitTextStroke = "";
+        el.removeAttribute('data-text');
 
-        // Effects
-        const fx = style.effect || 'none';
+        const fx = style.effect || 'effect-none';
         
-        if (fx === 'effect-glow') {
-            el.classList.add('effect-glow');
-            el.style.color = style.color; 
-        } else if (fx.startsWith('effect-gradient') || fx === 'effect-rainbow' || fx === 'effect-fire') {
-            el.classList.add(fx);
-            // Gradients handle color themselves via background-clip
-        } else if (fx === 'effect-glitch') {
-            el.classList.add('effect-glitch');
-            el.setAttribute('data-text', el.textContent); // Needed for glitch attr
+        // Add effect class
+        el.classList.add(fx);
+
+        // Apply dynamic color where needed
+        if (['effect-outline', 'effect-outline-thick', 'effect-glow', 'effect-glow-strong'].includes(fx)) {
             el.style.color = style.color;
-        } else if (fx === 'effect-neon') {
-            el.classList.add('effect-neon');
-        } else if (fx === 'effect-ice') {
-            el.classList.add('effect-ice');
+        } else if (fx.startsWith('effect-gradient') || fx.startsWith('effect-anim') || fx === 'effect-rainbow' || fx === 'effect-fire') {
+            // Gradient/Anim handles color
+        } else if (fx === 'effect-glitch') {
+            el.setAttribute('data-text', el.textContent);
+            el.style.color = style.color;
+        } else if (fx.startsWith('effect-neon') || fx === 'effect-ice') {
+            // Fixed colors
         } else {
-            // Normal
+            // Standard solid color
             el.style.color = style.color;
         }
     }
 
-    // Live Preview in Customize Modal
     function updateCustPreview() {
-        // Update Username Preview
+        // Username
         const namePreview = document.getElementById('cust-username-preview');
-        // Grab values
         tempCustState.color = document.getElementById('cust-color').value;
         tempCustState.font = document.getElementById('cust-font').value || 'font-default';
         
-        // Reset classes
-        namePreview.className = "text-4xl"; // Base size
-        
-        // Apply Style Logic manually for preview
-        if (tempCustState.font) {
-            namePreview.classList.add(tempCustState.font);
-        }
-        
-        // Clear inline
-        namePreview.style.color = "";
-        namePreview.style.textShadow = "";
-        namePreview.removeAttribute('data-text');
+        namePreview.className = "text-4xl"; 
+        applyUsernameStyle(namePreview, {
+            color: tempCustState.color,
+            font: tempCustState.font,
+            effect: tempCustState.effect
+        });
+        // Override for preview context
+        if (tempCustState.effect === 'effect-glitch') namePreview.setAttribute('data-text', "Your Name");
 
-        if (tempCustState.effect === 'effect-glow') {
-            namePreview.classList.add('effect-glow');
-            namePreview.style.color = tempCustState.color;
-        } else if (tempCustState.effect.startsWith('effect-gradient') || tempCustState.effect === 'effect-rainbow') {
-            namePreview.classList.add(tempCustState.effect);
-        } else if (tempCustState.effect === 'effect-glitch') {
-            namePreview.classList.add('effect-glitch');
-            namePreview.setAttribute('data-text', "Your Name");
-            namePreview.style.color = tempCustState.color;
-        } else if (tempCustState.effect === 'effect-neon') {
-            namePreview.classList.add('effect-neon');
-        } else if (tempCustState.effect === 'effect-ice') {
-            namePreview.classList.add('effect-ice');
-        } else {
-            namePreview.style.color = tempCustState.color;
-        }
+        // List Item
+        const listPreview = document.getElementById('cust-list-preview');
+        listPreview.className = `flex items-center gap-3 p-2 rounded hover:bg-[#35373c] transition ${tempCustState.listStyle}`;
 
-        // Update Card Preview
+        // Card
         const cardPreview = document.getElementById('cust-card-preview-box');
-        cardPreview.className = `p-6 rounded-xl border h-40 flex items-center justify-center relative overflow-hidden transition-all ${tempCustState.cardTheme}`;
+        cardPreview.className = `p-4 rounded-xl border h-32 flex items-center justify-center relative overflow-hidden transition-all shadow-lg ${tempCustState.cardTheme}`;
     }
     
-    // Listeners for live preview inputs
     ['cust-color', 'cust-font'].forEach(id => {
         const el = document.getElementById(id);
         if(el) el.addEventListener('input', updateCustPreview);
     });
     
-    // File Input Previews in Edit Modal
     els.displays.editPfpInput.addEventListener('change', (e) => {
         if(e.target.files[0]) els.displays.editPfpPreview.src = URL.createObjectURL(e.target.files[0]);
     });
@@ -1092,9 +1243,7 @@
         const bgClass = type === 'success' ? 'bg-green-500/90' : 'bg-red-500/90';
         toast.className = `px-6 py-2 rounded-full text-white font-bold shadow-lg mb-2 text-sm text-center toast-enter backdrop-blur-md ${bgClass}`;
         toast.textContent = message;
-        
         els.displays.toastContainer.appendChild(toast);
-        
         setTimeout(() => {
             toast.classList.remove('toast-enter');
             toast.classList.add('toast-exit');
@@ -1150,7 +1299,6 @@
                 try { pfpUrl = await processImage(pfpFile); } catch (e) {}
             }
 
-            // Initial Balance: 1000 Coins, 10 Gems
             await setDoc(doc(db, "users", user.uid), {
                 uid: user.uid,
                 username,
@@ -1197,26 +1345,21 @@
             try {
                 const docRef = doc(db, "users", user.uid);
                 
-                // Listen to own profile
                 onSnapshot(docRef, (docSnap) => {
                      if (docSnap.exists()) {
                         currentUserProfile = docSnap.data();
-                        // Ensure defaults
                         if (currentUserProfile.coins === undefined) updateDoc(docRef, {coins: 1000});
                         if (currentUserProfile.gems === undefined) updateDoc(docRef, {gems: 10});
 
-                        // Status Update Header
                         const s = currentUserProfile.status || 'online';
                         els.displays.headerStatusText.textContent = s.charAt(0).toUpperCase() + s.slice(1);
                         
-                        // Reset classes
                         els.displays.headerStatusDot.className = "absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-[3px] border-[#2b2d31]";
                         if (s === 'online') els.displays.headerStatusDot.classList.add('status-online');
                         else if (s === 'busy') els.displays.headerStatusDot.classList.add('status-busy');
                         else if (s === 'dnd') els.displays.headerStatusDot.classList.add('status-dnd');
                         else els.displays.headerStatusDot.classList.add('status-offline');
 
-                        // Wallet update
                         if (!els.displays.walletModal.classList.contains('hidden')) {
                             els.displays.walletCoins.textContent = formatNumber(currentUserProfile.coins || 0);
                             els.displays.walletGems.textContent = formatNumber(currentUserProfile.gems || 0);
@@ -1277,7 +1420,6 @@
         const div = document.createElement('div');
         
         if (['allin', 'flip', 'roll', 'slots', 'rps', 'guess'].includes(msg.type)) {
-            // ... (Gambling rendering remains same) ...
              const isWin = msg.result === 'WON';
             const colorClass = isWin ? 'text-green-400' : 'text-red-400';
             const borderColor = isWin ? 'border-green-500/30' : 'border-red-500/30';
@@ -1310,7 +1452,6 @@
                 </div>
             `;
         } else if (msg.type === 'bank') {
-            // ... (Bank rendering) ...
              div.className = "flex justify-center my-4 animate-fade-in";
             div.innerHTML = `
                 <div class="relative flex flex-col items-center p-6 rounded-xl border border-blue-500/30 bg-gradient-to-br from-blue-900/20 to-transparent max-w-sm w-full backdrop-blur-sm">
@@ -1330,7 +1471,6 @@
                 </div>
             `;
         } else if (msg.type === 'leaderboard') {
-            // ... (Leaderboard rendering) ...
              let rows = '';
              msg.topUsers.forEach((u, i) => {
                  rows += `
@@ -1352,16 +1492,13 @@
                 </div>
              `;
         } else {
-            // Normal Chat Message
             div.className = "flex gap-4 pl-2 pr-4 py-1 hover:bg-[#2e3035] -mx-2 rounded group animate-fade-in";
             const time = msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now';
             
-            // Generate Name Element
             const nameSpan = document.createElement('span');
             nameSpan.className = "font-medium text-white hover:underline cursor-pointer text-sm";
             nameSpan.textContent = msg.username;
             nameSpan.onclick = () => app.openProfile(msg.uid);
-            // If msg has stored style, use it (we will start saving it)
             if (msg.usernameStyle) applyUsernameStyle(nameSpan, msg.usernameStyle);
 
             div.innerHTML = `
@@ -1370,13 +1507,11 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-baseline gap-2" id="msg-header-${msg.createdAt?.seconds || Date.now()}">
-                        <!-- Name injected below -->
                         <span class="text-[10px] text-gray-400">${time}</span>
                     </div>
                     <p class="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap break-words">${escapeHtml(msg.text)}</p>
                 </div>
             `;
-            // Inject name span
             div.querySelector(`div[id^="msg-header-"]`).prepend(nameSpan);
         }
         els.displays.msgContainer.appendChild(div);
@@ -1388,7 +1523,6 @@
         if (!text) return;
         els.inputs.msg.value = '';
 
-        // Command Handling
         if (text.startsWith('/')) {
             handleCommand(text);
             return;
@@ -1400,7 +1534,7 @@
                 uid: currentUser.uid,
                 username: currentUserProfile.username,
                 pfpUrl: currentUserProfile.pfpUrl,
-                usernameStyle: currentUserProfile.usernameStyle || null, // Save style with msg
+                usernameStyle: currentUserProfile.usernameStyle || null,
                 createdAt: serverTimestamp()
             });
         } catch (err) { console.error(err); }
@@ -1591,8 +1725,8 @@
 
     function renderUserInList(user, status) {
         const div = document.createElement('div');
-        div.className = "flex items-center gap-3 p-2 rounded hover:bg-[#35373c] cursor-pointer group opacity-90 hover:opacity-100 transition";
-        // FIX: Explicitly call window.app.openProfile instead of implicit app.openProfile
+        // Base classes plus dynamic list style
+        div.className = `flex items-center gap-3 p-2 rounded hover:bg-[#35373c] cursor-pointer group opacity-90 hover:opacity-100 transition ${user.listStyle || 'list-style-default'}`;
         div.onclick = () => window.app.openProfile(user.uid);
         if (status === 'offline') div.classList.add('opacity-50');
 
@@ -1601,11 +1735,8 @@
         if (status === 'busy') statusColor = 'bg-yellow-500';
         if (status === 'dnd') statusColor = 'bg-red-500';
 
-        // Apply style if available
         let nameClass = "text-sm font-medium text-gray-200 truncate group-hover:text-white";
-        let styleAttr = "";
         
-        // We need to create elements to properly apply style
         const nameSpan = document.createElement('div');
         nameSpan.textContent = user.username;
         nameSpan.className = nameClass;
@@ -1617,13 +1748,11 @@
                 ${status !== 'offline' ? `<div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 border-[3px] border-[#2b2d31] rounded-full ${statusColor}"></div>` : ''}
             </div>
             <div class="flex-1 min-w-0">
-                <!-- Name injected below -->
                 <div id="u-list-name-${user.uid}" class="w-full"></div>
                 <div class="text-[10px] text-gray-400 uppercase font-bold">${status}</div>
             </div>
         `;
         
-        // Inject styled name
         div.querySelector(`#u-list-name-${user.uid}`).appendChild(nameSpan);
         
         els.displays.onlineList.appendChild(div);
