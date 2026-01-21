@@ -333,25 +333,37 @@
         'qg': 1e123, 'uqg': 1e126, 'dqg': 1e129, 'tqg': 1e132, 'qaqg': 1e135, 'qiqg': 1e138, 'sxqg': 1e141, 'spqg': 1e144, 'ocqg': 1e147, 'noqg': 1e150
     };
 
+    // Pre-sort suffixes by value descending for efficient formatting
+    const SORTED_SUFFIXES = Object.entries(SUFFIXES).sort((a, b) => b[1] - a[1]);
+
     function parseAbbreviatedNumber(input) {
         if (!input) return NaN;
-        input = input.toLowerCase().replace(/,/g, ''); // Remove commas
+        input = input.toLowerCase().replace(/,/g, ''); 
         if (input === 'all') return 'all';
         
-        // Sort suffixes by length desc to match 'qad' before 'qa'
-        const sortedSuffixes = Object.keys(SUFFIXES).sort((a, b) => b.length - a.length);
-        
-        for (const suffix of sortedSuffixes) {
+        for (const [suffix, value] of SORTED_SUFFIXES) {
             if (input.endsWith(suffix)) {
                 const numPart = input.slice(0, -suffix.length);
                 const val = parseFloat(numPart);
                 if (isNaN(val)) return NaN;
-                return Math.floor(val * SUFFIXES[suffix]);
+                return Math.floor(val * value);
             }
         }
-        
-        // No suffix, just number
         return Math.floor(parseFloat(input));
+    }
+
+    function formatNumber(num) {
+        if (num === undefined || num === null || isNaN(num)) return "0";
+        if (num < 1000) return Math.floor(num).toLocaleString();
+
+        for (const [suffix, value] of SORTED_SUFFIXES) {
+            if (num >= value) {
+                // Show up to 2 decimals, but remove trailing zeros (e.g. 1.50 -> 1.5, 1.00 -> 1)
+                const formatted = (num / value).toFixed(2).replace(/\.0+$/, '').replace(/(\.[0-9]*[1-9])0+$/, '$1');
+                return formatted + suffix;
+            }
+        }
+        return Math.floor(num).toLocaleString();
     }
 
     // State
@@ -456,8 +468,8 @@
         },
         openWallet: () => {
             if (currentUserProfile) {
-                els.displays.walletCoins.textContent = (currentUserProfile.coins || 0).toLocaleString();
-                els.displays.walletGems.textContent = (currentUserProfile.gems || 0).toLocaleString();
+                els.displays.walletCoins.textContent = formatNumber(currentUserProfile.coins || 0);
+                els.displays.walletGems.textContent = formatNumber(currentUserProfile.gems || 0);
             }
             els.displays.walletModal.classList.remove('hidden');
         },
@@ -473,8 +485,8 @@
                     document.getElementById('profile-username').textContent = data.username;
                     document.getElementById('profile-age').textContent = data.age || 'N/A';
                     document.getElementById('profile-gender').textContent = data.gender || 'N/A';
-                    document.getElementById('profile-coins').textContent = (data.coins || 0).toLocaleString();
-                    document.getElementById('profile-gems').textContent = (data.gems || 0).toLocaleString();
+                    document.getElementById('profile-coins').textContent = formatNumber(data.coins || 0);
+                    document.getElementById('profile-gems').textContent = formatNumber(data.gems || 0);
                     
                     const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown';
                     document.getElementById('profile-joined').textContent = `Joined ${date}`;
@@ -513,12 +525,11 @@
 
     // --- Event Listeners ---
 
-    // (User menu listener handled inline in HTML now)
     document.addEventListener('click', (e) => {
         // Only hide if click is outside the dropdown and outside the trigger
         const dropdown = els.displays.statusDropdown;
         const trigger = document.getElementById('user-menu-trigger'); // Parent container
-        if (!dropdown.contains(e.target) && !trigger.contains(e.target)) {
+        if (!dropdown.contains(e.target) && trigger && !trigger.contains(e.target)) {
              dropdown.classList.add('hidden');
         }
         if (e.target === els.displays.walletModal) app.closeWallet();
@@ -629,8 +640,8 @@
 
                         // Wallet update if open
                         if (!els.displays.walletModal.classList.contains('hidden')) {
-                            els.displays.walletCoins.textContent = (currentUserProfile.coins || 0).toLocaleString();
-                            els.displays.walletGems.textContent = (currentUserProfile.gems || 0).toLocaleString();
+                            els.displays.walletCoins.textContent = formatNumber(currentUserProfile.coins || 0);
+                            els.displays.walletGems.textContent = formatNumber(currentUserProfile.gems || 0);
                         }
                     }
                 });
@@ -720,7 +731,7 @@
                     
                     <div class="flex items-center gap-2 text-sm text-gray-300">
                         ${isWin ? `<span>Won</span>` : `<span>Lost</span>`}
-                        <span class="font-mono font-bold text-white">${msg.amount.toLocaleString()}</span>
+                        <span class="font-mono font-bold text-white">${formatNumber(msg.amount)}</span>
                     </div>
 
                     ${isWin && msg.multiplier > 1 ? `
@@ -741,11 +752,11 @@
                     <div class="w-full space-y-2">
                         <div class="flex justify-between items-center bg-[#1e1f22]/50 p-3 rounded">
                             <span class="text-yellow-500 font-bold uppercase text-xs">Coins</span>
-                            <span class="text-white font-mono font-bold">${msg.coins.toLocaleString()}</span>
+                            <span class="text-white font-mono font-bold">${formatNumber(msg.coins)}</span>
                         </div>
                         <div class="flex justify-between items-center bg-[#1e1f22]/50 p-3 rounded">
                             <span class="text-purple-400 font-bold uppercase text-xs">Gems</span>
-                            <span class="text-white font-mono font-bold">${msg.gems.toLocaleString()}</span>
+                            <span class="text-white font-mono font-bold">${formatNumber(msg.gems)}</span>
                         </div>
                     </div>
                 </div>
@@ -760,7 +771,7 @@
                             <img src="${u.pfpUrl}" onclick="app.openProfile('${u.uid}')" class="w-6 h-6 rounded-full cursor-pointer hover:opacity-80">
                             <span class="text-white font-medium cursor-pointer hover:underline" onclick="app.openProfile('${u.uid}')">${escapeHtml(u.username)}</span>
                         </div>
-                        <span class="text-yellow-500 font-mono">${(u.coins||0).toLocaleString()} 🪙</span>
+                        <span class="text-yellow-500 font-mono">${formatNumber(u.coins)} 🪙</span>
                     </div>
                  `;
              });
@@ -780,7 +791,7 @@
                     <img src="${msg.pfpUrl}" onclick="app.openProfile('${msg.uid}')" class="w-20 h-20 rounded-full border-4 border-yellow-400 shadow-xl mb-2 object-cover cursor-pointer">
                     <div class="text-yellow-400 font-black text-2xl mb-1">${escapeHtml(msg.username)}</div>
                     <div class="text-white text-sm">Won the Daily Pot!</div>
-                    <div class="text-4xl font-black text-yellow-300 mt-2 tracking-tighter">+${msg.amount.toLocaleString()} 🪙</div>
+                    <div class="text-4xl font-black text-yellow-300 mt-2 tracking-tighter">+${formatNumber(msg.amount)} 🪙</div>
                 </div>
             `;
         } else {
@@ -1024,7 +1035,7 @@
                 transaction.update(senderRef, { [currency]: senderBal - amount });
                 transaction.update(receiverRef, { [currency]: receiverBal + amount });
             });
-            showToast(`Sent ${amount} ${currency} to ${targetName}`, 'success');
+            showToast(`Sent ${formatNumber(amount)} ${currency} to ${targetName}`, 'success');
         } catch (e) {
             const msg = typeof e === 'string' ? e : "Transaction failed";
             showToast(msg, 'error');
@@ -1267,3 +1278,5 @@
         return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 </script>
+</body>
+</html>
