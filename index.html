@@ -233,8 +233,8 @@
 
                 <!-- Arcade Button -->
                 <button onclick="window.location.href='game.html'" class="text-gray-400 hover:text-purple-400 transition" title="Orbitly Arcade">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
+                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                     </svg>
                 </button>
 
@@ -915,9 +915,19 @@
             tempCustState.effect = style.effect || 'none';
             tempCustState.cardTheme = currentUserProfile.usercardStyle || 'card-theme-default';
 
+            // Ensure valid state
+            if (!tempCustState.font) tempCustState.font = 'font-default';
+
             // Set UI inputs
             document.getElementById('cust-color').value = tempCustState.color;
-            document.getElementById('cust-font').value = tempCustState.font;
+            const fontSelect = document.getElementById('cust-font');
+            fontSelect.value = tempCustState.font;
+
+            // If value wasn't valid, reset to default
+            if (!fontSelect.value) {
+                fontSelect.value = 'font-default';
+                tempCustState.font = 'font-default';
+            }
             
             // Render previews
             updateCustPreview();
@@ -960,7 +970,7 @@
             try {
                 // Update State from Inputs for safety (font/color might have changed without explicit setter)
                 tempCustState.color = document.getElementById('cust-color').value;
-                tempCustState.font = document.getElementById('cust-font').value;
+                tempCustState.font = document.getElementById('cust-font').value || 'font-default';
 
                 await updateDoc(doc(db, "users", currentUser.uid), {
                     usernameStyle: {
@@ -1024,13 +1034,15 @@
         const namePreview = document.getElementById('cust-username-preview');
         // Grab values
         tempCustState.color = document.getElementById('cust-color').value;
-        tempCustState.font = document.getElementById('cust-font').value;
+        tempCustState.font = document.getElementById('cust-font').value || 'font-default';
         
         // Reset classes
         namePreview.className = "text-4xl"; // Base size
         
         // Apply Style Logic manually for preview
-        namePreview.classList.add(tempCustState.font);
+        if (tempCustState.font) {
+            namePreview.classList.add(tempCustState.font);
+        }
         
         // Clear inline
         namePreview.style.color = "";
