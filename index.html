@@ -651,7 +651,7 @@
                 <button onclick="app.openNews()" class="w-full text-left px-4 py-3 hover:bg-[#35373c] text-white font-bold flex items-center gap-3 border-b border-[#1e1f22]">
                     <i class="fas fa-newspaper text-purple-400"></i> News
                 </button>
-                <button onclick="showToast('Leaderboard coming soon!', 'info'); document.getElementById('hamburger-menu').classList.add('hidden');" class="w-full text-left px-4 py-3 hover:bg-[#35373c] text-white font-bold flex items-center gap-3">
+                <button onclick="app.openLeaderboard()" class="w-full text-left px-4 py-3 hover:bg-[#35373c] text-white font-bold flex items-center gap-3">
                     <i class="fas fa-trophy text-yellow-400"></i> Leaderboard
                 </button>
             </div>
@@ -843,6 +843,46 @@
         </div>
     </div>
 
+    <!-- Leaderboard Modal -->
+    <div id="leaderboard-modal" class="absolute inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#240a40] rounded-xl shadow-2xl w-full max-w-sm border border-[#4a148c] relative flex flex-col max-h-[85vh] overflow-hidden">
+            <!-- Menu View -->
+            <div id="lb-menu" class="p-6 space-y-4">
+                <div class="flex justify-between items-center mb-6 border-b border-purple-800 pb-2">
+                    <h3 class="text-white font-bold text-xl flex items-center gap-2"><i class="fas fa-trophy text-yellow-400"></i> Leaderboards</h3>
+                    <button onclick="document.getElementById('leaderboard-modal').classList.add('hidden')" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+                </div>
+                
+                <button onclick="app.showLeaderboard('coins')" class="w-full bg-[#f59e0b] hover:bg-[#d97706] text-white font-bold py-3 rounded-lg flex items-center px-4 shadow-lg transition transform hover:scale-105">
+                    <div class="w-8 h-8 bg-white/20 rounded flex items-center justify-center mr-4"><i class="fas fa-coins text-white"></i></div>
+                    Top Gold
+                </button>
+                <button onclick="app.showLeaderboard('gems')" class="w-full bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold py-3 rounded-lg flex items-center px-4 shadow-lg transition transform hover:scale-105">
+                    <div class="w-8 h-8 bg-white/20 rounded flex items-center justify-center mr-4"><i class="far fa-gem text-white"></i></div>
+                    Top Gems
+                </button>
+                <button onclick="app.showLeaderboard('likesCount')" class="w-full bg-[#84cc16] hover:bg-[#65a30d] text-white font-bold py-3 rounded-lg flex items-center px-4 shadow-lg transition transform hover:scale-105">
+                    <div class="w-8 h-8 bg-white/20 rounded flex items-center justify-center mr-4"><i class="fas fa-thumbs-up text-white"></i></div>
+                    Top Likes
+                </button>
+            </div>
+
+            <!-- List View -->
+            <div id="lb-list-view" class="hidden flex flex-col h-full bg-[#1e0536]">
+                <div class="p-4 bg-[#2e0947] border-b border-[#4a148c] flex justify-between items-center shrink-0">
+                    <h3 id="lb-title" class="text-white font-bold text-lg">Top List</h3>
+                    <button onclick="app.openLeaderboard()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+                </div>
+                <div id="lb-list-content" class="flex-1 overflow-y-auto p-2 space-y-1">
+                    <!-- Ranks injected here -->
+                </div>
+                <div class="p-2 border-t border-[#4a148c] bg-[#2e0947] text-center">
+                    <button onclick="document.getElementById('lb-list-view').classList.add('hidden'); document.getElementById('lb-menu').classList.remove('hidden');" class="text-xs text-purple-300 hover:text-white uppercase font-bold tracking-wider">Back to Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Wallet Modal -->
     <div id="wallet-modal" class="absolute inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center">
         <!-- ... (Wallet modal content unchanged) ... -->
@@ -866,10 +906,10 @@
         </div>
     </div>
 
-    <!-- User Profile Modal (View) -->
+    <!-- User Profile Modal (View) - Updated for PFP z-index fix -->
     <div id="profile-modal" class="absolute inset-0 z-50 hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-        <!-- ... (Profile modal content unchanged) ... -->
-        <div id="profile-card-content" class="card-theme-default rounded-xl shadow-2xl w-full max-w-sm overflow-hidden relative transform transition-all scale-100 max-h-[90vh] flex flex-col">
+        <!-- Re-structured for scrolling and z-index -->
+        <div id="profile-card-content" class="card-theme-default rounded-xl shadow-2xl w-full max-w-sm overflow-hidden relative transform transition-all scale-100 max-h-[90vh] overflow-y-auto block">
             <!-- Banner -->
             <div class="h-32 bg-gray-700 relative overflow-hidden group shrink-0">
                 <img id="profile-banner" src="" class="w-full h-full object-cover">
@@ -879,9 +919,10 @@
                 </button>
             </div>
 
-            <div class="px-6 pb-6 relative overflow-y-auto flex-1">
-                <!-- PFP -->
-                <div class="relative -mt-16 mb-4 flex justify-between items-end z-20">
+            <!-- Content Area - Removed internal overflow, added relative z-index -->
+            <div class="px-6 pb-6 relative">
+                <!-- PFP - Pulled up with negative margin, z-index ensures top -->
+                <div class="relative -mt-16 mb-4 flex justify-between items-end z-10">
                     <div class="relative">
                         <img id="profile-pfp" src="" class="w-28 h-28 rounded-full border-4 border-[#2b2d31] bg-[#2b2d31] object-cover shadow-lg">
                         <div class="bg-[#1e1f22] px-2 py-0.5 rounded text-[10px] font-bold text-gray-400 border border-[#111214] absolute bottom-1 right-0 shadow-md" id="profile-status-badge">ONLINE</div>
@@ -909,7 +950,7 @@
                 </div>
 
                 <!-- Bio -->
-                <div id="profile-bio-container" class="mb-4 hidden max-h-32 overflow-y-auto">
+                <div id="profile-bio-container" class="mb-4 hidden">
                     <p id="profile-bio" class="text-sm text-gray-300 italic bg-[#1e1f22]/50 p-2 rounded border border-white/5 break-words whitespace-pre-wrap"></p>
                 </div>
 
@@ -1208,7 +1249,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, setDoc, getDoc, updateDoc, deleteDoc, where, getDocs, limit, runTransaction, arrayUnion, arrayRemove, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, setDoc, getDoc, updateDoc, deleteDoc, where, getDocs, limit, runTransaction, arrayUnion, arrayRemove, writeBatch, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     
     // ... (Firebase Config & Helpers same as before) ...
     const firebaseConfig = {
@@ -1275,7 +1316,8 @@
             newsDrawer: document.getElementById('news-drawer'), newsContainer: document.getElementById('news-container'), newsEmpty: document.getElementById('news-empty'), addNewsModal: document.getElementById('add-news-modal'), newsImgPreview: document.getElementById('news-image-preview'), newsImgPlaceholder: document.getElementById('news-image-placeholder'), commentsModal: document.getElementById('news-comments-modal'), commentsList: document.getElementById('news-comments-list'),
             friendBtn: document.getElementById('btn-toggle-friend'),
             friendReqModal: document.getElementById('friend-req-modal'), friendReqList: document.getElementById('friend-req-list'), friendReqBadge: document.getElementById('friend-req-badge'),
-            sidebarBtnAll: document.getElementById('sidebar-btn-all'), sidebarBtnFriends: document.getElementById('sidebar-btn-friends')
+            sidebarBtnAll: document.getElementById('sidebar-btn-all'), sidebarBtnFriends: document.getElementById('sidebar-btn-friends'),
+            leaderboardModal: document.getElementById('leaderboard-modal'), lbMenu: document.getElementById('lb-menu'), lbList: document.getElementById('lb-list-view'), lbContent: document.getElementById('lb-list-content')
         }
     };
 
@@ -1290,7 +1332,7 @@
         setStatus: async (status) => { if (!currentUser) return; try { await updateDoc(doc(db, "users", currentUser.uid), { status: status }); els.displays.statusDropdown.classList.add('hidden'); } catch (e) { console.error("Status update failed", e); } },
         openWallet: () => { if (currentUserProfile) { els.displays.walletCoins.textContent = formatNumber(currentUserProfile.coins || 0); els.displays.walletGems.textContent = formatNumber(currentUserProfile.gems || 0); } els.displays.walletModal.classList.remove('hidden'); },
         closeWallet: () => { els.displays.walletModal.classList.add('hidden'); },
-        openProfile: async (uid) => { try { const snap = await getDoc(doc(db, "users", uid)); if(snap.exists()) { const data = snap.data(); document.getElementById('profile-pfp').src = data.pfpUrl || 'https://ui-avatars.com/api/?name=?'; const bannerEl = document.getElementById('profile-banner'); const bannerPlace = document.getElementById('profile-banner-placeholder'); if (data.bannerUrl) { bannerEl.src = data.bannerUrl; bannerEl.classList.remove('hidden'); bannerPlace.classList.add('hidden'); } else { bannerEl.classList.add('hidden'); bannerPlace.classList.remove('hidden'); } const nameEl = document.getElementById('profile-username'); nameEl.textContent = data.username; applyUsernameStyle(nameEl, data.usernameStyle); const cardEl = document.getElementById('profile-card-content'); cardEl.className = "rounded-xl shadow-2xl w-full max-w-sm overflow-hidden relative transform transition-all scale-100 max-h-[90vh] flex flex-col"; cardEl.classList.add(data.usercardStyle || 'card-theme-default'); const bioEl = document.getElementById('profile-bio'); const bioCont = document.getElementById('profile-bio-container'); if (data.bio) { bioEl.textContent = data.bio; bioCont.classList.remove('hidden'); } else { bioCont.classList.add('hidden'); } document.getElementById('profile-age').textContent = data.age || 'N/A'; document.getElementById('profile-gender').textContent = data.gender || 'N/A'; document.getElementById('profile-coins').textContent = formatNumber(data.coins || 0); document.getElementById('profile-gems').textContent = formatNumber(data.gems || 0); const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown'; document.getElementById('profile-joined').textContent = `Joined ${date}`; const status = (data.status || 'offline').toUpperCase(); const badge = document.getElementById('profile-status-badge'); badge.textContent = status; const editBtn = document.getElementById('profile-edit-btn'); if (currentUser && currentUser.uid === uid) editBtn.classList.remove('hidden'); else editBtn.classList.add('hidden'); 
+        openProfile: async (uid) => { try { const snap = await getDoc(doc(db, "users", uid)); if(snap.exists()) { const data = snap.data(); document.getElementById('profile-pfp').src = data.pfpUrl || 'https://ui-avatars.com/api/?name=?'; const bannerEl = document.getElementById('profile-banner'); const bannerPlace = document.getElementById('profile-banner-placeholder'); if (data.bannerUrl) { bannerEl.src = data.bannerUrl; bannerEl.classList.remove('hidden'); bannerPlace.classList.add('hidden'); } else { bannerEl.classList.add('hidden'); bannerPlace.classList.remove('hidden'); } const nameEl = document.getElementById('profile-username'); nameEl.textContent = data.username; applyUsernameStyle(nameEl, data.usernameStyle); const cardEl = document.getElementById('profile-card-content'); cardEl.className = "rounded-xl shadow-2xl w-full max-w-sm overflow-hidden relative transform transition-all scale-100 max-h-[90vh] overflow-y-auto block"; cardEl.classList.add(data.usercardStyle || 'card-theme-default'); const bioEl = document.getElementById('profile-bio'); const bioCont = document.getElementById('profile-bio-container'); if (data.bio) { bioEl.textContent = data.bio; bioCont.classList.remove('hidden'); } else { bioCont.classList.add('hidden'); } document.getElementById('profile-age').textContent = data.age || 'N/A'; document.getElementById('profile-gender').textContent = data.gender || 'N/A'; document.getElementById('profile-coins').textContent = formatNumber(data.coins || 0); document.getElementById('profile-gems').textContent = formatNumber(data.gems || 0); const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown'; document.getElementById('profile-joined').textContent = `Joined ${date}`; const status = (data.status || 'offline').toUpperCase(); const badge = document.getElementById('profile-status-badge'); badge.textContent = status; const editBtn = document.getElementById('profile-edit-btn'); if (currentUser && currentUser.uid === uid) editBtn.classList.remove('hidden'); else editBtn.classList.add('hidden'); 
             
             // Likes Logic
             const likes = (data.likes && Array.isArray(data.likes)) ? data.likes : [];
@@ -1366,17 +1408,106 @@
                 const likes = (data.likes && Array.isArray(data.likes)) ? data.likes : [];
                 const isLiked = likes.includes(currentUser.uid);
                 
+                const batch = writeBatch(db);
                 if (isLiked) {
-                    await updateDoc(ref, { likes: arrayRemove(currentUser.uid) });
+                    batch.update(ref, { 
+                        likes: arrayRemove(currentUser.uid),
+                        likesCount: increment(-1) 
+                    });
                     showToast("Unliked", 'success');
                 } else {
-                    await updateDoc(ref, { likes: arrayUnion(currentUser.uid) });
+                    batch.update(ref, { 
+                        likes: arrayUnion(currentUser.uid),
+                        likesCount: increment(1)
+                    });
                     showToast("Liked!", 'success');
                 }
-                app.openProfile(targetUid); // Refresh UI
+                await batch.commit();
+                
+                // Re-open/refresh to show new count if still open
+                if(!els.displays.profileModal.classList.contains('hidden')) app.openProfile(targetUid);
             } catch (e) {
                 console.error(e);
-                showToast("Failed to update like", 'error');
+                // Fallback for missing likesCount field on legacy data
+                try {
+                    const ref = doc(db, "users", targetUid);
+                    const snap = await getDoc(ref);
+                    const data = snap.data();
+                    const likes = (data.likes && Array.isArray(data.likes)) ? data.likes : [];
+                    const isLiked = likes.includes(currentUser.uid);
+                    if (isLiked) await updateDoc(ref, { likes: arrayRemove(currentUser.uid) });
+                    else await updateDoc(ref, { likes: arrayUnion(currentUser.uid) });
+                    showToast("Updated (Legacy)", 'success');
+                } catch(err) {
+                    showToast("Failed to update like", 'error');
+                }
+            }
+        },
+
+        // --- Leaderboard Logic ---
+        openLeaderboard: () => {
+            document.getElementById('hamburger-menu').classList.add('hidden');
+            els.displays.leaderboardModal.classList.remove('hidden');
+            els.displays.lbMenu.classList.remove('hidden');
+            els.displays.lbList.classList.add('hidden');
+        },
+        
+        showLeaderboard: async (type) => {
+            els.displays.lbMenu.classList.add('hidden');
+            els.displays.lbList.classList.remove('hidden');
+            els.displays.lbContent.innerHTML = '<div class="text-center text-purple-300 py-4"><div class="loader mx-auto mb-2"></div>Loading Top 100...</div>';
+            
+            let title = "Top List";
+            let field = type;
+            let icon = "";
+            let suffix = "";
+            
+            if (type === 'coins') { title = "Top Gold"; icon = "fas fa-coins text-yellow-400"; suffix = " 🪙"; }
+            else if (type === 'gems') { title = "Top Gems"; icon = "far fa-gem text-purple-400"; suffix = " 💎"; }
+            else if (type === 'likesCount') { title = "Top Likes"; icon = "fas fa-thumbs-up text-green-400"; suffix = " ❤️"; }
+            
+            document.getElementById('lb-title').innerHTML = `<i class="${icon}"></i> ${title}`;
+            
+            try {
+                const q = query(collection(db, "users"), orderBy(field, "desc"), limit(100));
+                const snap = await getDocs(q);
+                
+                if (snap.empty) {
+                    els.displays.lbContent.innerHTML = '<div class="text-center text-gray-400 py-4">No data found.</div>';
+                    return;
+                }
+                
+                let html = '';
+                let rank = 1;
+                snap.forEach(doc => {
+                    const u = doc.data();
+                    let val = u[field] || 0;
+                    
+                    let medal = "";
+                    if (rank === 1) medal = "🥇";
+                    else if (rank === 2) medal = "🥈";
+                    else if (rank === 3) medal = "🥉";
+                    else medal = `<span class="font-bold text-gray-400 w-6 text-center">${rank}</span>`;
+                    
+                    html += `
+                        <div class="flex items-center justify-between p-3 bg-[#240a40] hover:bg-[#34125f] rounded-lg border border-[#4a148c] transition cursor-pointer" onclick="app.openProfile('${u.uid}')">
+                            <div class="flex items-center gap-3">
+                                <div class="text-xl w-8 text-center">${medal}</div>
+                                <img src="${u.pfpUrl || 'https://ui-avatars.com/api/?name=?'}" class="w-10 h-10 rounded-full border-2 border-[#4a148c] object-cover">
+                                <span class="text-white font-bold text-sm truncate max-w-[120px]">${escapeHtml(u.username)}</span>
+                            </div>
+                            <div class="text-white font-mono font-bold text-sm bg-[#4a148c] px-2 py-1 rounded">
+                                ${formatNumber(val)}${suffix}
+                            </div>
+                        </div>
+                    `;
+                    rank++;
+                });
+                
+                els.displays.lbContent.innerHTML = html;
+            } catch (e) {
+                console.error(e);
+                els.displays.lbContent.innerHTML = '<div class="text-center text-red-400 py-4">Failed to load leaderboard.</div>';
             }
         },
 
@@ -1509,11 +1640,7 @@
                 btnAll.className = "flex-1 py-1 text-xs font-bold rounded uppercase tracking-wide text-gray-400 hover:text-gray-200 transition flex items-center justify-center gap-2";
             }
             
-            // Re-trigger listener logic (easiest way is to refresh the list manually or wait for next snapshot? 
-            // Better to re-render using current snapshot data if we had it, but for simplicity, we'll wait for listener or force re-fetch if needed.
-            // Actually, we can just trigger the existing listener callback logic if we stored the data? 
-            // The listener runs on data change. Let's just restart listener or simpler: 
-            // The listener holds the data. We need to re-render.
+            // Re-trigger listener logic
             if(unsubscribeUsers) {
                 unsubscribeUsers();
                 startUsersListener();
@@ -2182,7 +2309,7 @@
     els.inputs.signupPfp.addEventListener('change', (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (ev) => { els.displays.pfpPreview.src = ev.target.result; els.displays.pfpPreview.classList.remove('hidden'); els.displays.pfpPlaceholder.classList.add('hidden'); }; reader.readAsDataURL(file); } });
 
     // --- Auth Handlers (unchanged) ---
-    els.forms.signup.addEventListener('submit', async (e) => { e.preventDefault(); const username = document.getElementById('signup-username').value; const email = document.getElementById('signup-email').value; const password = document.getElementById('signup-password').value; const age = parseInt(document.getElementById('signup-age').value); const gender = document.getElementById('signup-gender').value; const pfpFile = els.inputs.signupPfp.files[0]; if (age < 11 || age > 1000) return showError("Age must be between 11 and 1000."); toggleLoading(true); try { const userCredential = await createUserWithEmailAndPassword(auth, email, password); const user = userCredential.user; let pfpUrl = `https://ui-avatars.com/api/?name=${username}&background=random`; if (pfpFile) { try { pfpUrl = await processImage(pfpFile); } catch (e) {} } await setDoc(doc(db, "users", user.uid), { uid: user.uid, username, email, age, gender, pfpUrl, status: 'online', coins: 1000, gems: 10, lastDaily: 0, createdAt: serverTimestamp(), lastSeen: serverTimestamp(), likes: [], friends: [], friendRequests: [] }); try { await updateProfile(user, { displayName: username }); } catch(e){} } catch (err) { showError(err.message); } finally { toggleLoading(false); } });
+    els.forms.signup.addEventListener('submit', async (e) => { e.preventDefault(); const username = document.getElementById('signup-username').value; const email = document.getElementById('signup-email').value; const password = document.getElementById('signup-password').value; const age = parseInt(document.getElementById('signup-age').value); const gender = document.getElementById('signup-gender').value; const pfpFile = els.inputs.signupPfp.files[0]; if (age < 11 || age > 1000) return showError("Age must be between 11 and 1000."); toggleLoading(true); try { const userCredential = await createUserWithEmailAndPassword(auth, email, password); const user = userCredential.user; let pfpUrl = `https://ui-avatars.com/api/?name=${username}&background=random`; if (pfpFile) { try { pfpUrl = await processImage(pfpFile); } catch (e) {} } await setDoc(doc(db, "users", user.uid), { uid: user.uid, username, email, age, gender, pfpUrl, status: 'online', coins: 1000, gems: 10, lastDaily: 0, createdAt: serverTimestamp(), lastSeen: serverTimestamp(), likes: [], friends: [], friendRequests: [], likesCount: 0 }); try { await updateProfile(user, { displayName: username }); } catch(e){} } catch (err) { showError(err.message); } finally { toggleLoading(false); } });
     els.forms.login.addEventListener('submit', async (e) => { e.preventDefault(); const email = document.getElementById('login-email').value; const password = document.getElementById('login-password').value; toggleLoading(true); try { await signInWithEmailAndPassword(auth, email, password); } catch (err) { showError(err.message); } finally { toggleLoading(false); } });
 
     // --- Main App Logic ---
@@ -2213,6 +2340,7 @@
                         if (currentUserProfile.gems === undefined) updateDoc(docRef, {gems: 10}); 
                         if (currentUserProfile.friends === undefined) updateDoc(docRef, {friends: []});
                         if (currentUserProfile.friendRequests === undefined) updateDoc(docRef, {friendRequests: []});
+                        if (currentUserProfile.likesCount === undefined) updateDoc(docRef, {likesCount: 0});
                         const s = currentUserProfile.status || 'online'; 
                         
                         // Header Updates
@@ -2483,72 +2611,199 @@
         } catch(e) { console.error(e); showToast("Failed to clear chat", "error"); }
     }
     function showHelp() { const div = document.createElement('div'); div.className = "my-4 mx-4 p-4 bg-[#2b2d31] rounded-lg border border-[#1e1f22] text-sm shadow-xl"; div.innerHTML = ` <h3 class="font-bold text-white mb-3 text-lg border-b border-gray-700 pb-2">Orbitly Commands</h3> <div class="grid grid-cols-1 md:grid-cols-2 gap-4"> <div> <h4 class="text-blue-400 font-bold mb-1 uppercase text-xs">Essentials</h4> <ul class="space-y-1 text-gray-300"> <li><span class="text-white font-mono">/daily</span> - Claim free reward (24h)</li> <li><span class="text-white font-mono">/bank</span> - View your balance</li> <li><span class="text-white font-mono">/pay [user] [amt] [c/g]</span> - Pay someone</li> <li><span class="text-white font-mono">/top</span> - Leaderboard (Public)</li> <li><span class="text-white font-mono">/convert [c/g] [amt]</span> - Swap currency</li> </ul> </div> <div> <h4 class="text-green-400 font-bold mb-1 uppercase text-xs">Gambling</h4> <ul class="space-y-1 text-gray-300"> <li><span class="text-white font-mono">/allin [c/g]</span> - Bet everything</li> <li><span class="text-white font-mono">/flip [amt] [c/g]</span> - Coin flip (2x)</li> <li><span class="text-white font-mono">/roll [amt] [c/g]</span> - Dice roll (>3 wins)</li> <li><span class="text-white font-mono">/slots [amt] [c/g]</span> - Slot machine</li> <li><span class="text-white font-mono">/rps [r/p/s] [amt] [c/g]</span> - Rock Paper Scissors</li> <li><span class="text-white font-mono">/guess [1-10] [amt] [c/g]</span> - Guess number (5x)</li> </ul> </div> </div> <div class="mt-3 text-xs text-gray-500 italic">Rate: 10 Coins = 1 Gem</div> `; els.displays.msgContainer.appendChild(div); requestAnimationFrame(() => els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight); }
-    function showPrefixes() { const keys = Object.keys(SUFFIXES).sort((a,b) => SUFFIXES[a] - SUFFIXES[b]); const list = keys.map(k => `<span class="bg-[#1e1f22] px-1 rounded text-yellow-400 font-mono">${k}</span>`).join(' '); const div = document.createElement('div'); div.className = "my-4 mx-4 p-4 bg-[#2b2d31] rounded-lg border border-[#1e1f22] text-sm shadow-xl"; div.innerHTML = `<h3 class="font-bold text-white mb-2 text-lg">Number Abbreviations</h3><div class="flex flex-wrap gap-2 leading-relaxed">${list}</div>`; els.displays.msgContainer.appendChild(div); requestAnimationFrame(() => els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight); }
-    async function executeDaily() { if (!currentUserProfile) return; const now = Date.now(); const last = currentUserProfile.lastDaily || 0; const oneDay = 24 * 60 * 60 * 1000; if (now - last < oneDay) { const timeLeft = Math.ceil((oneDay - (now - last)) / (1000 * 60 * 60)); showToast(`Daily reward available in ${timeLeft} hours`, 'error'); return; } await updateDoc(doc(db, "users", currentUser.uid), { coins: (currentUserProfile.coins || 0) + 500, gems: (currentUserProfile.gems || 0) + 5, lastDaily: now }); showToast("Claimed 500 Coins & 5 Gems!", 'success'); }
-    async function executeConvert(currencyArg, amountStr) { const isCoins = ['c', 'coin', 'coins'].includes(currencyArg.toLowerCase()); const isGems = ['g', 'gem', 'gems'].includes(currencyArg.toLowerCase()); if (!isCoins && !isGems) return showToast("Usage: /convert {c/g} {amount}", 'error'); const amount = parseAbbreviatedNumber(amountStr); if (isNaN(amount) || amount <= 0) return showToast("Invalid amount", 'error'); const fromCurrency = isCoins ? 'coins' : 'gems'; const toCurrency = isCoins ? 'gems' : 'coins'; let resultingAmount = 0; if (fromCurrency === 'coins') { if (amount < 10) return showToast("Minimum 10 Coins", 'error'); resultingAmount = Math.floor(amount / 10); } else { resultingAmount = amount * 10; } try { await runTransaction(db, async (transaction) => { const userRef = doc(db, "users", currentUser.uid); const sfDoc = await transaction.get(userRef); if (!sfDoc.exists()) throw "User does not exist!"; const userData = sfDoc.data(); const currentBal = userData[fromCurrency] || 0; if (currentBal < amount) throw `Not enough ${fromCurrency}!`; transaction.update(userRef, { [fromCurrency]: currentBal - amount, [toCurrency]: (userData[toCurrency] || 0) + resultingAmount }); }); showToast(`Converted`, 'success'); } catch (e) { showToast(typeof e === 'string' ? e : "Failed", 'error'); } }
-    async function executeTop() { const q = query(collection(db, "users"), orderBy("coins", "desc"), limit(3)); const snap = await getDocs(q); const topUsers = []; snap.forEach(d => { const u = d.data(); topUsers.push({ uid: u.uid, username: u.username, pfpUrl: u.pfpUrl, coins: u.coins || 0 }); }); await addDoc(collection(db, "messages"), { type: 'leaderboard', topUsers: topUsers, createdAt: serverTimestamp() }); }
-    async function executePay(targetName, amountStr, currStr) { const amount = parseAbbreviatedNumber(amountStr); if (isNaN(amount) || amount <= 0) return showToast("Invalid Amount", 'error'); const isCoins = ['c', 'coin', 'coins'].includes(currStr?.toLowerCase()); const currency = isCoins ? 'coins' : 'gems'; if ((currentUserProfile[currency] || 0) < amount) return showToast("Insufficient funds", 'error'); if (currentUserProfile.username === targetName) return showToast("Cannot pay yourself", 'error'); const q = query(collection(db, "users"), where("username", "==", targetName)); const snap = await getDocs(q); if (snap.empty) return showToast("User not found", 'error'); const targetUid = snap.docs[0].id; try { await runTransaction(db, async (transaction) => { const senderRef = doc(db, "users", currentUser.uid); const receiverRef = doc(db, "users", targetUid); const sSnap = await transaction.get(senderRef); const rSnap = await transaction.get(receiverRef); if (!sSnap.exists() || !rSnap.exists()) throw "Error"; if ((sSnap.data()[currency] || 0) < amount) throw "Funds"; transaction.update(senderRef, { [currency]: sSnap.data()[currency] - amount }); transaction.update(receiverRef, { [currency]: (rSnap.data()[currency] || 0) + amount }); }); showToast(`Sent`, 'success'); } catch (e) { showToast("Transaction failed", 'error'); } }
-    async function executeBank() { if (!currentUserProfile) return; await addDoc(collection(db, "messages"), { type: 'bank', uid: currentUser.uid, username: currentUserProfile.username, pfpUrl: currentUserProfile.pfpUrl, coins: currentUserProfile.coins || 0, gems: currentUserProfile.gems || 0, createdAt: serverTimestamp() }); }
-    async function executeGamble(game, amountStr, currStr, extra) { if (!currentUserProfile) return; const isCoins = ['c', 'coin', 'coins'].includes(currStr?.toLowerCase()); const currencyKey = isCoins ? 'coins' : 'gems'; let balance = currentUserProfile[currencyKey] || 0; let bet = amountStr === 'all' ? balance : parseAbbreviatedNumber(amountStr); if (isNaN(bet) || bet <= 0) { showToast("Invalid Amount", 'error'); return; } if (balance < bet) { showToast(`Not enough ${currencyKey}`, 'error'); return; } const isDev = currentUser.email === 'dev@gmail.com'; let win = false; let multiplier = 0; let details = ""; if (game === '/allin') { if (isDev) { win = true; multiplier = 10; } else { win = Math.random() < 0.55; if (win) { const r = Math.random(); multiplier = r<0.5?1:r<0.75?2:r<0.875?3:r<0.975?5:10; } } } else if (game === '/flip') { const isHeads = Math.random() < 0.5; details = `Coin: ${isHeads?'Heads':'Tails'}`; if(isDev){win=true; multiplier=2;}else{win=Math.random()<0.55; multiplier=2;} } else if (game === '/roll') { let roll = Math.floor(Math.random() * 6) + 1; if(isDev){roll=6;win=true;multiplier=3;}else{if(roll>=3)win=true; multiplier=roll===6?3:1.5;} details=`Rolled ${roll}`; } else if (game === '/slots') { const s=['🍒','🍋','🍇','💎','7️⃣']; let s1=s[Math.floor(Math.random()*5)], s2=s[Math.floor(Math.random()*5)], s3=s[Math.floor(Math.random()*5)]; if(isDev){s1=s2=s3='7️⃣';win=true;multiplier=10;}else{ if(Math.random() < 0.2) { s2=s1; s3=s1; } if(s1===s2&&s2===s3){win=true;multiplier=s1==='7️⃣'?10:5;}else if(s1===s2||s2===s3||s1===s3){win=true;multiplier=1.5;}} details=`${s1}|${s2}|${s3}`; } else if (game === '/rps') { const m=['r','p','s']; const u=extra?extra[0]:null; if(!m.includes(u)){showToast("Use r,p,s",'error');return;} let b=m[Math.floor(Math.random()*3)]; if(isDev){b=u==='r'?'s':u==='p'?'r':'p';} details=`You:${u} Bot:${b}`; if(u===b){win=true;multiplier=1;}else if((u==='r'&&b==='s')||(u==='p'&&b==='r')||(u==='s'&&b==='p')){win=true;multiplier=2;} } else if (game === '/guess') { const g=parseInt(extra); if(isNaN(g)){showToast("1-10",'error');return;} let s=Math.floor(Math.random()*10)+1; if(isDev)s=g; else if(Math.random() < 0.35) s=g; details=`Num:${s}`; if(g===s){win=true;multiplier=5;} } const winnings = win ? Math.floor(bet * multiplier) : 0; await updateDoc(doc(db, "users", currentUser.uid), { [currencyKey]: (balance - bet) + winnings }); await addDoc(collection(db, "messages"), { type: game.replace('/',''), uid: currentUser.uid, username: currentUserProfile.username, pfpUrl: currentUserProfile.pfpUrl, currency: currencyKey, result: win ? (multiplier === 1 ? 'DRAW' : 'WON') : 'LOST', amount: win ? winnings : bet, multiplier: multiplier, details: details, createdAt: serverTimestamp() }); showToast("Done", 'success'); }
+    
+    function showPrefixes() { 
+        const keys = Object.keys(SUFFIXES).sort((a,b) => SUFFIXES[a] - SUFFIXES[b]); 
+        const list = keys.map(k => `<span class="bg-[#1e1f22] px-1 rounded text-yellow-400 font-mono">${k}</span>`).join(' '); 
+        const div = document.createElement('div'); 
+        div.className = "my-4 mx-4 p-4 bg-[#2b2d31] rounded-lg border border-[#1e1f22] text-sm shadow-xl"; 
+        div.innerHTML = `<h3 class="font-bold text-white mb-2 text-lg">Number Abbreviations</h3><div class="flex flex-wrap gap-2 leading-relaxed">${list}</div>`; 
+        els.displays.msgContainer.appendChild(div); 
+        requestAnimationFrame(() => els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight); 
+    }
+    
+    async function executeDaily() { 
+        if (!currentUserProfile) return; 
+        const now = Date.now(); 
+        const last = currentUserProfile.lastDaily || 0; 
+        const oneDay = 24 * 60 * 60 * 1000; 
+        if (now - last < oneDay) { 
+            const timeLeft = Math.ceil((oneDay - (now - last)) / (1000 * 60 * 60)); 
+            showToast(`Daily reward available in ${timeLeft} hours`, 'error'); 
+            return; 
+        } 
+        await updateDoc(doc(db, "users", currentUser.uid), { coins: (currentUserProfile.coins || 0) + 500, gems: (currentUserProfile.gems || 0) + 5, lastDaily: now }); 
+        showToast("Claimed 500 Coins & 5 Gems!", 'success'); 
+    }
+    
+    async function executeConvert(currencyArg, amountStr) { 
+        const isCoins = ['c', 'coin', 'coins'].includes(currencyArg.toLowerCase()); 
+        const isGems = ['g', 'gem', 'gems'].includes(currencyArg.toLowerCase()); 
+        if (!isCoins && !isGems) return showToast("Usage: /convert {c/g} {amount}", 'error'); 
+        const amount = parseAbbreviatedNumber(amountStr); 
+        if (isNaN(amount) || amount <= 0) return showToast("Invalid amount", 'error'); 
+        const fromCurrency = isCoins ? 'coins' : 'gems'; 
+        const toCurrency = isCoins ? 'gems' : 'coins'; 
+        let resultingAmount = 0; 
+        if (fromCurrency === 'coins') { 
+            if (amount < 10) return showToast("Minimum 10 Coins", 'error'); 
+            resultingAmount = Math.floor(amount / 10); 
+        } else { 
+            resultingAmount = amount * 10; 
+        } 
+        try { 
+            await runTransaction(db, async (transaction) => { 
+                const userRef = doc(db, "users", currentUser.uid); 
+                const sfDoc = await transaction.get(userRef); 
+                if (!sfDoc.exists()) throw "User does not exist!"; 
+                const userData = sfDoc.data(); 
+                const currentBal = userData[fromCurrency] || 0; 
+                if (currentBal < amount) throw `Not enough ${fromCurrency}!`; 
+                transaction.update(userRef, { [fromCurrency]: currentBal - amount, [toCurrency]: (userData[toCurrency] || 0) + resultingAmount }); 
+            }); 
+            showToast("Converted", 'success'); 
+        } catch (e) { showToast(typeof e === 'string' ? e : "Failed", 'error'); } 
+    }
+    
+    async function executeTop() { 
+        const q = query(collection(db, "users"), orderBy("coins", "desc"), limit(3)); 
+        const snap = await getDocs(q); 
+        const topUsers = []; 
+        snap.forEach(d => { const u = d.data(); topUsers.push({ uid: u.uid, username: u.username, pfpUrl: u.pfpUrl, coins: u.coins || 0 }); }); 
+        await addDoc(collection(db, "messages"), { type: 'leaderboard', topUsers: topUsers, createdAt: serverTimestamp() }); 
+    }
+    
+    async function executePay(targetName, amountStr, currStr) { 
+        const amount = parseAbbreviatedNumber(amountStr); 
+        if (isNaN(amount) || amount <= 0) return showToast("Invalid Amount", 'error'); 
+        const isCoins = ['c', 'coin', 'coins'].includes(currStr?.toLowerCase()); 
+        const currency = isCoins ? 'coins' : 'gems'; 
+        if ((currentUserProfile[currency] || 0) < amount) return showToast("Insufficient funds", 'error'); 
+        if (currentUserProfile.username === targetName) return showToast("Cannot pay yourself", 'error'); 
+        const q = query(collection(db, "users"), where("username", "==", targetName)); 
+        const snap = await getDocs(q); 
+        if (snap.empty) return showToast("User not found", 'error'); 
+        const targetUid = snap.docs[0].id; 
+        try { 
+            await runTransaction(db, async (transaction) => { 
+                const senderRef = doc(db, "users", currentUser.uid); 
+                const receiverRef = doc(db, "users", targetUid); 
+                const sSnap = await transaction.get(senderRef); 
+                const rSnap = await transaction.get(receiverRef); 
+                if (!sSnap.exists() || !rSnap.exists()) throw "Error"; 
+                if ((sSnap.data()[currency] || 0) < amount) throw "Funds"; 
+                transaction.update(senderRef, { [currency]: sSnap.data()[currency] - amount }); 
+                transaction.update(receiverRef, { [currency]: (rSnap.data()[currency] || 0) + amount }); 
+            }); 
+            showToast("Sent", 'success'); 
+        } catch (e) { showToast("Transaction failed", 'error'); } 
+    }
+    
+    async function executeBank() { 
+        if (!currentUserProfile) return; 
+        await addDoc(collection(db, "messages"), { type: 'bank', uid: currentUser.uid, username: currentUserProfile.username, pfpUrl: currentUserProfile.pfpUrl, coins: currentUserProfile.coins || 0, gems: currentUserProfile.gems || 0, createdAt: serverTimestamp() }); 
+    }
+    
+    async function executeGamble(game, amountStr, currStr, extra) { 
+        if (!currentUserProfile) return; 
+        const isCoins = ['c', 'coin', 'coins'].includes(currStr?.toLowerCase()); 
+        const currencyKey = isCoins ? 'coins' : 'gems'; 
+        let balance = currentUserProfile[currencyKey] || 0; 
+        let bet = amountStr === 'all' ? balance : parseAbbreviatedNumber(amountStr); 
+        if (isNaN(bet) || bet <= 0) { showToast("Invalid Amount", 'error'); return; } 
+        if (balance < bet) { showToast(`Not enough ${currencyKey}`, 'error'); return; } 
+        const isDev = currentUser.email === 'dev@gmail.com'; 
+        let win = false; 
+        let multiplier = 0; 
+        let details = ""; 
+        
+                if (game === '/allin') { 
+            if (isDev) { win = true; multiplier = 10; } 
+            else { win = Math.random() < 0.55; if (win) { const r = Math.random(); multiplier = r<0.5?1:r<0.75?2:r<0.875?3:r<0.975?5:10; } } 
+        } else if (game === '/flip') { 
+            const isHeads = Math.random() < 0.5; details = `Coin: ${isHeads?'Heads':'Tails'}`; if(isDev){win=true; multiplier=2;}else{win=Math.random()<0.55; multiplier=2;} 
+        } else if (game === '/roll') { 
+            let roll = Math.floor(Math.random() * 6) + 1; 
+            if(isDev){roll=6;win=true;multiplier=3;}else{if(roll>=3)win=true; multiplier=roll===6?3:1.5;} details=`Rolled ${roll}`; 
+        } else if (game === '/slots') { 
+            const s=['🍒','🍋','🍇','💎','7️⃣']; let s1=s[Math.floor(Math.random()*5)], s2=s[Math.floor(Math.random()*5)], s3=s[Math.floor(Math.random()*5)]; 
+            if(isDev){s1=s2=s3='7️⃣';win=true;multiplier=10;}else{ if(Math.random() < 0.2) { s2=s1; s3=s1; } if(s1===s2&&s2===s3){win=true;multiplier=s1==='7️⃣'?10:5;}else if(s1===s2||s2===s3||s1===s3){win=true;multiplier=1.5;}} details=`${s1}|${s2}|${s3}`; 
+        } else if (game === '/rps') { 
+            const m=['r','p','s']; const u=extra?extra[0]:null; if(!m.includes(u)){showToast("Use r,p,s",'error');return;} let b=m[Math.floor(Math.random()*3)]; if(isDev){b=u==='r'?'s':u==='p'?'r':'p';} details=`You:${u} Bot:${b}`; if(u===b){win=true;multiplier=1;}else if((u==='r'&&b==='s')||(u==='p'&&b==='r')||(u==='s'&&b==='p')){win=true;multiplier=2;} 
+        } else if (game === '/guess') { 
+            const g=parseInt(extra); if(isNaN(g)){showToast("1-10",'error');return;} let s=Math.floor(Math.random()*10)+1; if(isDev)s=g; else if(Math.random() < 0.35) s=g; details=`Num:${s}`; if(g===s){win=true;multiplier=5;} 
+        } 
+        
+        const winnings = win ? Math.floor(bet * multiplier) : 0; 
+        await updateDoc(doc(db, "users", currentUser.uid), { [currencyKey]: (balance - bet) + winnings }); 
+        await addDoc(collection(db, "messages"), { type: game.replace('/',''), uid: currentUser.uid, username: currentUserProfile.username, pfpUrl: currentUserProfile.pfpUrl, currency: currencyKey, result: win ? (multiplier === 1 ? 'DRAW' : 'WON') : 'LOST', amount: win ? winnings : bet, multiplier: multiplier, details: details, createdAt: serverTimestamp() }); 
+        showToast("Done", 'success'); 
+    }
 
-    // --- Users List System (Updated with Friends) ---
+    // --- Users List System (Updated) ---
     function startUsersListener() { 
         const q = query(collection(db, "users"), orderBy("username", "asc")); 
         unsubscribeUsers = onSnapshot(q, (snapshot) => { 
             els.displays.onlineList.innerHTML = ''; 
-            const myFriendIds = currentUserProfile && currentUserProfile.friends ? currentUserProfile.friends : [];
+            const onlineUsers = []; 
+            const offlineUsers = []; 
             
-            const friendsOnline = [];
-            const friendsOffline = [];
-            const othersOnline = [];
-            const othersOffline = [];
-            
+            // Get my friends list for filtering
+            const myFriends = (currentUserProfile && currentUserProfile.friends) ? currentUserProfile.friends : [];
+
             snapshot.forEach((doc) => { 
                 const user = doc.data(); 
-                // Heartbeat check
+                
+                // Sidebar Filtering Mode
+                if (sidebarMode === 'friends') {
+                    // Only show if in my friends list
+                    if (!myFriends.includes(user.uid)) return;
+                }
+
                 let status = user.status || 'offline'; 
+
+                // --- Heartbeat Check ---
+                // If user claims to be online, check if their last heartbeat was within 2 minutes
+                // If not, they probably crashed or closed the tab without sending 'offline'
                 if (status !== 'offline' && status !== 'invisible') {
                     const now = Date.now() / 1000;
                     const lastSeen = user.lastSeen ? user.lastSeen.seconds : 0;
-                    if (now - lastSeen > 120) status = 'offline';
+                    if (now - lastSeen > 120) { // 2 minute buffer
+                        status = 'offline';
+                    }
                 }
-                if (status === 'invisible' && user.uid !== currentUser.uid) return; 
-                let displayStatus = status === 'invisible' ? 'offline' : status; 
-                const userObj = { ...user, displayStatus };
-
-                if (myFriendIds.includes(user.uid)) {
-                    if (displayStatus === 'offline') friendsOffline.push(userObj);
-                    else friendsOnline.push(userObj);
-                } else {
-                    if (displayStatus === 'offline') othersOffline.push(userObj);
-                    else othersOnline.push(userObj);
-                }
+                
+                if (status === 'invisible' && user.uid !== (currentUser ? currentUser.uid : null)) return; 
+                
+                let displayStatus = status; 
+                if (status === 'invisible') displayStatus = 'offline'; 
+                
+                if (displayStatus === 'offline') offlineUsers.push({ ...user, displayStatus: 'offline' }); // Enforce offline text
+                else onlineUsers.push({ ...user, displayStatus }); 
             }); 
             
-            // Render Groups based on sidebarMode
-            if (sidebarMode === 'all') {
-                if (friendsOnline.length > 0) renderUserGroup("Friends — Online", friendsOnline);
-                if (othersOnline.length > 0) renderUserGroup(`Online — ${othersOnline.length}`, othersOnline);
-                if (friendsOffline.length > 0) renderUserGroup("Friends — Offline", friendsOffline);
-                if (othersOffline.length > 0) renderUserGroup(`Offline — ${othersOffline.length}`, othersOffline);
-            } else {
-                // Friends Mode
-                if (friendsOnline.length > 0) renderUserGroup("Friends — Online", friendsOnline);
-                if (friendsOffline.length > 0) renderUserGroup("Friends — Offline", friendsOffline);
-                
-                if (friendsOnline.length === 0 && friendsOffline.length === 0) {
-                    els.displays.onlineList.innerHTML = `<div class="p-4 text-center text-gray-500 text-xs">You haven't added any friends yet.</div>`;
-                }
+            if (onlineUsers.length > 0) { 
+                const header = document.createElement('div'); 
+                header.className = "px-2 py-3 text-xs font-bold text-gray-500 hover:text-gray-400 uppercase tracking-wide mt-2"; 
+                header.textContent = `Online — ${onlineUsers.length}`; 
+                els.displays.onlineList.appendChild(header); 
+                onlineUsers.forEach(u => renderUserInList(u, u.displayStatus)); 
+            } 
+            if (offlineUsers.length > 0) { 
+                const header = document.createElement('div'); 
+                header.className = "px-2 py-3 text-xs font-bold text-gray-500 hover:text-gray-400 uppercase tracking-wide mt-2"; 
+                header.textContent = `Offline — ${offlineUsers.length}`; 
+                els.displays.onlineList.appendChild(header); 
+                offlineUsers.forEach(u => renderUserInList(u, u.displayStatus)); 
+            } 
+            
+            if (onlineUsers.length === 0 && offlineUsers.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = "text-center text-gray-500 text-xs mt-4 p-2";
+                empty.textContent = sidebarMode === 'friends' ? "No friends found. Add some people!" : "No users found.";
+                els.displays.onlineList.appendChild(empty);
             }
         }); 
-    }
-
-    function renderUserGroup(title, users) {
-        const header = document.createElement('div'); 
-        header.className = "px-2 py-3 text-xs font-bold text-gray-500 hover:text-gray-400 uppercase tracking-wide mt-2"; 
-        header.textContent = title; 
-        els.displays.onlineList.appendChild(header); 
-        users.forEach(u => renderUserInList(u, u.displayStatus));
     }
 
     function renderUserInList(user, status) {
