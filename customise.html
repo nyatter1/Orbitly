@@ -448,7 +448,7 @@
                 Appearance Customization
             </h1>
         </div>
-        <button onclick="window.location.href='/'" class="px-4 py-2 bg-[#5865F2] hover:bg-[#4752c4] text-white rounded font-bold transition flex items-center gap-2">
+        <button onclick="window.location.href='index.html'" class="px-4 py-2 bg-[#5865F2] hover:bg-[#4752c4] text-white rounded font-bold transition flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Back to Chat
         </button>
     </header>
@@ -647,11 +647,23 @@
         fontSel.innerHTML = allFonts.map(f => `<option value="${f.val}">${f.name}</option>`).join('');
         fontSel.value = tempCustState.font;
         
-        document.getElementById('effect-grid').innerHTML = allEffects.map(e => `<button onclick="window.app.setCustEffect('${e.id}')" id="btn-${e.id}" class="p-2 bg-[#2b2d31] border border-gray-700 hover:border-white rounded text-xs font-bold text-white overflow-hidden relative ${e.id===tempCustState.effect?'cust-active':''}"><span class="${e.id} block w-full h-full flex items-center justify-center">${e.label}</span></button>`).join('');
-        
-        document.getElementById('list-style-grid').innerHTML = allListStyles.map(s => `<button onclick="window.app.setListStyle('${s.id}')" id="btn-${s.id}" class="h-10 rounded text-xs font-bold text-gray-300 transition-all flex items-center justify-center px-2 overflow-hidden ${s.id} ${s.id===tempCustState.listStyle?'cust-active':''}">${s.label}</button>`).join('');
-        
-        document.getElementById('card-theme-grid').innerHTML = allCardThemes.map(t => `<button onclick="window.app.setCustCard('${t.id}')" id="btn-${t.id}" class="h-10 rounded text-xs font-bold text-gray-300 transition-all flex items-center justify-center px-2 overflow-hidden ${t.id} ${t.id===tempCustState.cardTheme?'cust-active':''}">${t.label}</button>`).join('');
+        // Effects: show name inside button with effect class applied (mostly text effects)
+        document.getElementById('effect-grid').innerHTML = allEffects.map(e => `
+            <button onclick="window.app.setCustEffect('${e.id}')" id="btn-${e.id}" class="p-2 bg-[#2b2d31] border border-gray-700 hover:border-white rounded text-xs font-bold text-gray-300 overflow-hidden relative min-h-[40px] ${e.id===tempCustState.effect?'cust-active':''}">
+                <span class="${e.id} block w-full h-full flex items-center justify-center">${e.label}</span>
+            </button>`).join('');
+            
+        // List Styles: Apply the list style class to the button itself
+        document.getElementById('list-style-grid').innerHTML = allListStyles.map(s => `
+            <button onclick="window.app.setListStyle('${s.id}')" id="btn-${s.id}" class="h-12 rounded text-xs font-bold transition-all flex items-center justify-center px-2 overflow-hidden ${s.id} ${s.id===tempCustState.listStyle?'cust-active':''} text-gray-300">
+                ${s.label}
+            </button>`).join('');
+            
+        // Card Themes: Apply the card theme class to the button
+        document.getElementById('card-theme-grid').innerHTML = allCardThemes.map(t => `
+            <button onclick="window.app.setCustCard('${t.id}')" id="btn-${t.id}" class="h-12 rounded text-xs font-bold transition-all flex items-center justify-center px-2 overflow-hidden ${t.id} ${t.id===tempCustState.cardTheme?'cust-active':''} text-gray-300">
+                ${t.label}
+            </button>`).join('');
         
         // Listeners
         ['cust-color', 'cust-font', 'cust-list-bg', 'cust-list-border', 'cust-list-text', 'cust-msg-color'].forEach(id => document.getElementById(id).addEventListener('input', updateCustPreview));
