@@ -89,6 +89,32 @@
         flex-shrink: 0;
     }
 
+    /* Typing Indicator */
+    .typing-indicator span {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        background-color: #b9bbbe;
+        border-radius: 50%;
+        animation: typing 1.4s infinite ease-in-out both;
+        margin: 0 1px;
+    }
+    .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+    /* Like Heart Animation */
+    @keyframes heart-burst {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+        100% { transform: scale(1); }
+    }
+    .like-anim { animation: heart-burst 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+    /* Notification Badge Pulse */
+    @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(242, 63, 67, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(242, 63, 67, 0); } 100% { box-shadow: 0 0 0 0 rgba(242, 63, 67, 0); } }
+    .notif-pulse { animation: pulse-red 2s infinite; }
+
     /* --- FONTS --- */
     .font-default { font-family: ui-sans-serif, system-ui, sans-serif; }
     .font-abril { font-family: 'Abril Fatface', cursive; }
@@ -537,7 +563,6 @@
     
     <!-- Auth View -->
 <div id="auth-view" class="flex-1 flex flex-col justify-center items-center p-4 bg-[url('https://picsum.photos/1920/1080?blur=10')] bg-cover bg-center relative z-50">
-    <!-- ... (Auth view content unchanged) ... -->
     <div class="absolute inset-0 bg-gray-900/80 backdrop-blur-sm"></div>
     
     <div class="relative w-full max-w-md bg-[#2b2d31] rounded-lg shadow-2xl overflow-hidden">
@@ -636,7 +661,14 @@
             </div>
             
             <div class="flex items-center gap-4">
-                
+                 <!-- Notifications Bell -->
+                 <button onclick="app.toggleNotifications()" class="text-gray-400 hover:text-white transition relative" title="Notifications">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    <div id="notif-badge" class="hidden absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#313338] notif-pulse"></div>
+                </button>
+
                  <!-- Customize Button -->
                  <button onclick="app.openCustomize()" class="text-gray-400 hover:text-pink-400 transition" title="Customize">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -680,7 +712,6 @@
 
                     <!-- Status Dropdown -->
                     <div id="status-dropdown" class="hidden absolute top-full right-0 mt-2 w-48 bg-[#111214] rounded shadow-xl border border-[#1e1f22] overflow-hidden z-50">
-                        <!-- ... (Status dropdown content unchanged) ... -->
                         <div class="p-2 space-y-1">
                             <button onclick="app.setStatus('online')" class="w-full text-left px-2 py-1.5 rounded hover:bg-[#4752c4] hover:text-white text-gray-300 text-sm flex items-center gap-2 group">
                                 <div class="w-2.5 h-2.5 rounded-full status-online"></div> Online
@@ -709,9 +740,15 @@
             <!-- Messages injected here -->
         </div>
 
-        <!-- Input Area (Updated for Reply) -->
+        <!-- Input Area (Updated for Reply & Typing) -->
         <div class="px-4 pb-4 bg-[#313338] relative">
             
+            <!-- Typing Indicator -->
+            <div id="typing-indicator" class="absolute bottom-full left-4 mb-2 flex items-center gap-2 text-xs font-bold text-gray-400 h-6 opacity-0 transition-opacity duration-300">
+                <div class="typing-indicator"><span></span><span></span><span></span></div>
+                <span id="typing-text">Someone is typing...</span>
+            </div>
+
             <!-- Reply Preview Bar -->
             <div id="reply-bar" class="hidden absolute bottom-full left-4 right-4 mb-2 bg-[#2b2d31] border border-[#1e1f22] rounded-t-lg p-2 flex items-center justify-between reply-preview-anim z-10 shadow-lg">
                 <div class="flex flex-col text-sm ml-2 overflow-hidden">
@@ -729,7 +766,6 @@
         </div>
     </div>
 
-    <!-- ... (Sidebar, Wallet, Profile Modal, Edit Profile Modal, Customize Modal same as before) ... -->
     <!-- Sidebar (Online Players) -->
     <div class="w-60 bg-[#2b2d31] flex flex-col shrink-0 border-l border-[#1e1f22]">
         <div class="p-4 border-b border-[#1e1f22] h-16 flex items-center justify-center">
@@ -740,9 +776,27 @@
         </div>
     </div>
 
+    <!-- Notification Modal (Middle of Screen) -->
+    <div id="notification-modal" class="absolute inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target === this) app.toggleNotifications()">
+        <div class="bg-[#2b2d31] rounded-xl shadow-2xl w-full max-w-sm border border-[#1e1f22] relative flex flex-col max-h-[70vh]">
+            <div class="p-4 border-b border-[#1e1f22] flex justify-between items-center bg-[#202225] rounded-t-xl">
+                <h3 class="text-white font-bold text-lg flex items-center gap-2">
+                    <svg class="w-5 h-5 text-[#5865F2]" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
+                    Notifications
+                </h3>
+                <button onclick="app.toggleNotifications()" class="text-gray-400 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="notif-list" class="flex-1 overflow-y-auto p-2 space-y-2">
+                <!-- Notifications injected here -->
+                <div class="text-center text-gray-500 py-8 text-sm italic">No new notifications</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Wallet Modal -->
     <div id="wallet-modal" class="absolute inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center">
-        <!-- ... (Wallet modal content unchanged) ... -->
         <div class="bg-[#2b2d31] rounded-xl shadow-2xl p-6 w-80 transform transition-all scale-100 border border-[#1e1f22] relative">
             <button onclick="app.closeWallet()" class="absolute top-2 right-2 text-gray-400 hover:text-white">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -765,7 +819,6 @@
 
     <!-- User Profile Modal (View) -->
     <div id="profile-modal" class="absolute inset-0 z-50 hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-        <!-- ... (Profile modal content unchanged) ... -->
         <div id="profile-card-content" class="card-theme-default rounded-xl shadow-2xl w-full max-w-sm overflow-hidden relative transform transition-all scale-100">
             <!-- Banner -->
             <div class="h-32 bg-gray-700 relative overflow-hidden group">
@@ -777,20 +830,30 @@
             </div>
 
             <div class="px-6 pb-6 relative">
-                <!-- PFP -->
+                <!-- PFP & Status -->
                 <div class="relative -mt-16 mb-4 flex justify-between items-end">
                     <div class="relative">
                         <img id="profile-pfp" src="" class="w-28 h-28 rounded-full border-4 border-[#2b2d31] bg-[#2b2d31] object-cover shadow-lg">
                         <div class="bg-[#1e1f22] px-2 py-0.5 rounded text-[10px] font-bold text-gray-400 border border-[#111214] absolute bottom-1 right-0 shadow-md" id="profile-status-badge">ONLINE</div>
                     </div>
-                    <!-- Edit Button (Shown only for own profile) -->
-                    <button id="profile-edit-btn" onclick="app.openEditProfile()" class="hidden mb-2 bg-[#5865F2] hover:bg-[#4752c4] text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-lg flex items-center gap-1">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg> Edit
-                    </button>
+                    
+                    <div class="flex gap-2 mb-2">
+                        <!-- Like Button (New Feature) -->
+                        <button id="btn-like-profile" onclick="app.likeProfile()" class="bg-[#2b2d31]/80 hover:bg-pink-500/20 text-gray-400 hover:text-pink-500 border border-gray-600 px-3 py-1.5 rounded-full text-xs font-bold transition shadow-lg flex items-center gap-1 group">
+                             <svg class="w-4 h-4 group-hover:fill-pink-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                             <span id="profile-likes-count">0</span>
+                        </button>
+
+                        <!-- Edit Button (Shown only for own profile) -->
+                        <button id="profile-edit-btn" onclick="app.openEditProfile()" class="hidden bg-[#5865F2] hover:bg-[#4752c4] text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-lg flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg> Edit
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="mb-4">
                     <h3 id="profile-username" class="text-2xl font-bold text-white leading-tight break-words"></h3>
+                    <p id="profile-custom-status" class="text-sm text-[#949BA4] font-medium mt-1 truncate hidden"></p>
                     <p id="profile-joined" class="text-xs text-gray-400 mt-1">Joined Dec 2023</p>
                 </div>
 
@@ -826,7 +889,6 @@
 
     <!-- Edit Profile Modal (Basic Info Only) -->
     <div id="edit-profile-modal" class="absolute inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <!-- ... (Edit profile modal content unchanged) ... -->
         <div class="bg-[#2b2d31] rounded-xl shadow-2xl w-full max-w-md border border-[#1e1f22] relative flex flex-col max-h-[90vh]">
             <div class="p-4 border-b border-[#1e1f22] flex justify-between items-center">
                 <h3 class="text-white font-bold text-lg">Edit Profile</h3>
@@ -862,6 +924,11 @@
                         <label class="block text-xs uppercase font-bold text-gray-400 mb-1">Username</label>
                         <input type="text" id="edit-username" class="w-full px-3 py-2 bg-[#1e1f22] border border-gray-700 rounded text-white focus:border-[#5865F2] outline-none">
                     </div>
+                    <!-- New Feature: Custom Status -->
+                    <div>
+                        <label class="block text-xs uppercase font-bold text-gray-400 mb-1">Custom Status Message</label>
+                        <input type="text" id="edit-custom-status" maxlength="40" placeholder="e.g. Grinding for gems..." class="w-full px-3 py-2 bg-[#1e1f22] border border-gray-700 rounded text-white focus:border-[#5865F2] outline-none">
+                    </div>
                     <div>
                         <label class="block text-xs uppercase font-bold text-gray-400 mb-1">Bio</label>
                         <textarea id="edit-bio" rows="2" class="w-full px-3 py-2 bg-[#1e1f22] border border-gray-700 rounded text-white focus:border-[#5865F2] outline-none resize-none" placeholder="Tell us about yourself..."></textarea>
@@ -895,7 +962,6 @@
 
     <!-- Customize Menu Modal -->
     <div id="customize-modal" class="absolute inset-0 z-50 hidden bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
-        <!-- ... (Customize content unchanged, just re-referencing div structure) ... -->
         <div class="bg-[#2b2d31] rounded-xl shadow-2xl w-full max-w-4xl border border-[#1e1f22] relative flex flex-col h-[85vh] overflow-hidden">
             
             <!-- Header -->
@@ -1106,6 +1172,10 @@
     let currentUserProfile = null;
     let unsubscribeMessages = null;
     let unsubscribeUsers = null;
+    let unsubscribeNotifs = null;
+    let unsubscribeTyping = null;
+    let currentlyViewingProfileId = null;
+    let typingTimeout = null;
     
     // New State for Reply
     let replyingTo = null; // { id, text, username, pfpUrl }
@@ -1133,7 +1203,9 @@
             headerPfp: document.getElementById('current-user-pfp'), headerName: document.getElementById('current-username'), headerStatusText: document.getElementById('current-status-text'), headerStatusDot: document.getElementById('current-user-status-dot'), statusDropdown: document.getElementById('status-dropdown'), invisibleBtn: document.getElementById('btn-invisible'), walletModal: document.getElementById('wallet-modal'), walletCoins: document.getElementById('wallet-coins'), walletGems: document.getElementById('wallet-gems'), profileModal: document.getElementById('profile-modal'), toastContainer: document.getElementById('toast-container'),
             editModal: document.getElementById('edit-profile-modal'), editPfpInput: document.getElementById('edit-pfp-input'), editBannerInput: document.getElementById('edit-banner-input'), editPfpPreview: document.getElementById('edit-pfp-preview'), editBannerPreview: document.getElementById('edit-banner-preview'),
             custModal: document.getElementById('customize-modal'),
-            replyBar: document.getElementById('reply-bar'), replyBarUser: document.getElementById('reply-bar-username'), replyBarText: document.getElementById('reply-bar-text')
+            replyBar: document.getElementById('reply-bar'), replyBarUser: document.getElementById('reply-bar-username'), replyBarText: document.getElementById('reply-bar-text'),
+            notifModal: document.getElementById('notification-modal'), notifList: document.getElementById('notif-list'), notifBadge: document.getElementById('notif-badge'),
+            typingIndicator: document.getElementById('typing-indicator'), typingText: document.getElementById('typing-text')
         }
     };
 
@@ -1148,12 +1220,107 @@
         setStatus: async (status) => { if (!currentUser) return; try { await updateDoc(doc(db, "users", currentUser.uid), { status: status }); els.displays.statusDropdown.classList.add('hidden'); } catch (e) { console.error("Status update failed", e); } },
         openWallet: () => { if (currentUserProfile) { els.displays.walletCoins.textContent = formatNumber(currentUserProfile.coins || 0); els.displays.walletGems.textContent = formatNumber(currentUserProfile.gems || 0); } els.displays.walletModal.classList.remove('hidden'); },
         closeWallet: () => { els.displays.walletModal.classList.add('hidden'); },
-        openProfile: async (uid) => { try { const snap = await getDoc(doc(db, "users", uid)); if(snap.exists()) { const data = snap.data(); document.getElementById('profile-pfp').src = data.pfpUrl || 'https://ui-avatars.com/api/?name=?'; const bannerEl = document.getElementById('profile-banner'); const bannerPlace = document.getElementById('profile-banner-placeholder'); if (data.bannerUrl) { bannerEl.src = data.bannerUrl; bannerEl.classList.remove('hidden'); bannerPlace.classList.add('hidden'); } else { bannerEl.classList.add('hidden'); bannerPlace.classList.remove('hidden'); } const nameEl = document.getElementById('profile-username'); nameEl.textContent = data.username; applyUsernameStyle(nameEl, data.usernameStyle); const cardEl = document.getElementById('profile-card-content'); cardEl.className = "rounded-xl shadow-2xl w-full max-w-sm overflow-hidden relative transform transition-all scale-100"; cardEl.classList.add(data.usercardStyle || 'card-theme-default'); const bioEl = document.getElementById('profile-bio'); const bioCont = document.getElementById('profile-bio-container'); if (data.bio) { bioEl.textContent = data.bio; bioCont.classList.remove('hidden'); } else { bioCont.classList.add('hidden'); } document.getElementById('profile-age').textContent = data.age || 'N/A'; document.getElementById('profile-gender').textContent = data.gender || 'N/A'; document.getElementById('profile-coins').textContent = formatNumber(data.coins || 0); document.getElementById('profile-gems').textContent = formatNumber(data.gems || 0); const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown'; document.getElementById('profile-joined').textContent = `Joined ${date}`; const status = (data.status || 'offline').toUpperCase(); const badge = document.getElementById('profile-status-badge'); badge.textContent = status; const editBtn = document.getElementById('profile-edit-btn'); if (currentUser && currentUser.uid === uid) editBtn.classList.remove('hidden'); else editBtn.classList.add('hidden'); els.displays.profileModal.classList.remove('hidden'); } } catch(e) { console.error(e); } },
+        
+        // --- Updated Profile Logic for Likes & Stalking ---
+        openProfile: async (uid) => { 
+            try { 
+                const snap = await getDoc(doc(db, "users", uid)); 
+                if(snap.exists()) { 
+                    const data = snap.data(); 
+                    currentlyViewingProfileId = uid;
+                    
+                    document.getElementById('profile-pfp').src = data.pfpUrl || 'https://ui-avatars.com/api/?name=?'; 
+                    const bannerEl = document.getElementById('profile-banner'); 
+                    const bannerPlace = document.getElementById('profile-banner-placeholder'); 
+                    if (data.bannerUrl) { bannerEl.src = data.bannerUrl; bannerEl.classList.remove('hidden'); bannerPlace.classList.add('hidden'); } else { bannerEl.classList.add('hidden'); bannerPlace.classList.remove('hidden'); } 
+                    const nameEl = document.getElementById('profile-username'); 
+                    nameEl.textContent = data.username; 
+                    applyUsernameStyle(nameEl, data.usernameStyle); 
+                    
+                    // Custom Status (New Feature)
+                    const statusMsgEl = document.getElementById('profile-custom-status');
+                    if(data.customStatus) {
+                        statusMsgEl.textContent = `"${data.customStatus}"`;
+                        statusMsgEl.classList.remove('hidden');
+                    } else {
+                        statusMsgEl.classList.add('hidden');
+                    }
+
+                    // Like Count (New Feature)
+                    document.getElementById('profile-likes-count').textContent = formatNumber(data.likes || 0);
+                    
+                    const cardEl = document.getElementById('profile-card-content'); 
+                    cardEl.className = "rounded-xl shadow-2xl w-full max-w-sm overflow-hidden relative transform transition-all scale-100"; 
+                    cardEl.classList.add(data.usercardStyle || 'card-theme-default'); 
+                    const bioEl = document.getElementById('profile-bio'); 
+                    const bioCont = document.getElementById('profile-bio-container'); 
+                    if (data.bio) { bioEl.textContent = data.bio; bioCont.classList.remove('hidden'); } else { bioCont.classList.add('hidden'); } 
+                    document.getElementById('profile-age').textContent = data.age || 'N/A'; 
+                    document.getElementById('profile-gender').textContent = data.gender || 'N/A'; 
+                    document.getElementById('profile-coins').textContent = formatNumber(data.coins || 0); 
+                    document.getElementById('profile-gems').textContent = formatNumber(data.gems || 0); 
+                    const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown'; 
+                    document.getElementById('profile-joined').textContent = `Joined ${date}`; 
+                    const status = (data.status || 'offline').toUpperCase(); 
+                    const badge = document.getElementById('profile-status-badge'); 
+                    badge.textContent = status; 
+                    const editBtn = document.getElementById('profile-edit-btn'); 
+                    if (currentUser && currentUser.uid === uid) editBtn.classList.remove('hidden'); else editBtn.classList.add('hidden'); 
+                    
+                    els.displays.profileModal.classList.remove('hidden'); 
+
+                    // Trigger Stalk Notification (If not viewing self)
+                    if (currentUser && uid !== currentUser.uid) {
+                        sendNotification(uid, 'stalk', currentUserProfile.username);
+                    }
+                } 
+            } catch(e) { console.error(e); } 
+        },
         openMyProfile: () => { if(currentUser) app.openProfile(currentUser.uid); },
-        closeProfile: () => { els.displays.profileModal.classList.add('hidden'); },
-        openEditProfile: () => { if (!currentUserProfile) return; document.getElementById('edit-username').value = currentUserProfile.username; document.getElementById('edit-bio').value = currentUserProfile.bio || ""; document.getElementById('edit-age').value = currentUserProfile.age; document.getElementById('edit-gender').value = currentUserProfile.gender; els.displays.editPfpPreview.src = currentUserProfile.pfpUrl || 'https://ui-avatars.com/api/?name=?'; els.displays.editBannerPreview.src = currentUserProfile.bannerUrl || ''; els.displays.profileModal.classList.add('hidden'); els.displays.editModal.classList.remove('hidden'); },
+        closeProfile: () => { els.displays.profileModal.classList.add('hidden'); currentlyViewingProfileId = null; },
+        
+        // --- Like Profile Function ---
+        likeProfile: async () => {
+            if(!currentUser || !currentlyViewingProfileId) return;
+            // Optimistic Update
+            const btn = document.getElementById('btn-like-profile');
+            const countEl = document.getElementById('profile-likes-count');
+            
+            // Anim
+            const heart = btn.querySelector('svg');
+            heart.classList.add('like-anim');
+            setTimeout(() => heart.classList.remove('like-anim'), 300);
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const userRef = doc(db, "users", currentlyViewingProfileId);
+                    const sfDoc = await transaction.get(userRef);
+                    if (!sfDoc.exists()) throw "User does not exist!";
+                    const newLikes = (sfDoc.data().likes || 0) + 1;
+                    transaction.update(userRef, { likes: newLikes });
+                });
+                countEl.textContent = formatNumber(parseInt(countEl.textContent.replace(/,/g,'')) + 1);
+                
+                // Trigger Like Notification
+                if(currentlyViewingProfileId !== currentUser.uid) {
+                    sendNotification(currentlyViewingProfileId, 'like', currentUserProfile.username);
+                }
+            } catch (e) {
+                console.error("Like failed", e);
+            }
+        },
+
+        // --- Notification Logic ---
+        toggleNotifications: () => {
+            els.displays.notifModal.classList.toggle('hidden');
+            if(!els.displays.notifModal.classList.contains('hidden')) {
+                // Clear unread logic could go here, for now simpler
+            }
+        },
+
+        openEditProfile: () => { if (!currentUserProfile) return; document.getElementById('edit-username').value = currentUserProfile.username; document.getElementById('edit-bio').value = currentUserProfile.bio || ""; document.getElementById('edit-age').value = currentUserProfile.age; document.getElementById('edit-gender').value = currentUserProfile.gender; document.getElementById('edit-custom-status').value = currentUserProfile.customStatus || ""; els.displays.editPfpPreview.src = currentUserProfile.pfpUrl || 'https://ui-avatars.com/api/?name=?'; els.displays.editBannerPreview.src = currentUserProfile.bannerUrl || ''; els.displays.profileModal.classList.add('hidden'); els.displays.editModal.classList.remove('hidden'); },
         closeEditProfile: () => { els.displays.editModal.classList.add('hidden'); },
-        saveProfile: async () => { if(!currentUser) return; const newUsername = document.getElementById('edit-username').value.trim(); const newBio = document.getElementById('edit-bio').value.trim(); const newAge = parseInt(document.getElementById('edit-age').value); const newGender = document.getElementById('edit-gender').value; const pfpFile = els.displays.editPfpInput.files[0]; const bannerFile = els.displays.editBannerInput.files[0]; let pfpUrl = currentUserProfile.pfpUrl; let bannerUrl = currentUserProfile.bannerUrl; if (!newUsername) return showToast("Username required", 'error'); if (newUsername.length > 20) return showToast("Username too long", 'error'); try { if (pfpFile) pfpUrl = await processUpload(pfpFile); if (bannerFile) bannerUrl = await processUpload(bannerFile); await updateDoc(doc(db, "users", currentUser.uid), { username: newUsername, bio: newBio, age: newAge, gender: newGender, pfpUrl: pfpUrl, bannerUrl: bannerUrl || null }); showToast("Profile Saved!", 'success'); app.closeEditProfile(); app.openProfile(currentUser.uid); } catch (e) { console.error(e); showToast("Error saving profile", 'error'); } },
+        saveProfile: async () => { if(!currentUser) return; const newUsername = document.getElementById('edit-username').value.trim(); const newBio = document.getElementById('edit-bio').value.trim(); const newAge = parseInt(document.getElementById('edit-age').value); const newGender = document.getElementById('edit-gender').value; const newCustomStatus = document.getElementById('edit-custom-status').value.trim(); const pfpFile = els.displays.editPfpInput.files[0]; const bannerFile = els.displays.editBannerInput.files[0]; let pfpUrl = currentUserProfile.pfpUrl; let bannerUrl = currentUserProfile.bannerUrl; if (!newUsername) return showToast("Username required", 'error'); if (newUsername.length > 20) return showToast("Username too long", 'error'); try { if (pfpFile) pfpUrl = await processUpload(pfpFile); if (bannerFile) bannerUrl = await processUpload(bannerFile); await updateDoc(doc(db, "users", currentUser.uid), { username: newUsername, bio: newBio, age: newAge, gender: newGender, customStatus: newCustomStatus, pfpUrl: pfpUrl, bannerUrl: bannerUrl || null }); showToast("Profile Saved!", 'success'); app.closeEditProfile(); app.openProfile(currentUser.uid); } catch (e) { console.error(e); showToast("Error saving profile", 'error'); } },
         
         // ... Customization Menu Logic (Mostly unchanged, refs new fonts) ...
         openCustomize: () => {
@@ -1585,6 +1752,13 @@
     
     els.displays.editPfpInput.addEventListener('change', (e) => { if(e.target.files[0]) els.displays.editPfpPreview.src = URL.createObjectURL(e.target.files[0]); });
     els.displays.editBannerInput.addEventListener('change', (e) => { if(e.target.files[0]) els.displays.editBannerPreview.src = URL.createObjectURL(e.target.files[0]); });
+    
+    // Typing Listener
+    els.inputs.msg.addEventListener('input', () => {
+        if(!currentUser) return;
+        // Update Firestore typing status
+        updateTypingStatus();
+    });
 
     // --- Toast System ---
     function showToast(message, type = 'success') { const toast = document.createElement('div'); const bgClass = type === 'success' ? 'bg-green-500/90' : 'bg-red-500/90'; toast.className = `px-6 py-2 rounded-full text-white font-bold shadow-lg mb-2 text-sm text-center toast-enter backdrop-blur-md ${bgClass}`; toast.textContent = message; els.displays.toastContainer.appendChild(toast); setTimeout(() => { toast.classList.remove('toast-enter'); toast.classList.add('toast-exit'); setTimeout(() => toast.remove(), 300); }, 2500); }
@@ -1651,10 +1825,14 @@
             els.chatView.classList.add('flex'); 
             startChatListener(); 
             startUsersListener(); 
+            listenForNotifications();
+            listenForTyping();
         } else { 
             if (window.presenceInterval) clearInterval(window.presenceInterval);
             if (unsubscribeMessages) unsubscribeMessages(); 
             if (unsubscribeUsers) unsubscribeUsers(); 
+            if (unsubscribeNotifs) unsubscribeNotifs();
+            if (unsubscribeTyping) unsubscribeTyping();
             currentUser = null; 
             currentUserProfile = null; 
             els.chatView.classList.add('hidden'); 
@@ -1662,6 +1840,103 @@
             els.authView.classList.remove('hidden'); 
         } 
     });
+
+    // --- Notification System ---
+    async function sendNotification(targetUid, type, senderName) {
+        if (!targetUid || !senderName) return;
+        try {
+            await addDoc(collection(db, "notifications"), {
+                recipientId: targetUid,
+                senderName: senderName,
+                type: type, // 'like' or 'stalk'
+                timestamp: serverTimestamp(),
+                read: false
+            });
+        } catch(e) { console.error("Failed to send notif", e); }
+    }
+
+    function listenForNotifications() {
+        if(!currentUser) return;
+        const q = query(collection(db, "notifications"), where("recipientId", "==", currentUser.uid), orderBy("timestamp", "desc"), limit(20));
+        
+        unsubscribeNotifs = onSnapshot(q, (snapshot) => {
+            const list = els.displays.notifList;
+            list.innerHTML = '';
+            
+            if (snapshot.empty) {
+                list.innerHTML = '<div class="text-center text-gray-500 py-8 text-sm italic">No new notifications</div>';
+                els.displays.notifBadge.classList.add('hidden');
+                return;
+            }
+
+            let hasUnread = false;
+            snapshot.forEach(doc => {
+                const n = doc.data();
+                if (!n.read) hasUnread = true;
+                
+                const item = document.createElement('div');
+                item.className = "bg-[#1e1f22] p-3 rounded border-l-4 border-[#5865F2] shadow-sm animate-fade-in";
+                
+                let message = "";
+                if (n.type === 'like') message = `<span class="font-bold text-pink-400">${escapeHtml(n.senderName)}</span> Liked your profile.`;
+                else if (n.type === 'stalk') message = `<span class="font-bold text-gray-300">${escapeHtml(n.senderName)}</span> Stalked your profile.`;
+                
+                const time = n.timestamp ? new Date(n.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now';
+
+                item.innerHTML = `
+                    <div class="text-sm text-gray-200">${message}</div>
+                    <div class="text-[10px] text-gray-500 text-right mt-1">${time}</div>
+                `;
+                list.appendChild(item);
+            });
+
+            if(hasUnread && els.displays.notifModal.classList.contains('hidden')) {
+                els.displays.notifBadge.classList.remove('hidden');
+            } else {
+                els.displays.notifBadge.classList.add('hidden');
+            }
+        });
+    }
+
+    // --- Typing System ---
+    async function updateTypingStatus() {
+        if (!currentUser) return;
+        try {
+            const userRef = doc(db, "typing", currentUser.uid);
+            await setDoc(userRef, {
+                username: currentUserProfile.username,
+                timestamp: serverTimestamp()
+            });
+        } catch (e) {}
+    }
+
+    function listenForTyping() {
+        const q = query(collection(db, "typing"));
+        unsubscribeTyping = onSnapshot(q, (snapshot) => {
+            const now = Date.now() / 1000;
+            const typers = [];
+            
+            snapshot.forEach(doc => {
+                if (doc.id === currentUser?.uid) return;
+                const data = doc.data();
+                if (data.timestamp && (now - data.timestamp.seconds) < 3) { // Active within last 3 seconds
+                    typers.push(data.username);
+                }
+            });
+
+            const indicator = els.displays.typingIndicator;
+            const textEl = els.displays.typingText;
+
+            if (typers.length > 0) {
+                indicator.classList.remove('opacity-0');
+                if (typers.length === 1) textEl.textContent = `${typers[0]} is typing...`;
+                else if (typers.length === 2) textEl.textContent = `${typers[0]} and ${typers[1]} are typing...`;
+                else textEl.textContent = "Several people are typing...";
+            } else {
+                indicator.classList.add('opacity-0');
+            }
+        });
+    }
 
     // --- Chat System (Updated) ---
     function startChatListener() { 
@@ -1673,6 +1948,20 @@
                     const data = change.doc.data();
                     data.id = change.doc.id; // Attach ID
                     renderMessage(data); 
+
+                    // Check for Mentions (Feature: AFK/Idle Auto-Response)
+                    if (currentUser && currentUserProfile && data.text.includes(`@${currentUserProfile.username}`)) {
+                        if (currentUserProfile.status === 'busy' || currentUserProfile.status === 'dnd') {
+                            // Don't auto-reply to self
+                            if (data.uid !== currentUser.uid) {
+                                // Simulate system whisper locally (or could post publicly, but local is less spammy)
+                                const warning = document.createElement('div');
+                                warning.className = "ml-12 mr-4 my-1 p-2 bg-yellow-500/10 border border-yellow-500/30 rounded text-xs text-yellow-200";
+                                warning.innerHTML = `🤖 <b>Auto-Reply:</b> You were mentioned, but your status is set to <b>${currentUserProfile.status.toUpperCase()}</b>.`;
+                                els.displays.msgContainer.appendChild(warning);
+                            }
+                        }
+                    }
                 }
                 if (change.type === "removed") {
                     const el = document.getElementById(`msg-${change.doc.id}`);
