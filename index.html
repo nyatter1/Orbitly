@@ -89,6 +89,12 @@
         flex-shrink: 0;
     }
 
+    /* Navigation Drawer Animations */
+    .drawer-enter { transform: translateX(-100%); }
+    .drawer-enter-active { transform: translateX(0); transition: transform 0.3s ease-out; }
+    .drawer-exit { transform: translateX(0); }
+    .drawer-exit-active { transform: translateX(-100%); transition: transform 0.3s ease-in; }
+
     /* --- FONTS --- */
     .font-default { font-family: ui-sans-serif, system-ui, sans-serif; }
     .font-abril { font-family: 'Abril Fatface', cursive; }
@@ -631,9 +637,23 @@
     <!-- Main Chat Area -->
     <div class="flex-1 flex flex-col min-w-0 bg-[#313338]">
         <!-- Header -->
-        <header class="bg-[#313338] border-b border-[#26272d] p-3 shadow-sm flex justify-between items-center h-16 shrink-0 z-10">
+        <header class="bg-[#313338] border-b border-[#26272d] p-3 shadow-sm flex justify-between items-center h-16 shrink-0 z-10 relative">
             <div class="flex items-center gap-2 px-2">
+                <!-- Hamburger Menu Button -->
+                <button onclick="app.toggleHamburger()" class="text-gray-300 hover:text-white mr-2 relative z-20">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
                 <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExMXBhNjNycTQweDFkY214NjMxYWtiZWs1ZjZ3dTJxb254d21ldHIyOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/HPbuRgMPF2vL2/giphy.gif" alt="Logo" class="h-10 object-contain">
+            </div>
+
+            <!-- Hamburger Dropdown Menu -->
+            <div id="hamburger-menu" class="hidden absolute top-16 left-2 w-48 bg-[#2b2d31] border border-[#1e1f22] rounded-lg shadow-xl z-50 overflow-hidden animate-fade-in">
+                <button onclick="app.openNews()" class="w-full text-left px-4 py-3 hover:bg-[#35373c] text-white font-bold flex items-center gap-3 border-b border-[#1e1f22]">
+                    <i class="fas fa-newspaper text-purple-400"></i> News
+                </button>
+                <button onclick="showToast('Leaderboard coming soon!', 'info'); document.getElementById('hamburger-menu').classList.add('hidden');" class="w-full text-left px-4 py-3 hover:bg-[#35373c] text-white font-bold flex items-center gap-3">
+                    <i class="fas fa-trophy text-yellow-400"></i> Leaderboard
+                </button>
             </div>
             
             <div class="flex items-center gap-4">
@@ -727,6 +747,79 @@
             <form id="message-form" class="bg-[#383a40] rounded-lg px-4 py-3 flex items-center w-full shadow-sm z-20 relative">
                 <input type="text" id="message-input" autocomplete="off" placeholder="Message #general-chat (Type /cmds for help)" class="flex-1 bg-transparent border-none text-gray-100 placeholder-gray-500 focus:ring-0 focus:outline-none">
             </form>
+        </div>
+    </div>
+
+    <!-- NEWS DRAWER -->
+    <div id="news-drawer" class="fixed inset-y-0 left-0 w-full sm:w-96 bg-[#241b35] shadow-2xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col border-r border-[#1e1f22]">
+        <!-- News Header -->
+        <div class="p-4 bg-[#2b2d31] border-b border-[#1e1f22] flex justify-between items-center shrink-0">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <i class="fas fa-newspaper text-purple-400"></i> News
+            </h2>
+            <button onclick="app.closeNews()" class="text-gray-400 hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <!-- Add News Button (Dev Only) -->
+        <div id="admin-news-controls" class="hidden p-2 bg-[#1e1f22] border-b border-[#2b2d31]">
+            <button onclick="app.openAddNews()" class="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded font-bold text-sm transition">
+                <i class="fas fa-plus mr-2"></i> Add News Post
+            </button>
+        </div>
+
+        <!-- News Content -->
+        <div id="news-container" class="flex-1 overflow-y-auto p-4 space-y-4">
+            <!-- Empty State (Shown if no news) -->
+            <div id="news-empty" class="hidden flex flex-col items-center justify-center h-64 text-gray-500">
+                <div class="w-16 h-16 bg-[#2b2d31] rounded-lg flex items-center justify-center mb-3">
+                    <i class="fas fa-exclamation-circle text-red-400 text-2xl"></i>
+                </div>
+                <p>No news to display</p>
+            </div>
+            <!-- News items injected here -->
+        </div>
+    </div>
+
+    <!-- Add News Modal -->
+    <div id="add-news-modal" class="absolute inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#2b2d31] rounded-xl shadow-2xl w-full max-w-md border border-[#1e1f22] relative p-6">
+            <h3 class="text-white font-bold text-lg mb-4">Post News</h3>
+            <div class="space-y-4">
+                <textarea id="news-text-input" rows="4" class="w-full bg-[#1e1f22] text-white rounded p-3 border border-gray-700 focus:border-purple-500 outline-none resize-none" placeholder="Type news here..."></textarea>
+                
+                <div class="relative group cursor-pointer border-2 border-dashed border-gray-600 hover:border-purple-500 rounded-lg p-4 transition text-center" onclick="document.getElementById('news-image-input').click()">
+                    <img id="news-image-preview" src="" class="hidden max-h-40 mx-auto rounded mb-2">
+                    <div id="news-image-placeholder" class="text-gray-400 text-sm">
+                        <i class="fas fa-cloud-upload-alt text-2xl mb-2"></i><br>Click to upload image
+                    </div>
+                    <input type="file" id="news-image-input" class="hidden" accept="image/*">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="document.getElementById('add-news-modal').classList.add('hidden')" class="px-4 py-2 text-gray-400 hover:text-white">Cancel</button>
+                <button onclick="app.postNews()" class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded font-bold">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- News Comments Modal -->
+    <div id="news-comments-modal" class="absolute inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#2b2d31] rounded-xl shadow-2xl w-full max-w-md border border-[#1e1f22] relative flex flex-col max-h-[80vh]">
+            <div class="p-4 border-b border-[#1e1f22] flex justify-between items-center bg-[#202225]">
+                <h3 class="text-white font-bold">Comments</h3>
+                <button onclick="document.getElementById('news-comments-modal').classList.add('hidden')" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="news-comments-list" class="flex-1 overflow-y-auto p-4 space-y-3">
+                <!-- Comments injected here -->
+            </div>
+            <div class="p-3 border-t border-[#1e1f22] bg-[#202225] flex gap-2">
+                <input type="text" id="news-comment-input" placeholder="Write a comment..." class="flex-1 bg-[#1e1f22] text-white rounded px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-purple-500">
+                <button id="btn-post-comment" class="text-purple-400 hover:text-white font-bold text-sm px-2">Post</button>
+            </div>
         </div>
     </div>
 
@@ -1115,6 +1208,8 @@
     let currentUserProfile = null;
     let unsubscribeMessages = null;
     let unsubscribeUsers = null;
+    let unsubscribeNews = null;
+    let currentNewsIdForComments = null;
     
     // New State for Reply
     let replyingTo = null; // { id, text, username, pfpUrl }
@@ -1136,13 +1231,14 @@
         chatView: document.getElementById('chat-view'),
         forms: { login: document.getElementById('login-form'), signup: document.getElementById('signup-form') },
         tabs: { login: document.getElementById('tab-login'), signup: document.getElementById('tab-signup') },
-        inputs: { signupPfp: document.getElementById('signup-pfp'), msg: document.getElementById('message-input') },
+        inputs: { signupPfp: document.getElementById('signup-pfp'), msg: document.getElementById('message-input'), newsText: document.getElementById('news-text-input'), newsImg: document.getElementById('news-image-input'), newsComment: document.getElementById('news-comment-input') },
         displays: {
             pfpPreview: document.getElementById('pfp-preview'), pfpPlaceholder: document.getElementById('pfp-placeholder'), error: document.getElementById('auth-error'), loader: document.getElementById('auth-loader'), feedback: document.getElementById('auth-feedback'), msgContainer: document.getElementById('messages-container'), onlineList: document.getElementById('online-list'),
             headerPfp: document.getElementById('current-user-pfp'), headerName: document.getElementById('current-username'), headerStatusText: document.getElementById('current-status-text'), headerStatusDot: document.getElementById('current-user-status-dot'), statusDropdown: document.getElementById('status-dropdown'), invisibleBtn: document.getElementById('btn-invisible'), walletModal: document.getElementById('wallet-modal'), walletCoins: document.getElementById('wallet-coins'), walletGems: document.getElementById('wallet-gems'), profileModal: document.getElementById('profile-modal'), toastContainer: document.getElementById('toast-container'),
             editModal: document.getElementById('edit-profile-modal'), editPfpInput: document.getElementById('edit-pfp-input'), editBannerInput: document.getElementById('edit-banner-input'), editPfpPreview: document.getElementById('edit-pfp-preview'), editBannerPreview: document.getElementById('edit-banner-preview'),
             custModal: document.getElementById('customize-modal'),
-            replyBar: document.getElementById('reply-bar'), replyBarUser: document.getElementById('reply-bar-username'), replyBarText: document.getElementById('reply-bar-text')
+            replyBar: document.getElementById('reply-bar'), replyBarUser: document.getElementById('reply-bar-username'), replyBarText: document.getElementById('reply-bar-text'),
+            newsDrawer: document.getElementById('news-drawer'), newsContainer: document.getElementById('news-container'), newsEmpty: document.getElementById('news-empty'), addNewsModal: document.getElementById('add-news-modal'), newsImgPreview: document.getElementById('news-image-preview'), newsImgPlaceholder: document.getElementById('news-image-placeholder'), commentsModal: document.getElementById('news-comments-modal'), commentsList: document.getElementById('news-comments-list')
         }
     };
 
@@ -1202,6 +1298,111 @@
                 console.error(e);
                 showToast("Failed to update like", 'error');
             }
+        },
+
+        // --- News System ---
+        toggleHamburger: () => {
+            const menu = document.getElementById('hamburger-menu');
+            menu.classList.toggle('hidden');
+        },
+        openNews: () => {
+            els.displays.newsDrawer.classList.remove('-translate-x-full');
+            document.getElementById('hamburger-menu').classList.add('hidden');
+            if (currentUser && currentUser.email === 'dev@gmail.com') {
+                document.getElementById('admin-news-controls').classList.remove('hidden');
+            } else {
+                document.getElementById('admin-news-controls').classList.add('hidden');
+            }
+            startNewsListener();
+        },
+        closeNews: () => {
+            els.displays.newsDrawer.classList.add('-translate-x-full');
+            if (unsubscribeNews) unsubscribeNews();
+        },
+        openAddNews: () => {
+            els.displays.addNewsModal.classList.remove('hidden');
+            els.inputs.newsText.value = '';
+            els.inputs.newsImg.value = '';
+            els.displays.newsImgPreview.classList.add('hidden');
+            els.displays.newsImgPlaceholder.classList.remove('hidden');
+        },
+        postNews: async () => {
+            if (!currentUser || currentUser.email !== 'dev@gmail.com') return;
+            const text = els.inputs.newsText.value.trim();
+            const file = els.inputs.newsImg.files[0];
+            
+            if (!text && !file) return showToast("Add text or image", 'error');
+            
+            let imageUrl = null;
+            if (file) {
+                try { imageUrl = await processUpload(file); } catch(e) { return showToast("Image upload failed", 'error'); }
+            }
+
+            try {
+                await addDoc(collection(db, "news"), {
+                    text,
+                    imageUrl,
+                    author: currentUserProfile.username,
+                    authorPfp: currentUserProfile.pfpUrl,
+                    likes: [],
+                    comments: [],
+                    createdAt: serverTimestamp()
+                });
+                els.displays.addNewsModal.classList.add('hidden');
+                showToast("News posted!", 'success');
+            } catch(e) {
+                console.error(e);
+                showToast("Failed to post news", 'error');
+            }
+        },
+        handleNewsLike: async (newsId) => {
+            if (!currentUser) return;
+            try {
+                const ref = doc(db, "news", newsId);
+                const snap = await getDoc(ref);
+                if (!snap.exists()) return;
+                const data = snap.data();
+                const likes = data.likes || [];
+                const isLiked = likes.includes(currentUser.uid);
+                
+                if (isLiked) {
+                    await updateDoc(ref, { likes: arrayRemove(currentUser.uid) });
+                } else {
+                    await updateDoc(ref, { likes: arrayUnion(currentUser.uid) });
+                }
+            } catch(e) { console.error(e); }
+        },
+        openNewsComments: async (newsId) => {
+            currentNewsIdForComments = newsId;
+            els.displays.commentsModal.classList.remove('hidden');
+            renderComments(newsId);
+        },
+        postNewsComment: async () => {
+            if (!currentUser || !currentNewsIdForComments) return;
+            const text = els.inputs.newsComment.value.trim();
+            if (!text) return;
+            els.inputs.newsComment.value = '';
+            
+            const newComment = {
+                uid: currentUser.uid,
+                username: currentUserProfile.username,
+                pfpUrl: currentUserProfile.pfpUrl,
+                text,
+                createdAt: Date.now()
+            };
+
+            try {
+                const ref = doc(db, "news", currentNewsIdForComments);
+                await updateDoc(ref, { comments: arrayUnion(newComment) });
+                // Re-render handled by listener updating local view not ideal, but simpler to just re-fetch or let listener handle.
+                // Since modal is open, we can listen or just let the main listener update UI. 
+                // BUT main listener updates the LIST. We need to update the MODAL list.
+                // We'll manually append for instant feedback or re-fetch.
+                // For simplicity in this structure, we'll re-render from the updated snapshot in the main listener if we can,
+                // or just manually adding here:
+                // Actually, the main listener updates the news DOM. We need a way to see comments live.
+                // We'll rely on the main `onSnapshot` to trigger a re-render of comments if the modal is open.
+            } catch(e) { console.error(e); showToast("Comment failed", 'error'); }
         },
 
         // ... Customization Menu Logic (Mostly unchanged, refs new fonts) ...
@@ -1327,6 +1528,9 @@
         if (!e.target.closest('.msg-actions')) {
             document.querySelectorAll('[id^="msg-menu-"]').forEach(el => el.classList.add('hidden'));
         }
+        if (!e.target.closest('#hamburger-menu') && !e.target.closest('button[onclick="app.toggleHamburger()"]')) {
+            document.getElementById('hamburger-menu').classList.add('hidden');
+        }
     });
 
     // Expose for HTML onclicks
@@ -1337,6 +1541,131 @@
     window.initiateReply = app.initiateReply;
     window.deleteMessage = app.deleteMessage;
     window.toggleMsgMenu = app.toggleMsgMenu;
+
+    // --- News Listeners ---
+    function startNewsListener() {
+        const q = query(collection(db, "news"), orderBy("createdAt", "desc"));
+        unsubscribeNews = onSnapshot(q, (snapshot) => {
+            const container = els.displays.newsContainer;
+            container.innerHTML = '';
+            
+            if (snapshot.empty) {
+                els.displays.newsEmpty.classList.remove('hidden');
+                container.appendChild(els.displays.newsEmpty);
+                return;
+            } else {
+                els.displays.newsEmpty.classList.add('hidden');
+            }
+
+            // Create a cache for checking updates in the open modal
+            const allNewsData = {}; 
+
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                data.id = docSnap.id;
+                allNewsData[data.id] = data;
+                renderNewsItem(data);
+            });
+
+            // If comments modal is open, refresh it live
+            if (currentNewsIdForComments && !els.displays.commentsModal.classList.contains('hidden')) {
+                const updatedData = allNewsData[currentNewsIdForComments];
+                if (updatedData) {
+                    renderCommentsList(updatedData.comments || []);
+                }
+            }
+        });
+    }
+
+    function renderNewsItem(item) {
+        const div = document.createElement('div');
+        div.className = "bg-[#202225] rounded-lg p-4 border border-[#2b2d31] shadow-lg animate-fade-in";
+        
+        const date = item.createdAt ? new Date(item.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
+        const likes = item.likes || [];
+        const comments = item.comments || [];
+        const isLiked = currentUser ? likes.includes(currentUser.uid) : false;
+
+        let imageHtml = '';
+        if (item.imageUrl) {
+            imageHtml = `<img src="${item.imageUrl}" class="w-full h-48 object-cover rounded-lg mb-3 border border-[#2b2d31]">`;
+        }
+
+        div.innerHTML = `
+            <div class="flex items-center gap-2 mb-2">
+                <img src="${item.authorPfp || 'https://ui-avatars.com/api/?name=?'}" class="w-8 h-8 rounded-full object-cover">
+                <div>
+                    <div class="text-sm font-bold text-white">${escapeHtml(item.author)}</div>
+                    <div class="text-xs text-gray-500">${date}</div>
+                </div>
+            </div>
+            ${imageHtml}
+            <p class="text-gray-200 text-sm mb-3 whitespace-pre-wrap">${formatTextWithMentions(item.text)}</p>
+            <div class="flex gap-4 border-t border-[#2b2d31] pt-2">
+                <button onclick="app.handleNewsLike('${item.id}')" class="flex items-center gap-1 text-xs font-bold ${isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'} transition">
+                    <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i> ${likes.length}
+                </button>
+                <button onclick="app.openNewsComments('${item.id}')" class="flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-purple-400 transition">
+                    <i class="far fa-comment-alt"></i> ${comments.length}
+                </button>
+            </div>
+        `;
+        els.displays.newsContainer.appendChild(div);
+    }
+
+    function renderComments(newsId) {
+        // Find data from cache or refetch? simpler to let the listener drive updates, but initial open needs data.
+        // We'll fetch single doc for safety on open
+        getDoc(doc(db, "news", newsId)).then(snap => {
+            if (snap.exists()) {
+                renderCommentsList(snap.data().comments || []);
+            }
+        });
+    }
+
+    function renderCommentsList(comments) {
+        const list = els.displays.commentsList;
+        list.innerHTML = '';
+        if (!comments || comments.length === 0) {
+            list.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">No comments yet.</div>';
+            return;
+        }
+        // Sort by time
+        comments.sort((a, b) => b.createdAt - a.createdAt);
+        
+        comments.forEach(c => {
+            const div = document.createElement('div');
+            div.className = "flex gap-2 mb-2";
+            const time = new Date(c.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            div.innerHTML = `
+                <img src="${c.pfpUrl || 'https://ui-avatars.com/api/?name=?'}" class="w-8 h-8 rounded-full object-cover shrink-0">
+                <div class="bg-[#1e1f22] p-2 rounded-lg rounded-tl-none flex-1 min-w-0">
+                    <div class="flex justify-between items-baseline">
+                        <span class="text-xs font-bold text-white">${escapeHtml(c.username)}</span>
+                        <span class="text-[10px] text-gray-500">${time}</span>
+                    </div>
+                    <p class="text-xs text-gray-300 break-words">${escapeHtml(c.text)}</p>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    // New Image Preview Listener
+    els.inputs.newsImg.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                els.displays.newsImgPreview.src = ev.target.result;
+                els.displays.newsImgPreview.classList.remove('hidden');
+                els.displays.newsImgPlaceholder.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    document.getElementById('btn-post-comment').onclick = app.postNewsComment;
 
     // ... (Arrays for customizations same as before) ...
     const allFonts = [
@@ -1488,63 +1817,6 @@
         { id: 'card-theme-gradient-10', label: 'Storm' },
     ];
 
-    const allListStyles = [
-        { id: 'list-style-default', label: 'Default' },
-        { id: 'list-style-glass', label: 'Glass' },
-        { id: 'list-style-neon', label: 'Neon Box' },
-        { id: 'list-style-gold', label: 'Gold Edge' },
-        { id: 'list-style-fire', label: 'Fire Base' },
-        { id: 'list-style-royal', label: 'Royal Purple' },
-        { id: 'list-style-outline', label: 'Dashed Outline' },
-        { id: 'list-style-compact', label: 'Compact' },
-        { id: 'list-style-bubble', label: 'Bubble' },
-        { id: 'list-style-pill', label: 'Pill' },
-        { id: 'list-style-sharp', label: 'Sharp' },
-        { id: 'list-style-skew', label: 'Skewed' },
-        { id: 'list-style-leaf', label: 'Leaf' },
-        { id: 'list-style-left-accent-red', label: 'Left Red' },
-        { id: 'list-style-left-accent-blue', label: 'Left Blue' },
-        { id: 'list-style-left-accent-green', label: 'Left Green' },
-        { id: 'list-style-left-accent-purple', label: 'Left Purple' },
-        { id: 'list-style-right-accent', label: 'Right Accent' },
-        { id: 'list-style-underline', label: 'Underline' },
-        { id: 'list-style-spaced', label: 'Spaced' },
-        { id: 'list-style-striped', label: 'Striped' },
-        { id: 'list-style-terminal', label: 'Terminal' },
-        { id: 'list-style-gameboy', label: 'Gameboy' },
-        { id: 'list-style-minimal-white', label: 'Minimal White' },
-        { id: 'list-style-minimal-dark', label: 'Minimal Dark' },
-        { id: 'list-style-gradient-blue', label: 'Grad Blue' },
-        { id: 'list-style-gradient-purple', label: 'Grad Purple' },
-        { id: 'list-style-gradient-red', label: 'Grad Red' },
-        { id: 'list-style-card', label: 'Card' },
-        { id: 'list-style-floating', label: 'Floating' },
-        { id: 'list-style-cyberpunk', label: 'Cyberpunk' },
-        { id: 'list-style-outline-dashed', label: 'Outline Dash' },
-        { id: 'list-style-outline-dotted', label: 'Outline Dot' },
-        { id: 'list-style-outline-double', label: 'Outline Dbl' },
-        { id: 'list-style-translucent', label: 'Translucent' },
-        { id: 'list-style-glow', label: 'Glowing' },
-        { id: 'list-style-inset', label: 'Inset' },
-        { id: 'list-style-embossed', label: 'Embossed' },
-        { id: 'list-style-grid', label: 'Grid' },
-        { id: 'list-style-diamond', label: 'Diamond' },
-        { id: 'list-style-ticket', label: 'Ticket' },
-        { id: 'list-style-folder', label: 'Folder' },
-        { id: 'list-style-ribbon', label: 'Ribbon' },
-        { id: 'list-style-tag', label: 'Tag' },
-        { id: 'list-style-bubble-left', label: 'Bubble L' },
-        { id: 'list-style-bubble-right', label: 'Bubble R' },
-        { id: 'list-style-comic', label: 'Comic' },
-        { id: 'list-style-blueprint', label: 'Blueprint' },
-        { id: 'list-style-sketch', label: 'Sketch' },
-        { id: 'list-style-stamped', label: 'Stamped' },
-        { id: 'list-style-vintage', label: 'Vintage' },
-        { id: 'list-style-wood', label: 'Wood' },
-        { id: 'list-style-metal', label: 'Metal' },
-        { id: 'list-style-caution', label: 'Caution' }
-    ];
-
     function generateFontOptions() {
         const select = document.getElementById('cust-font');
         select.innerHTML = allFonts.map(f => `<option value="${f.val}">${f.name}</option>`).join('');
@@ -1643,7 +1915,7 @@
     els.inputs.signupPfp.addEventListener('change', (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (ev) => { els.displays.pfpPreview.src = ev.target.result; els.displays.pfpPreview.classList.remove('hidden'); els.displays.pfpPlaceholder.classList.add('hidden'); }; reader.readAsDataURL(file); } });
 
     // --- Auth Handlers (unchanged) ---
-    els.forms.signup.addEventListener('submit', async (e) => { e.preventDefault(); const username = document.getElementById('signup-username').value; const email = document.getElementById('signup-email').value; const password = document.getElementById('signup-password').value; const age = parseInt(document.getElementById('signup-age').value); const gender = document.getElementById('signup-gender').value; const pfpFile = els.inputs.signupPfp.files[0]; if (age < 11 || age > 1000) return showError("Age must be between 11 and 1000."); toggleLoading(true); try { const userCredential = await createUserWithEmailAndPassword(auth, email, password); const user = userCredential.user; let pfpUrl = `https://ui-avatars.com/api/?name=${username}&background=random`; if (pfpFile) { try { pfpUrl = await processImage(pfpFile); } catch (e) {} } await setDoc(doc(db, "users", user.uid), { uid: user.uid, username, email, age, gender, pfpUrl, status: 'online', coins: 1000, gems: 10, lastDaily: 0, createdAt: serverTimestamp(), lastSeen: serverTimestamp() }); try { await updateProfile(user, { displayName: username }); } catch(e){} } catch (err) { showError(err.message); } finally { toggleLoading(false); } });
+    els.forms.signup.addEventListener('submit', async (e) => { e.preventDefault(); const username = document.getElementById('signup-username').value; const email = document.getElementById('signup-email').value; const password = document.getElementById('signup-password').value; const age = parseInt(document.getElementById('signup-age').value); const gender = document.getElementById('signup-gender').value; const pfpFile = els.inputs.signupPfp.files[0]; if (age < 11 || age > 1000) return showError("Age must be between 11 and 1000."); toggleLoading(true); try { const userCredential = await createUserWithEmailAndPassword(auth, email, password); const user = userCredential.user; let pfpUrl = `https://ui-avatars.com/api/?name=${username}&background=random`; if (pfpFile) { try { pfpUrl = await processImage(pfpFile); } catch (e) {} } await setDoc(doc(db, "users", user.uid), { uid: user.uid, username, email, age, gender, pfpUrl, status: 'online', coins: 1000, gems: 10, lastDaily: 0, createdAt: serverTimestamp(), lastSeen: serverTimestamp(), likes: [] }); try { await updateProfile(user, { displayName: username }); } catch(e){} } catch (err) { showError(err.message); } finally { toggleLoading(false); } });
     els.forms.login.addEventListener('submit', async (e) => { e.preventDefault(); const email = document.getElementById('login-email').value; const password = document.getElementById('login-password').value; toggleLoading(true); try { await signInWithEmailAndPassword(auth, email, password); } catch (err) { showError(err.message); } finally { toggleLoading(false); } });
 
     // --- Main App Logic ---
