@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -644,6 +643,7 @@
                     <div class="relative"><img id="profile-pfp" src="" class="w-28 h-28 rounded-full border-4 border-[#2b2d31] bg-[#2b2d31] object-cover shadow-lg"><div class="bg-[#1e1f22] px-2 py-0.5 rounded text-[10px] font-bold text-gray-400 border border-[#111214] absolute bottom-1 right-0 shadow-md" id="profile-status-badge">ONLINE</div></div>
                     <div class="flex gap-2 mb-2 items-center">
                         <button id="profile-edit-btn" onclick="app.openEditProfile()" class="hidden bg-[#5865F2] hover:bg-[#4752c4] text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-lg flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg> Edit</button>
+                        <button id="profile-msg-btn" class="hidden bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-lg flex items-center gap-1"><i class="fas fa-envelope"></i> Message</button>
                         <button id="profile-friend-btn" class="hidden bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-lg flex items-center gap-1">Add Friend</button>
                     </div>
                 </div>
@@ -725,6 +725,7 @@ let unsubscribeMessages = null;
 let unsubscribeUsers = null;
 let unsubscribeRooms = null;
 let unsubscribeNews = null;
+let unsubscribeDMs = null;
 let currentNewsIdForComments = null;
 let replyingTo = null;
 let pendingRoomJoin = null;
@@ -774,13 +775,17 @@ openProfile: async (uid) => { try { const snap = await getDoc(doc(db, "users", u
 
 const editBtn = document.getElementById('profile-edit-btn');
 const friendBtn = document.getElementById('profile-friend-btn');
+const msgBtn = document.getElementById('profile-msg-btn');
 
 if (currentUser && currentUser.uid === uid) {
 editBtn.classList.remove('hidden');
 friendBtn.classList.add('hidden');
+msgBtn.classList.add('hidden');
 } else {
 editBtn.classList.add('hidden');
 friendBtn.classList.remove('hidden');
+msgBtn.classList.remove('hidden');
+msgBtn.onclick = () => app.openDM(uid, data.username);
 
 const myFriends = (currentUserProfile && currentUserProfile.friends) ? currentUserProfile.friends : [];
 const mySent = (currentUserProfile && currentUserProfile.sentFriendRequests) ? currentUserProfile.sentFriendRequests : [];
@@ -857,6 +862,13 @@ await batch.commit();
 showToast("Unfriended", "success");
 app.openProfile(targetUid);
 } catch(e) { console.error(e); }
+},
+openDM: (targetUid, targetUsername) => {
+    if(!currentUser) return;
+    const uids = [currentUser.uid, targetUid].sort();
+    const dmId = `dm_${uids[0]}_${uids[1]}`;
+    app.enterRoom(dmId, targetUsername, true); // Treat DM as private room for UI logic
+    app.closeProfile();
 },
 
 toggleHamburger: () => { document.getElementById('hamburger-menu').classList.toggle('hidden'); },
@@ -983,18 +995,43 @@ openCreateRoom: () => { document.getElementById('room-name-input').value = ''; d
 createRoomSubmit: async () => { const name = document.getElementById('room-name-input').value.trim(); const pass = document.getElementById('room-password-input').value.trim(); const icon = document.getElementById('room-icon-input').value.trim(); if (!name) return showToast("Room name required", 'error'); if (name.length > 20) return showToast("Name too long", 'error'); try { const q = query(collection(db, "rooms"), where("createdBy", "==", currentUser.uid)); const snap = await getDocs(q); if (!snap.empty) return showToast("You can only create 1 room", 'error'); const roomData = { name, icon: icon || 'hashtag', createdBy: currentUser.uid, createdAt: serverTimestamp(), isPrivate: !!pass, password: pass }; const docRef = await addDoc(collection(db, "rooms"), roomData); document.getElementById('create-room-modal').classList.add('hidden'); showToast("Room created!", 'success'); window.app.enterRoom(docRef.id, name); } catch (e) { console.error(e); showToast("Error creating room", 'error'); } },
 attemptEnterRoom: (roomId, roomName, isPrivate, password) => { if (roomId === window.currentRoomId) return; if (isPrivate && password) { pendingRoomJoin = { id: roomId, name: roomName, correctPass: password }; document.getElementById('join-room-password').value = ''; document.getElementById('password-room-modal').classList.remove('hidden'); } else { window.app.enterRoom(roomId, roomName); } },
 submitRoomPassword: () => { const input = document.getElementById('join-room-password').value; if (!pendingRoomJoin) return; if (input === pendingRoomJoin.correctPass) { window.app.enterRoom(pendingRoomJoin.id, pendingRoomJoin.name); document.getElementById('password-room-modal').classList.add('hidden'); pendingRoomJoin = null; } else { showToast("Incorrect Password", 'error'); } },
-enterRoom: async (roomId, roomName) => { if (window.currentRoomId === roomId) return; if (unsubscribeMessages) unsubscribeMessages(); els.displays.msgContainer.innerHTML = ''; window.currentRoomId = roomId; document.getElementById('message-input').placeholder = `Message #${roomName}`; showToast(`Joined ${roomName}`, 'success'); const coll = roomId === 'general' ? "messages" : `rooms/${roomId}/messages`; startChatListener(coll);
-    try {
-        await updateDoc(doc(db, "users", currentUser.uid), { currentRoom: roomId });
-    } catch(e) { console.error("Failed to update user location", e); }
+enterRoom: async (roomId, roomName) => { 
+    if (window.currentRoomId === roomId) return; 
+    if (unsubscribeMessages) unsubscribeMessages(); 
+    els.displays.msgContainer.innerHTML = ''; 
+    window.currentRoomId = roomId; 
+    
+    // Set placeholder
+    if (roomId.startsWith('dm_')) {
+         document.getElementById('message-input').placeholder = `Message @${roomName}`;
+         showToast(`Private chat with ${roomName}`, 'success');
+         const collPath = `dms/${roomId}/messages`;
+         startChatListener(collPath);
+    } else {
+         document.getElementById('message-input').placeholder = `Message #${roomName}`;
+         showToast(`Joined ${roomName}`, 'success');
+         const collPath = roomId === 'general' ? "messages" : `rooms/${roomId}/messages`; 
+         startChatListener(collPath);
+         try {
+            await updateDoc(doc(db, "users", currentUser.uid), { currentRoom: roomId });
+        } catch(e) { console.error("Failed to update user location", e); }
+    }
 },
 runLeaderboard: () => { executeTop().then(() => { showToast("Leaderboard generated in chat!", 'success'); }).catch(() => { showToast("Failed to gen leaderboard", 'error'); }); },
 setSidebarMode: (mode) => {
-window.sidebarMode = mode;
-['users','friends','rooms'].forEach(m => document.getElementById(`tab-${m}`).className = `flex-1 py-1 text-xs font-bold rounded ${mode===m ? 'bg-[#5865F2] text-white' : 'bg-[#1e1f22] text-gray-400'}`);
-if (window.unsubscribeRooms) { window.unsubscribeRooms(); window.unsubscribeRooms = null; }
-if (window.unsubscribeUsersInternal) { window.unsubscribeUsersInternal(); window.unsubscribeUsersInternal = null; }
-if (mode === 'rooms') startRoomsListener(); else startUsersListenerInternal();
+    window.sidebarMode = mode;
+    ['users','friends','rooms','dms'].forEach(m => {
+        const el = document.getElementById(`tab-${m}`);
+        if(el) el.className = `flex-1 py-1 text-[10px] font-bold rounded ${mode===m ? 'bg-[#5865F2] text-white' : 'bg-[#1e1f22] text-gray-400'}`;
+    });
+    
+    if (window.unsubscribeRooms) { window.unsubscribeRooms(); window.unsubscribeRooms = null; }
+    if (window.unsubscribeUsersInternal) { window.unsubscribeUsersInternal(); window.unsubscribeUsersInternal = null; }
+    if (window.unsubscribeDMs) { window.unsubscribeDMs(); window.unsubscribeDMs = null; }
+
+    if (mode === 'rooms') startRoomsListener(); 
+    else if (mode === 'dms') startDMsListener();
+    else startUsersListenerInternal();
 }
 };
 
@@ -1041,7 +1078,7 @@ if (user.email === 'dev@gmail.com') els.displays.invisibleBtn.classList.remove('
 els.authView.classList.add('hidden'); els.chatView.classList.remove('hidden'); els.chatView.classList.add('flex');
 startChatListener("messages"); startUsersListener();
 } else {
-if (window.presenceInterval) clearInterval(window.presenceInterval); if (unsubscribeMessages) unsubscribeMessages(); if (unsubscribeUsers) unsubscribeUsers(); if (unsubscribeRooms) unsubscribeRooms();
+if (window.presenceInterval) clearInterval(window.presenceInterval); if (unsubscribeMessages) unsubscribeMessages(); if (unsubscribeUsers) unsubscribeUsers(); if (unsubscribeRooms) unsubscribeRooms(); if (unsubscribeDMs) unsubscribeDMs();
 currentUser = null; currentUserProfile = null; els.chatView.classList.add('hidden'); els.chatView.classList.remove('flex'); els.authView.classList.remove('hidden');
 }
 });
@@ -1050,8 +1087,13 @@ function startChatListener(collectionPath = "messages") {
 if (unsubscribeMessages) unsubscribeMessages();
 els.displays.msgContainer.innerHTML = '';
 let q;
-if (collectionPath.includes('/')) { const parts = collectionPath.split('/'); q = query(collection(db, parts[0], parts[1], parts[2]), orderBy("createdAt", "asc")); }
-else { q = query(collection(db, collectionPath), orderBy("createdAt", "asc")); }
+if (collectionPath.includes('/')) { 
+    // Handle nested collections like rooms/id/messages or dms/id/messages
+    const parts = collectionPath.split('/'); 
+    q = query(collection(db, parts[0], parts[1], parts[2]), orderBy("createdAt", "asc")); 
+} else { 
+    q = query(collection(db, collectionPath), orderBy("createdAt", "asc")); 
+}
 unsubscribeMessages = onSnapshot(q, (snapshot) => { snapshot.docChanges().forEach((change) => { if (change.type === "added") { const data = change.doc.data(); data.id = change.doc.id; renderMessage(data); } if (change.type === "removed") { const el = document.getElementById(`msg-${change.doc.id}`); if (el) el.remove(); } }); requestAnimationFrame(() => els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight); });
 }
 
@@ -1143,8 +1185,33 @@ els.displays.msgContainer.appendChild(div);
 document.getElementById('message-form').addEventListener('submit', async (e) => { e.preventDefault(); const text = els.inputs.msg.value.trim(); if (!text) return; els.inputs.msg.value = ''; if (text.startsWith('/')) { handleCommand(text); return; }
 const urlRegex = /(https?:\/\/[^\s]+)/g; if (urlRegex.test(text)) { showToast("Links are not allowed!", "error"); return; }
 const payload = { text, uid: currentUser.uid, username: currentUserProfile.username, pfpUrl: currentUserProfile.pfpUrl, usernameStyle: currentUserProfile.usernameStyle || null, messageStyle: currentUserProfile.messageStyle || { color: '#dbdee1' }, createdAt: serverTimestamp() }; if (replyingTo) { payload.replyTo = { id: replyingTo.id, username: replyingTo.username, text: replyingTo.text, pfpUrl: replyingTo.pfpUrl }; window.cancelReply(); }
-const collRef = window.currentRoomId === 'general' ? collection(db, "messages") : collection(db, "rooms", window.currentRoomId, "messages");
-try { await addDoc(collRef, payload); } catch (err) { console.error(err); }
+
+let collRef;
+if (window.currentRoomId === 'general') {
+    collRef = collection(db, "messages");
+} else if (window.currentRoomId.startsWith('dm_')) {
+    collRef = collection(db, "dms", window.currentRoomId, "messages");
+} else {
+    collRef = collection(db, "rooms", window.currentRoomId, "messages");
+}
+
+try { 
+    await addDoc(collRef, payload); 
+    // If DM, update the DM metadata so it shows up at the top
+    if (window.currentRoomId.startsWith('dm_')) {
+        const participants = window.currentRoomId.replace('dm_','').split('_');
+        const dmRef = doc(db, "dms", window.currentRoomId);
+        await setDoc(dmRef, {
+            participants: participants,
+            updatedAt: serverTimestamp(),
+            lastMessage: {
+                text: payload.text,
+                sender: currentUserProfile.username,
+                createdAt: serverTimestamp()
+            }
+        }, { merge: true });
+    }
+} catch (err) { console.error(err); }
 });
 
 async function handleCommand(cmdString) { const parts = cmdString.split(' '); const command = parts[0].toLowerCase(); const args = parts.slice(1); if (command === '/cmds') { showHelp(); return; } if (command === '/prefixs' || command === '/prefixes') { showPrefixes(); return; } if (command === '/top') { await executeTop(); return; } if (command === '/daily') { await executeDaily(); return; } if (command === '/convert') { if (args.length < 2) return showToast("Usage: /convert {c/g} {amount}", 'error'); await executeConvert(args[0], args[1]); return; } if (command === '/pfp' && args[0] === 'change') { app.openEditProfile(); return; } if (command === '/pay') { if (args.length < 3) return showToast("Usage: /pay {username} {amount} {c/g}", 'error'); await executePay(args[0], args[1], args[2]); return; } if (command === '/clear') { if (currentUser.email === 'dev@gmail.com') { await executeClear(); } else { showToast("You do not have permission", "error"); } return; } if (['/allin', '/flip', '/roll', '/slots', '/rps', '/guess', '/bank'].includes(command)) { if (command === '/bank') { await executeBank(); showToast("Action complete", 'success'); return; } let amountIdx = 0; let currIdx = 1; let extraArg = null; if (command === '/rps' || command === '/guess') { amountIdx = 1; currIdx = 2; extraArg = args[0]; } let amountStr = args[amountIdx]; let currencyStr = args[currIdx]; if (command === '/allin') { amountStr = 'all'; currencyStr = args[0]; } await executeGamble(command, amountStr, currencyStr, extraArg); } else { showToast("Invalid Command", 'error'); } }
@@ -1161,14 +1228,14 @@ async function executeGamble(game, amountStr, currStr, extra) { if (!currentUser
 // --- Users, Friends & Rooms List System ---
 function startUsersListener() {
 const container = els.displays.onlineList.parentElement.querySelector('.h-16');
-container.innerHTML = `<div class="flex gap-2 p-2 w-full h-full items-center"><button onclick="app.setSidebarMode('users')" id="tab-users" class="flex-1 py-1 text-xs font-bold rounded bg-[#5865F2] text-white">PLAYERS</button><button onclick="app.setSidebarMode('friends')" id="tab-friends" class="flex-1 py-1 text-xs font-bold rounded bg-[#1e1f22] text-gray-400">FRIENDS</button><button onclick="app.setSidebarMode('rooms')" id="tab-rooms" class="flex-1 py-1 text-xs font-bold rounded bg-[#1e1f22] text-gray-400">ROOMS</button></div>`;
-window.app.setSidebarMode = (mode) => {
-window.sidebarMode = mode;
-['users','friends','rooms'].forEach(m => document.getElementById(`tab-${m}`).className = `flex-1 py-1 text-xs font-bold rounded ${mode===m ? 'bg-[#5865F2] text-white' : 'bg-[#1e1f22] text-gray-400'}`);
-if (window.unsubscribeRooms) { window.unsubscribeRooms(); window.unsubscribeRooms = null; }
-if (window.unsubscribeUsersInternal) { window.unsubscribeUsersInternal(); window.unsubscribeUsersInternal = null; }
-if (mode === 'rooms') startRoomsListener(); else startUsersListenerInternal();
-};
+// Updated Sidebar HTML with DMs
+container.innerHTML = `<div class="flex gap-1 p-2 w-full h-full items-center">
+    <button onclick="app.setSidebarMode('users')" id="tab-users" class="flex-1 py-1 text-[10px] font-bold rounded bg-[#5865F2] text-white" title="Online Players">PLAYERS</button>
+    <button onclick="app.setSidebarMode('friends')" id="tab-friends" class="flex-1 py-1 text-[10px] font-bold rounded bg-[#1e1f22] text-gray-400" title="Friends">FRIENDS</button>
+    <button onclick="app.setSidebarMode('rooms')" id="tab-rooms" class="flex-1 py-1 text-[10px] font-bold rounded bg-[#1e1f22] text-gray-400" title="Public Rooms">ROOMS</button>
+    <button onclick="app.setSidebarMode('dms')" id="tab-dms" class="flex-1 py-1 text-[10px] font-bold rounded bg-[#1e1f22] text-gray-400" title="Direct Messages">DMs</button>
+</div>`;
+
 startUsersListenerInternal();
 }
 
@@ -1275,6 +1342,54 @@ if (room.icon && room.icon.startsWith('http')) {
 }
 
 div.innerHTML = ` <div class="w-8 h-8 rounded bg-[#2b2d31] border border-gray-600 flex items-center justify-center text-gray-400 group-hover:text-white group-hover:border-white transition overflow-hidden"> ${iconHtml} </div> <div class="flex-1 min-w-0"> <div class="text-sm font-bold text-gray-200 truncate group-hover:text-white">${escapeHtml(room.name)}</div> <div class="text-[10px] text-gray-500 uppercase flex items-center gap-1">${room.isPrivate ? '<i class="fas fa-lock text-[8px]"></i> Private' : 'Public'}</div> </div> `; els.displays.onlineList.appendChild(div);
+}
+
+function startDMsListener() {
+    const q = query(collection(db, "dms"), where("participants", "array-contains", currentUser.uid), orderBy("updatedAt", "desc"));
+    window.unsubscribeDMs = onSnapshot(q, async (snapshot) => {
+        els.displays.onlineList.innerHTML = '';
+        if (snapshot.empty) { 
+            const empty = document.createElement('div'); 
+            empty.className = "text-center text-gray-500 text-xs mt-4"; 
+            empty.textContent = "No active DMs."; 
+            els.displays.onlineList.appendChild(empty); 
+            return;
+        }
+
+        // We need to fetch the OTHER user's info for each DM
+        for (const docSnap of snapshot.docs) {
+            const data = docSnap.data();
+            const otherUid = data.participants.find(uid => uid !== currentUser.uid);
+            
+            if(!otherUid) continue; // Should not happen
+
+            // Fetch other user profile
+            // Optimization: In a real app, cache this or store simple user data in the DM doc
+            try {
+                const userSnap = await getDoc(doc(db, "users", otherUid));
+                let otherUser = { username: 'Unknown User', pfpUrl: 'https://ui-avatars.com/api/?name=?' };
+                if (userSnap.exists()) otherUser = userSnap.data();
+
+                const div = document.createElement('div'); 
+                const isActive = window.currentRoomId === docSnap.id;
+                div.className = `flex items-center gap-3 p-2 rounded hover:bg-[#35373c] cursor-pointer group mb-1 transition ${isActive ? 'bg-[#35373c] border-l-2 border-[#5865F2]' : ''}`; 
+                div.onclick = () => window.app.enterRoom(docSnap.id, otherUser.username);
+                
+                const lastMsg = data.lastMessage ? `${data.lastMessage.sender === currentUserProfile.username ? 'You: ' : ''}${escapeHtml(data.lastMessage.text)}` : 'No messages yet';
+
+                div.innerHTML = ` 
+                    <div class="relative">
+                        <img src="${otherUser.pfpUrl || 'https://ui-avatars.com/api/?name=?'}" class="w-8 h-8 rounded-full object-cover bg-gray-600"> 
+                    </div> 
+                    <div class="flex-1 min-w-0"> 
+                        <div class="text-sm font-bold text-gray-200 truncate group-hover:text-white">${escapeHtml(otherUser.username)}</div> 
+                        <div class="text-[10px] text-gray-500 truncate">${lastMsg}</div> 
+                    </div> 
+                `; 
+                els.displays.onlineList.appendChild(div);
+            } catch(e) { console.error(e); }
+        }
+    });
 }
 
 let typingTimeout;
