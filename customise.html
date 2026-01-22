@@ -448,8 +448,8 @@
                 Appearance Customization
             </h1>
         </div>
-        <button onclick="window.location.href='index.html'" class="px-4 py-2 bg-[#5865F2] hover:bg-[#4752c4] text-white rounded font-bold transition flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Back to Chat
+        <button onclick="window.location.reload()" class="px-4 py-2 bg-[#5865F2] hover:bg-[#4752c4] text-white rounded font-bold transition flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Reset
         </button>
     </header>
 
@@ -606,6 +606,10 @@
     let currentUser = null;
     let tempCustState = { color:'#ffffff', font:'font-default', effect:'effect-none', listStyle:'list-style-default', cardTheme:'card-theme-default', messageColor:'#dbdee1', customList:{bg:'#2b2d31',border:'#1e1f22',text:'#ffffff'} };
 
+    // Initial load for demo/offline access
+    initUI();
+    updateCustPreview();
+
     onAuthStateChanged(auth, async (user) => {
         if(user) {
             currentUser = user;
@@ -627,12 +631,14 @@
                 document.getElementById('cust-list-bg').value = tempCustState.customList.bg;
                 document.getElementById('cust-list-border').value = tempCustState.customList.border;
                 document.getElementById('cust-list-text').value = tempCustState.customList.text;
+                document.getElementById('cust-font').value = tempCustState.font;
 
-                initUI();
+                // Update UI state
+                renderSelection('effect-grid', tempCustState.effect);
+                renderSelection('list-style-grid', tempCustState.listStyle);
+                renderSelection('card-theme-grid', tempCustState.cardTheme);
                 updateCustPreview();
             }
-        } else {
-            window.location.href = 'index.html';
         }
     });
 
@@ -712,7 +718,14 @@
             updateCustPreview(); renderSelection('list-style-grid', id);
         },
         saveCustomization: async () => {
-            if(!currentUser) return;
+            if(!currentUser) {
+                // Show toast even if not logged in for demo feel
+                 const toast = document.createElement('div');
+                toast.className = "bg-yellow-600 text-white px-4 py-2 rounded shadow-lg"; toast.innerText = "Demo Mode: Changes not saved to server.";
+                document.getElementById('toast-container').appendChild(toast);
+                setTimeout(()=>toast.remove(), 2000);
+                return;
+            }
             try {
                 await updateDoc(doc(db, "users", currentUser.uid), {
                     usernameStyle: { color: tempCustState.color, font: tempCustState.font, effect: tempCustState.effect },
