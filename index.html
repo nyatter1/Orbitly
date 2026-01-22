@@ -643,7 +643,10 @@
                 <button onclick="app.toggleHamburger()" class="text-gray-300 hover:text-white mr-2 relative z-20">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
-                <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExMXBhNjNycTQweDFkY214NjMxYWtiZWs1ZjZ3dTJxb254d21ldHIyOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/HPbuRgMPF2vL2/giphy.gif" alt="Logo" class="h-10 object-contain">
+                <div class="flex items-center gap-2">
+                    <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExMXBhNjNycTQweDFkY214NjMxYWtiZWs1ZjZ3dTJxb254d21ldHIyOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/HPbuRgMPF2vL2/giphy.gif" alt="Logo" class="h-10 object-contain">
+                    <span id="current-room-name" class="text-gray-300 font-bold text-sm hidden sm:block truncate max-w-[150px]">Orbitly Chat</span>
+                </div>
             </div>
 
             <!-- Hamburger Dropdown Menu -->
@@ -828,24 +831,67 @@
         </div>
     </div>
 
-    <!-- Sidebar (Online Players & Friends) -->
+    <!-- Sidebar (Online Players & Friends & Rooms) -->
     <div class="w-60 bg-[#2b2d31] flex flex-col shrink-0 border-l border-[#1e1f22]">
         <div class="p-2 border-b border-[#1e1f22] h-14 flex items-center justify-center gap-1">
-             <button onclick="app.toggleSidebarMode('all')" id="sidebar-btn-all" class="flex-1 py-1 text-xs font-bold rounded uppercase tracking-wide bg-[#404249] text-white transition flex items-center justify-center gap-2">
-                 <i class="fas fa-users"></i> Group
+             <button onclick="app.toggleSidebarMode('all')" id="sidebar-btn-all" class="flex-1 py-1 text-xs font-bold rounded uppercase tracking-wide bg-[#404249] text-white transition flex items-center justify-center gap-2" title="Group">
+                 <i class="fas fa-users"></i>
              </button>
-             <button onclick="app.toggleSidebarMode('friends')" id="sidebar-btn-friends" class="flex-1 py-1 text-xs font-bold rounded uppercase tracking-wide text-gray-400 hover:text-gray-200 transition flex items-center justify-center gap-2">
-                 <i class="fas fa-user"></i> Friends
+             <button onclick="app.toggleSidebarMode('friends')" id="sidebar-btn-friends" class="flex-1 py-1 text-xs font-bold rounded uppercase tracking-wide text-gray-400 hover:text-gray-200 transition flex items-center justify-center gap-2" title="Friends">
+                 <i class="fas fa-user"></i>
+             </button>
+             <button onclick="app.toggleSidebarMode('rooms')" id="sidebar-btn-rooms" class="flex-1 py-1 text-xs font-bold rounded uppercase tracking-wide text-gray-400 hover:text-gray-200 transition flex items-center justify-center gap-2" title="Rooms">
+                 <i class="fas fa-door-open"></i>
              </button>
         </div>
         <div id="online-list" class="flex-1 overflow-y-auto p-3 space-y-0.5">
-            <!-- Users injected here -->
+            <!-- Users/Rooms injected here -->
+        </div>
+        <!-- Create Room Footer -->
+        <div id="rooms-footer" class="hidden p-3 border-t border-[#1e1f22]">
+            <button onclick="app.openCreateRoom()" class="w-full bg-[#5865F2] hover:bg-[#4752c4] text-white font-bold py-2 rounded text-xs flex items-center justify-center gap-2">
+                <i class="fas fa-plus"></i> Create Room
+            </button>
+        </div>
+    </div>
+
+    <!-- Create Room Modal -->
+    <div id="create-room-modal" class="absolute inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#2b2d31] rounded-xl shadow-2xl w-full max-w-sm border border-[#1e1f22] relative p-6">
+            <h3 class="text-white font-bold text-lg mb-4">Create New Room</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="uppercase text-xs font-bold text-gray-400 mb-1 block">Room Name</label>
+                    <input type="text" id="create-room-name" class="w-full px-3 py-2 bg-[#1e1f22] border border-gray-700 rounded text-white focus:border-[#5865F2] outline-none" placeholder="e.g. Chill Zone">
+                </div>
+                <div>
+                    <label class="uppercase text-xs font-bold text-gray-400 mb-1 block">Password (Optional)</label>
+                    <input type="password" id="create-room-pass" class="w-full px-3 py-2 bg-[#1e1f22] border border-gray-700 rounded text-white focus:border-[#5865F2] outline-none" placeholder="Leave empty for public">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="document.getElementById('create-room-modal').classList.add('hidden')" class="px-4 py-2 text-gray-400 hover:text-white text-sm font-bold">Cancel</button>
+                <button onclick="app.createRoom()" class="px-6 py-2 bg-[#5865F2] hover:bg-[#4752c4] text-white rounded font-bold text-sm">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enter Password Modal -->
+    <div id="password-modal" class="absolute inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[#2b2d31] rounded-xl shadow-2xl w-full max-w-sm border border-[#1e1f22] relative p-6">
+            <h3 class="text-white font-bold text-lg mb-2">Protected Room</h3>
+            <p id="password-modal-room-name" class="text-gray-400 text-sm mb-4">Enter password to join</p>
+            <input type="password" id="room-pass-input" class="w-full px-3 py-2 bg-[#1e1f22] border border-gray-700 rounded text-white focus:border-[#5865F2] outline-none mb-4" placeholder="Password">
+            <div class="flex justify-end gap-3">
+                <button onclick="document.getElementById('password-modal').classList.add('hidden')" class="px-4 py-2 text-gray-400 hover:text-white text-sm font-bold">Cancel</button>
+                <button id="btn-submit-room-pass" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded font-bold text-sm">Enter</button>
+            </div>
         </div>
     </div>
 
     <!-- Leaderboard Modal -->
     <div id="leaderboard-modal" class="absolute inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-[#240a40] rounded-xl shadow-2xl w-full max-w-sm border border-[#4a148c] relative flex flex-col max-h-[85vh] overflow-hidden">
+        <div class="bg-[#240a40] rounded-xl shadow-2xl w-full max-w-md border border-[#4a148c] relative flex flex-col h-[80vh] overflow-hidden">
             <!-- Menu View -->
             <div id="lb-menu" class="p-6 space-y-4">
                 <div class="flex justify-between items-center mb-6 border-b border-purple-800 pb-2">
@@ -876,7 +922,7 @@
                 <div id="lb-list-content" class="flex-1 overflow-y-auto p-2 space-y-1">
                     <!-- Ranks injected here -->
                 </div>
-                <div class="p-2 border-t border-[#4a148c] bg-[#2e0947] text-center">
+                <div class="p-2 border-t border-[#4a148c] bg-[#2e0947] text-center shrink-0">
                     <button onclick="document.getElementById('lb-list-view').classList.add('hidden'); document.getElementById('lb-menu').classList.remove('hidden');" class="text-xs text-purple-300 hover:text-white uppercase font-bold tracking-wider">Back to Menu</button>
                 </div>
             </div>
@@ -1283,8 +1329,11 @@
     let unsubscribeMessages = null;
     let unsubscribeUsers = null;
     let unsubscribeNews = null;
+    let unsubscribeRooms = null;
     let currentNewsIdForComments = null;
-    let sidebarMode = 'all'; // 'all' or 'friends'
+    let sidebarMode = 'all'; // 'all', 'friends', 'rooms'
+    let currentRoomId = 'general'; // Default room
+    let pendingRoomJoin = null; // Store temp room data for password modal
     
     // New State for Reply
     let replyingTo = null; // { id, text, username, pfpUrl }
@@ -1316,7 +1365,9 @@
             newsDrawer: document.getElementById('news-drawer'), newsContainer: document.getElementById('news-container'), newsEmpty: document.getElementById('news-empty'), addNewsModal: document.getElementById('add-news-modal'), newsImgPreview: document.getElementById('news-image-preview'), newsImgPlaceholder: document.getElementById('news-image-placeholder'), commentsModal: document.getElementById('news-comments-modal'), commentsList: document.getElementById('news-comments-list'),
             friendBtn: document.getElementById('btn-toggle-friend'),
             friendReqModal: document.getElementById('friend-req-modal'), friendReqList: document.getElementById('friend-req-list'), friendReqBadge: document.getElementById('friend-req-badge'),
-            sidebarBtnAll: document.getElementById('sidebar-btn-all'), sidebarBtnFriends: document.getElementById('sidebar-btn-friends'),
+            sidebarBtnAll: document.getElementById('sidebar-btn-all'), sidebarBtnFriends: document.getElementById('sidebar-btn-friends'), sidebarBtnRooms: document.getElementById('sidebar-btn-rooms'),
+            roomsFooter: document.getElementById('rooms-footer'),
+            createRoomModal: document.getElementById('create-room-modal'), passwordModal: document.getElementById('password-modal'),
             leaderboardModal: document.getElementById('leaderboard-modal'), lbMenu: document.getElementById('lb-menu'), lbList: document.getElementById('lb-list-view'), lbContent: document.getElementById('lb-list-content')
         }
     };
@@ -1428,8 +1479,8 @@
                 if(!els.displays.profileModal.classList.contains('hidden')) app.openProfile(targetUid);
             } catch (e) {
                 console.error(e);
-                // Fallback for missing likesCount field on legacy data
                 try {
+                    // Fallback
                     const ref = doc(db, "users", targetUid);
                     const snap = await getDoc(ref);
                     const data = snap.data();
@@ -1515,7 +1566,6 @@
         sendFriendRequest: async (targetUid) => {
             if (!currentUser) return;
             try {
-                // Add current user to target's friendRequests
                 await updateDoc(doc(db, "users", targetUid), { friendRequests: arrayUnion(currentUser.uid) });
                 showToast("Friend Request Sent!", 'success');
                 app.openProfile(targetUid);
@@ -1529,28 +1579,22 @@
                 const myRef = doc(db, "users", currentUser.uid);
                 const senderRef = doc(db, "users", senderUid);
 
-                // Add to my friends, remove from my requests
                 batch.update(myRef, {
                     friends: arrayUnion(senderUid),
                     friendRequests: arrayRemove(senderUid)
                 });
-                // Add me to sender's friends
                 batch.update(senderRef, {
                     friends: arrayUnion(currentUser.uid)
                 });
 
                 await batch.commit();
                 showToast("Friend Added!", 'success');
-                if(!els.displays.friendReqModal.classList.contains('hidden')) app.openFriendRequests(); // Refresh modal
-                if(!els.displays.profileModal.classList.contains('hidden')) app.openProfile(senderUid); // Refresh profile if open
+                if(!els.displays.friendReqModal.classList.contains('hidden')) app.openFriendRequests();
+                if(!els.displays.profileModal.classList.contains('hidden')) app.openProfile(senderUid);
             } catch (e) { 
                 console.error(e); 
-                // Fallback for rule restrictions - try single update
                 try {
                     await updateDoc(doc(db, "users", currentUser.uid), { friends: arrayUnion(senderUid), friendRequests: arrayRemove(senderUid) });
-                    // Hope sender updates their own side or relies on separate logic? 
-                    // If rules block updating sender's friend list, this is partial.
-                    // Assuming user's backend rules allow this logic for friends.
                     showToast("Accepted (Check connection)", 'success');
                 } catch(err) { showToast("Failed to accept", 'error'); }
             }
@@ -1581,7 +1625,6 @@
                 app.openProfile(targetUid);
             } catch (e) { 
                 console.error(e); 
-                // Fallback
                 await updateDoc(doc(db, "users", currentUser.uid), { friends: arrayRemove(targetUid) });
                 showToast("Removed (Local)", 'success');
             }
@@ -1600,7 +1643,6 @@
             const reqs = currentUserProfile.friendRequests;
             list.innerHTML = '';
             
-            // Fetch profiles
             for (const uid of reqs) {
                 try {
                     const snap = await getDoc(doc(db, "users", uid));
@@ -1631,20 +1673,103 @@
             sidebarMode = mode;
             const btnAll = els.displays.sidebarBtnAll;
             const btnFriends = els.displays.sidebarBtnFriends;
+            const btnRooms = els.displays.sidebarBtnRooms;
+            const footer = els.displays.roomsFooter;
             
+            // Reset classes
+            const inactiveClass = "flex-1 py-1 text-xs font-bold rounded uppercase tracking-wide text-gray-400 hover:text-gray-200 transition flex items-center justify-center gap-2";
+            const activeClass = "flex-1 py-1 text-xs font-bold rounded uppercase tracking-wide bg-[#5865F2] text-white transition flex items-center justify-center gap-2";
+            
+            btnAll.className = inactiveClass;
+            btnFriends.className = inactiveClass;
+            btnRooms.className = inactiveClass;
+            footer.classList.add('hidden');
+
             if (mode === 'all') {
                 btnAll.className = "flex-1 py-1 text-xs font-bold rounded uppercase tracking-wide bg-[#404249] text-white transition flex items-center justify-center gap-2";
-                btnFriends.className = "flex-1 py-1 text-xs font-bold rounded uppercase tracking-wide text-gray-400 hover:text-gray-200 transition flex items-center justify-center gap-2";
-            } else {
-                btnFriends.className = "flex-1 py-1 text-xs font-bold rounded uppercase tracking-wide bg-[#248046] text-white transition flex items-center justify-center gap-2";
-                btnAll.className = "flex-1 py-1 text-xs font-bold rounded uppercase tracking-wide text-gray-400 hover:text-gray-200 transition flex items-center justify-center gap-2";
-            }
-            
-            // Re-trigger listener logic
-            if(unsubscribeUsers) {
-                unsubscribeUsers();
+                if(unsubscribeRooms) unsubscribeRooms();
                 startUsersListener();
+            } else if (mode === 'friends') {
+                btnFriends.className = "flex-1 py-1 text-xs font-bold rounded uppercase tracking-wide bg-[#248046] text-white transition flex items-center justify-center gap-2";
+                if(unsubscribeRooms) unsubscribeRooms();
+                startUsersListener();
+            } else if (mode === 'rooms') {
+                btnRooms.className = activeClass;
+                footer.classList.remove('hidden');
+                if(unsubscribeUsers) unsubscribeUsers();
+                startRoomsListener();
             }
+        },
+
+        // --- Rooms System ---
+        openCreateRoom: () => {
+            els.displays.createRoomModal.classList.remove('hidden');
+            document.getElementById('create-room-name').value = '';
+            document.getElementById('create-room-pass').value = '';
+        },
+
+        createRoom: async () => {
+            if (!currentUser) return;
+            const name = document.getElementById('create-room-name').value.trim();
+            const pass = document.getElementById('create-room-pass').value.trim();
+            
+            if (!name) return showToast("Room name required", 'error');
+            
+            // Check one room per person
+            const q = query(collection(db, "rooms"), where("createdBy", "==", currentUser.uid));
+            const snap = await getDocs(q);
+            if (!snap.empty) return showToast("You can only create 1 room!", 'error');
+
+            try {
+                const docRef = await addDoc(collection(db, "rooms"), {
+                    name,
+                    password: pass || null,
+                    createdBy: currentUser.uid,
+                    createdAt: serverTimestamp(),
+                    isPrivate: !!pass
+                });
+                
+                els.displays.createRoomModal.classList.add('hidden');
+                showToast("Room created!", 'success');
+                app.enterRoom(docRef.id, name);
+            } catch(e) { console.error(e); showToast("Failed to create room", 'error'); }
+        },
+
+        attemptEnterRoom: (id, name, isPrivate, password) => {
+            if (!isPrivate) {
+                app.enterRoom(id, name);
+            } else {
+                pendingRoomJoin = { id, name, password };
+                document.getElementById('password-modal-room-name').textContent = `Enter password for ${name}`;
+                document.getElementById('room-pass-input').value = '';
+                els.displays.passwordModal.classList.remove('hidden');
+            }
+        },
+
+        submitRoomPassword: () => {
+            if (!pendingRoomJoin) return;
+            const input = document.getElementById('room-pass-input').value.trim();
+            if (input === pendingRoomJoin.password) {
+                els.displays.passwordModal.classList.add('hidden');
+                app.enterRoom(pendingRoomJoin.id, pendingRoomJoin.name);
+                pendingRoomJoin = null;
+            } else {
+                showToast("Incorrect password", 'error');
+            }
+        },
+
+        enterRoom: (roomId, roomName) => {
+            if (currentRoomId === roomId) return;
+            currentRoomId = roomId;
+            
+            // Update Header
+            document.getElementById('current-room-name').textContent = roomName || (roomId === 'general' ? 'Orbitly Chat' : 'Unknown Room');
+            
+            // Re-bind chat listener
+            if (unsubscribeMessages) unsubscribeMessages();
+            startChatListener();
+            
+            showToast(`Joined: ${roomName}`, 'success');
         },
 
         // --- News System ---
@@ -1880,6 +2005,9 @@
     window.initiateReply = app.initiateReply;
     window.deleteMessage = app.deleteMessage;
     window.toggleMsgMenu = app.toggleMsgMenu;
+    
+    // Pass submit for modal button
+    document.getElementById('btn-submit-room-pass').onclick = app.submitRoomPassword;
 
     // --- News Listeners ---
     function startNewsListener() {
@@ -1896,7 +2024,6 @@
                 els.displays.newsEmpty.classList.add('hidden');
             }
 
-            // Create a cache for checking updates in the open modal
             const allNewsData = {}; 
 
             snapshot.forEach(docSnap => {
@@ -1906,7 +2033,6 @@
                 renderNewsItem(data);
             });
 
-            // If comments modal is open, refresh it live
             if (currentNewsIdForComments && !els.displays.commentsModal.classList.contains('hidden')) {
                 const updatedData = allNewsData[currentNewsIdForComments];
                 if (updatedData) {
@@ -1967,7 +2093,6 @@
             list.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">No comments yet.</div>';
             return;
         }
-        // Sort by time
         comments.sort((a, b) => b.createdAt - a.createdAt);
         
         comments.forEach(c => {
@@ -2383,6 +2508,7 @@
             if (window.presenceInterval) clearInterval(window.presenceInterval);
             if (unsubscribeMessages) unsubscribeMessages(); 
             if (unsubscribeUsers) unsubscribeUsers(); 
+            if (unsubscribeRooms) unsubscribeRooms();
             currentUser = null; 
             currentUserProfile = null; 
             els.chatView.classList.add('hidden'); 
@@ -2394,7 +2520,16 @@
     // --- Chat System (Updated) ---
     function startChatListener() { 
         els.displays.msgContainer.innerHTML = ''; 
-        const q = query(collection(db, "messages"), orderBy("createdAt", "asc")); 
+        
+        let q;
+        // If 'general' or null, we might need special handling for legacy. 
+        // For simplicity, we assume we only show messages matching the roomId (or missing roomId for general if we could query that).
+        // Since we can't query "missing field" easily alongside ordering, we will rely on client side filtering OR start tagging everything with 'general'.
+        // For now, let's filter by roomId. If roomId is 'general', we query for it.
+        // NOTE: Old messages won't show up. User must clear chat or migrate to see them in 'general' context if we enforce.
+        // Let's enforce strictly to support rooms.
+        q = query(collection(db, "messages"), where("roomId", "==", currentRoomId), orderBy("createdAt", "asc"));
+        
         unsubscribeMessages = onSnapshot(q, (snapshot) => { 
             snapshot.docChanges().forEach((change) => { 
                 if (change.type === "added") {
@@ -2543,7 +2678,7 @@
         let text = els.inputs.msg.value.trim();
         if (!text) return;
 
-        // If command, skip filter
+        // If command, skip filter but only allowed in general? No, commands global.
         if (text.startsWith('/')) { 
             els.inputs.msg.value = '';
             handleCommand(text); 
@@ -2562,6 +2697,7 @@
             pfpUrl: currentUserProfile.pfpUrl,
             usernameStyle: currentUserProfile.usernameStyle || null,
             messageStyle: currentUserProfile.messageStyle || { color: '#dbdee1' },
+            roomId: currentRoomId, // Attach current Room ID
             createdAt: serverTimestamp()
         };
 
@@ -2581,33 +2717,27 @@
     });
 
     // ... (Commands and Utils same as before) ...
-    // Note: I'm redefining app.initiateReply inside window.app so the onclick inline logic works.
-    // The previous app.initiateReply in global app object was:
-    // initiateReply: (msgId, username, text) => { ... }
-    // I updated renderMessage to call `initiateReply` global function.
-    
-    // Also updating initiateReply signature to take pfpUrl
     window.app.initiateReply = (msgId, username, text, pfpUrl) => {
         replyingTo = { id: msgId, username, text, pfpUrl: pfpUrl || 'https://ui-avatars.com/api/?name=?' };
         els.displays.replyBarUser.textContent = username;
         els.displays.replyBarText.textContent = text;
         els.displays.replyBar.classList.remove('hidden');
         els.inputs.msg.focus();
-        // Close menu if open
         window.toggleMsgMenu(msgId);
     };
 
     // Re-attach remaining helpers just in case
     async function handleCommand(cmdString) { const parts = cmdString.split(' '); const command = parts[0].toLowerCase(); const args = parts.slice(1); if (command === '/cmds') { showHelp(); return; } if (command === '/prefixs' || command === '/prefixes') { showPrefixes(); return; } if (command === '/top') { await executeTop(); return; } if (command === '/daily') { await executeDaily(); return; } if (command === '/convert') { if (args.length < 2) return showToast("Usage: /convert {c/g} {amount}", 'error'); await executeConvert(args[0], args[1]); return; } if (command === '/pfp' && args[0] === 'change') { app.openEditProfile(); return; } if (command === '/pay') { if (args.length < 3) return showToast("Usage: /pay {username} {amount} {c/g}", 'error'); await executePay(args[0], args[1], args[2]); return; } if (command === '/clear') { if (currentUser.email === 'dev@gmail.com') { await executeClear(); } else { showToast("You do not have permission", "error"); } return; } if (['/allin', '/flip', '/roll', '/slots', '/rps', '/guess', '/bank'].includes(command)) { if (command === '/bank') { await executeBank(); showToast("Action complete", 'success'); return; } let amountIdx = 0; let currIdx = 1; let extraArg = null; if (command === '/rps' || command === '/guess') { amountIdx = 1; currIdx = 2; extraArg = args[0]; } let amountStr = args[amountIdx]; let currencyStr = args[currIdx]; if (command === '/allin') { amountStr = 'all'; currencyStr = args[0]; } await executeGamble(command, amountStr, currencyStr, extraArg); } else { showToast("Invalid Command", 'error'); } }
     async function executeClear() { 
-        if (!confirm("Are you sure you want to clear ALL messages? This cannot be undone.")) return;
+        if (!confirm("Are you sure you want to clear ALL messages in this room?")) return;
         try {
-            const q = query(collection(db, "messages"));
+            // Only clear current room messages
+            const q = query(collection(db, "messages"), where("roomId", "==", currentRoomId));
             const snap = await getDocs(q);
             const batch = writeBatch(db);
             snap.docs.forEach(d => batch.delete(d.ref));
             await batch.commit();
-            showToast("Chat cleared successfully", "success");
+            showToast("Room chat cleared", "success");
         } catch(e) { console.error(e); showToast("Failed to clear chat", "error"); }
     }
     function showHelp() { const div = document.createElement('div'); div.className = "my-4 mx-4 p-4 bg-[#2b2d31] rounded-lg border border-[#1e1f22] text-sm shadow-xl"; div.innerHTML = ` <h3 class="font-bold text-white mb-3 text-lg border-b border-gray-700 pb-2">Orbitly Commands</h3> <div class="grid grid-cols-1 md:grid-cols-2 gap-4"> <div> <h4 class="text-blue-400 font-bold mb-1 uppercase text-xs">Essentials</h4> <ul class="space-y-1 text-gray-300"> <li><span class="text-white font-mono">/daily</span> - Claim free reward (24h)</li> <li><span class="text-white font-mono">/bank</span> - View your balance</li> <li><span class="text-white font-mono">/pay [user] [amt] [c/g]</span> - Pay someone</li> <li><span class="text-white font-mono">/top</span> - Leaderboard (Public)</li> <li><span class="text-white font-mono">/convert [c/g] [amt]</span> - Swap currency</li> </ul> </div> <div> <h4 class="text-green-400 font-bold mb-1 uppercase text-xs">Gambling</h4> <ul class="space-y-1 text-gray-300"> <li><span class="text-white font-mono">/allin [c/g]</span> - Bet everything</li> <li><span class="text-white font-mono">/flip [amt] [c/g]</span> - Coin flip (2x)</li> <li><span class="text-white font-mono">/roll [amt] [c/g]</span> - Dice roll (>3 wins)</li> <li><span class="text-white font-mono">/slots [amt] [c/g]</span> - Slot machine</li> <li><span class="text-white font-mono">/rps [r/p/s] [amt] [c/g]</span> - Rock Paper Scissors</li> <li><span class="text-white font-mono">/guess [1-10] [amt] [c/g]</span> - Guess number (5x)</li> </ul> </div> </div> <div class="mt-3 text-xs text-gray-500 italic">Rate: 10 Coins = 1 Gem</div> `; els.displays.msgContainer.appendChild(div); requestAnimationFrame(() => els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight); }
@@ -2626,16 +2756,21 @@
         if (!currentUserProfile) return; 
         const now = Date.now(); 
         const last = currentUserProfile.lastDaily || 0; 
-        const oneDay = 24 * 60 * 60 * 1000; 
+        const oneDay = 24 * 60 * 6
+        0 * 1000; 
         if (now - last < oneDay) { 
             const timeLeft = Math.ceil((oneDay - (now - last)) / (1000 * 60 * 60)); 
             showToast(`Daily reward available in ${timeLeft} hours`, 'error'); 
             return; 
         } 
-        await updateDoc(doc(db, "users", currentUser.uid), { coins: (currentUserProfile.coins || 0) + 500, gems: (currentUserProfile.gems || 0) + 5, lastDaily: now }); 
+        await updateDoc(doc(db, "users", currentUser.uid), { 
+            coins: (currentUserProfile.coins || 0) + 500, 
+            gems: (currentUserProfile.gems || 0) + 5, 
+            lastDaily: now 
+        }); 
         showToast("Claimed 500 Coins & 5 Gems!", 'success'); 
     }
-    
+
     async function executeConvert(currencyArg, amountStr) { 
         const isCoins = ['c', 'coin', 'coins'].includes(currencyArg.toLowerCase()); 
         const isGems = ['g', 'gem', 'gems'].includes(currencyArg.toLowerCase()); 
@@ -2661,18 +2796,27 @@
                 if (currentBal < amount) throw `Not enough ${fromCurrency}!`; 
                 transaction.update(userRef, { [fromCurrency]: currentBal - amount, [toCurrency]: (userData[toCurrency] || 0) + resultingAmount }); 
             }); 
-            showToast("Converted", 'success'); 
+            showToast(`Converted`, 'success'); 
         } catch (e) { showToast(typeof e === 'string' ? e : "Failed", 'error'); } 
     }
-    
+
     async function executeTop() { 
+        // Sends a message to chat with the leaderboard, separate from the UI modal
         const q = query(collection(db, "users"), orderBy("coins", "desc"), limit(3)); 
         const snap = await getDocs(q); 
         const topUsers = []; 
-        snap.forEach(d => { const u = d.data(); topUsers.push({ uid: u.uid, username: u.username, pfpUrl: u.pfpUrl, coins: u.coins || 0 }); }); 
-        await addDoc(collection(db, "messages"), { type: 'leaderboard', topUsers: topUsers, createdAt: serverTimestamp() }); 
+        snap.forEach(d => { 
+            const u = d.data(); 
+            topUsers.push({ uid: u.uid, username: u.username, pfpUrl: u.pfpUrl, coins: u.coins || 0 }); 
+        }); 
+        await addDoc(collection(db, "messages"), { 
+            type: 'leaderboard', 
+            topUsers: topUsers, 
+            roomId: currentRoomId,
+            createdAt: serverTimestamp() 
+        }); 
     }
-    
+
     async function executePay(targetName, amountStr, currStr) { 
         const amount = parseAbbreviatedNumber(amountStr); 
         if (isNaN(amount) || amount <= 0) return showToast("Invalid Amount", 'error'); 
@@ -2695,15 +2839,24 @@
                 transaction.update(senderRef, { [currency]: sSnap.data()[currency] - amount }); 
                 transaction.update(receiverRef, { [currency]: (rSnap.data()[currency] || 0) + amount }); 
             }); 
-            showToast("Sent", 'success'); 
+            showToast(`Sent`, 'success'); 
         } catch (e) { showToast("Transaction failed", 'error'); } 
     }
-    
+
     async function executeBank() { 
         if (!currentUserProfile) return; 
-        await addDoc(collection(db, "messages"), { type: 'bank', uid: currentUser.uid, username: currentUserProfile.username, pfpUrl: currentUserProfile.pfpUrl, coins: currentUserProfile.coins || 0, gems: currentUserProfile.gems || 0, createdAt: serverTimestamp() }); 
+        await addDoc(collection(db, "messages"), { 
+            type: 'bank', 
+            uid: currentUser.uid, 
+            username: currentUserProfile.username, 
+            pfpUrl: currentUserProfile.pfpUrl, 
+            coins: currentUserProfile.coins || 0, 
+            gems: currentUserProfile.gems || 0, 
+            roomId: currentRoomId,
+            createdAt: serverTimestamp() 
+        }); 
     }
-    
+
     async function executeGamble(game, amountStr, currStr, extra) { 
         if (!currentUserProfile) return; 
         const isCoins = ['c', 'coin', 'coins'].includes(currStr?.toLowerCase()); 
@@ -2716,8 +2869,7 @@
         let win = false; 
         let multiplier = 0; 
         let details = ""; 
-        
-                if (game === '/allin') { 
+        if (game === '/allin') { 
             if (isDev) { win = true; multiplier = 10; } 
             else { win = Math.random() < 0.55; if (win) { const r = Math.random(); multiplier = r<0.5?1:r<0.75?2:r<0.875?3:r<0.975?5:10; } } 
         } else if (game === '/flip') { 
@@ -2736,52 +2888,86 @@
         
         const winnings = win ? Math.floor(bet * multiplier) : 0; 
         await updateDoc(doc(db, "users", currentUser.uid), { [currencyKey]: (balance - bet) + winnings }); 
-        await addDoc(collection(db, "messages"), { type: game.replace('/',''), uid: currentUser.uid, username: currentUserProfile.username, pfpUrl: currentUserProfile.pfpUrl, currency: currencyKey, result: win ? (multiplier === 1 ? 'DRAW' : 'WON') : 'LOST', amount: win ? winnings : bet, multiplier: multiplier, details: details, createdAt: serverTimestamp() }); 
+        await addDoc(collection(db, "messages"), { 
+            type: game.replace('/',''), 
+            uid: currentUser.uid, 
+            username: currentUserProfile.username, 
+            pfpUrl: currentUserProfile.pfpUrl, 
+            currency: currencyKey, 
+            result: win ? (multiplier === 1 ? 'DRAW' : 'WON') : 'LOST', 
+            amount: win ? winnings : bet, 
+            multiplier: multiplier, 
+            details: details, 
+            roomId: currentRoomId,
+            createdAt: serverTimestamp() 
+        }); 
         showToast("Done", 'success'); 
     }
 
-    // --- Users List System (Updated) ---
+    // --- Users List System ---
     function startUsersListener() { 
         const q = query(collection(db, "users"), orderBy("username", "asc")); 
         unsubscribeUsers = onSnapshot(q, (snapshot) => { 
             els.displays.onlineList.innerHTML = ''; 
             const onlineUsers = []; 
             const offlineUsers = []; 
+            const typers = [];
             
-            // Get my friends list for filtering
             const myFriends = (currentUserProfile && currentUserProfile.friends) ? currentUserProfile.friends : [];
 
             snapshot.forEach((doc) => { 
                 const user = doc.data(); 
                 
-                // Sidebar Filtering Mode
+                // Sidebar Filtering
                 if (sidebarMode === 'friends') {
-                    // Only show if in my friends list
                     if (!myFriends.includes(user.uid)) return;
                 }
 
                 let status = user.status || 'offline'; 
 
-                // --- Heartbeat Check ---
-                // If user claims to be online, check if their last heartbeat was within 2 minutes
-                // If not, they probably crashed or closed the tab without sending 'offline'
+                // Heartbeat Check
                 if (status !== 'offline' && status !== 'invisible') {
                     const now = Date.now() / 1000;
                     const lastSeen = user.lastSeen ? user.lastSeen.seconds : 0;
-                    if (now - lastSeen > 120) { // 2 minute buffer
-                        status = 'offline';
-                    }
+                    if (now - lastSeen > 120) status = 'offline';
                 }
                 
+                // Typing Check (Within last 5 seconds)
+                if (user.typing) {
+                    const now = Date.now();
+                    const typeTime = user.typing.seconds * 1000;
+                    if (now - typeTime < 5000 && user.uid !== currentUser.uid) {
+                        typers.push(user.username);
+                    }
+                }
+
                 if (status === 'invisible' && user.uid !== (currentUser ? currentUser.uid : null)) return; 
                 
                 let displayStatus = status; 
                 if (status === 'invisible') displayStatus = 'offline'; 
                 
-                if (displayStatus === 'offline') offlineUsers.push({ ...user, displayStatus: 'offline' }); // Enforce offline text
+                if (displayStatus === 'offline') offlineUsers.push({ ...user, displayStatus: 'offline' }); 
                 else onlineUsers.push({ ...user, displayStatus }); 
             }); 
             
+            // Render Typing Indicator
+            const existingTyping = document.getElementById('typing-indicator-bar');
+            if (existingTyping) existingTyping.remove();
+            
+            if (typers.length > 0) {
+                const typeDiv = document.createElement('div');
+                typeDiv.id = 'typing-indicator-bar';
+                typeDiv.className = "absolute bottom-20 left-4 z-30 text-xs font-bold text-gray-400 animate-pulse bg-[#2b2d31]/80 px-2 py-1 rounded-full border border-gray-700 pointer-events-none";
+                
+                if (typers.length === 1) typeDiv.textContent = `${typers[0]} is typing...`;
+                else if (typers.length === 2) typeDiv.textContent = `${typers[0]} and ${typers[1]} are typing...`;
+                else typeDiv.textContent = "Multiple people are typing...";
+                
+                // Insert before the input form area
+                const formArea = document.querySelector('#chat-view .px-4.pb-4.bg-\\[\\#313338\\]');
+                if (formArea) formArea.appendChild(typeDiv);
+            }
+
             if (onlineUsers.length > 0) { 
                 const header = document.createElement('div'); 
                 header.className = "px-2 py-3 text-xs font-bold text-gray-500 hover:text-gray-400 uppercase tracking-wide mt-2"; 
@@ -2795,12 +2981,12 @@
                 header.textContent = `Offline — ${offlineUsers.length}`; 
                 els.displays.onlineList.appendChild(header); 
                 offlineUsers.forEach(u => renderUserInList(u, u.displayStatus)); 
-            } 
+            }
             
             if (onlineUsers.length === 0 && offlineUsers.length === 0) {
                 const empty = document.createElement('div');
                 empty.className = "text-center text-gray-500 text-xs mt-4 p-2";
-                empty.textContent = sidebarMode === 'friends' ? "No friends found. Add some people!" : "No users found.";
+                empty.textContent = sidebarMode === 'friends' ? "No friends found." : "No users found.";
                 els.displays.onlineList.appendChild(empty);
             }
         }); 
@@ -2810,13 +2996,12 @@
         const div = document.createElement('div');
         div.className = `flex items-center gap-3 p-2 rounded hover:brightness-110 cursor-pointer group opacity-90 hover:opacity-100 transition`;
         
-        // Handle Custom vs Preset List Styles
         if (user.listStyle === 'custom' && user.customListStyle) {
             div.style.backgroundColor = user.customListStyle.bg;
             div.style.border = `1px solid ${user.customListStyle.border}`;
         } else {
             div.classList.add(user.listStyle || 'list-style-default');
-            div.classList.add('hover:bg-[#35373c]'); // Default hover
+            div.classList.add('hover:bg-[#35373c]');
         }
 
         div.onclick = () => window.app.openProfile(user.uid);
@@ -2828,7 +3013,6 @@
         if (status === 'dnd') statusColor = 'bg-red-500';
 
         let nameClass = "text-sm font-medium truncate";
-        // Default text color logic
         if (!user.listStyle || user.listStyle !== 'custom') {
             nameClass += " text-gray-200 group-hover:text-white";
         }
@@ -2837,12 +3021,10 @@
         nameSpan.textContent = user.username;
         nameSpan.className = nameClass;
         
-        // Apply custom list text color if custom
         if (user.listStyle === 'custom' && user.customListStyle) {
             nameSpan.style.color = user.customListStyle.text;
         }
 
-        // Apply username effects on top (override if necessary, but keep base color)
         if (user.usernameStyle) applyUsernameStyle(nameSpan, user.usernameStyle);
 
         div.innerHTML = `
@@ -2855,11 +3037,85 @@
                 <div class="text-[10px] text-gray-400 uppercase font-bold">${status}</div>
             </div>
         `;
-        
         div.querySelector(`#u-list-name-${user.uid}`).appendChild(nameSpan);
-        
         els.displays.onlineList.appendChild(div);
     }
+
+    // --- Rooms List System ---
+    function startRoomsListener() {
+        const q = query(collection(db, "rooms"), orderBy("createdAt", "desc"));
+        unsubscribeRooms = onSnapshot(q, (snapshot) => {
+            els.displays.onlineList.innerHTML = '';
+            
+            // Add General Room at top
+            const generalDiv = document.createElement('div');
+            generalDiv.className = "flex items-center gap-3 p-2 rounded hover:bg-[#35373c] cursor-pointer group mb-1";
+            if (currentRoomId === 'general') generalDiv.className += " bg-[#35373c] border-l-2 border-[#5865F2]";
+            generalDiv.onclick = () => app.enterRoom('general', 'Orbitly Chat');
+            generalDiv.innerHTML = `
+                <div class="w-8 h-8 rounded bg-[#5865F2] flex items-center justify-center text-white"><i class="fas fa-hashtag"></i></div>
+                <div class="flex-1"><div class="text-sm font-bold text-gray-200">Orbitly Chat</div><div class="text-[10px] text-gray-400">Public</div></div>
+            `;
+            els.displays.onlineList.appendChild(generalDiv);
+
+            if (snapshot.empty) {
+                const empty = document.createElement('div');
+                empty.className = "text-center text-gray-500 text-xs mt-4";
+                empty.textContent = "No custom rooms yet.";
+                els.displays.onlineList.appendChild(empty);
+            }
+
+            snapshot.forEach(doc => {
+                const r = doc.data();
+                r.id = doc.id;
+                renderRoomInList(r);
+            });
+        });
+    }
+
+    function renderRoomInList(room) {
+        const div = document.createElement('div');
+        const isActive = currentRoomId === room.id;
+        div.className = `flex items-center gap-3 p-2 rounded hover:bg-[#35373c] cursor-pointer group mb-1 transition ${isActive ? 'bg-[#35373c] border-l-2 border-[#5865F2]' : ''}`;
+        
+        // Pass password only if user created it (optional security, mainly logic is in enter)
+        // We pass the hash or check locally? 
+        // For security, checking password locally is bad, but for this simple app without cloud functions, we check against the doc data.
+        
+        div.onclick = () => app.attemptEnterRoom(room.id, room.name, room.isPrivate, room.password);
+
+        div.innerHTML = `
+            <div class="w-8 h-8 rounded bg-[#2b2d31] border border-gray-600 flex items-center justify-center text-gray-400 group-hover:text-white group-hover:border-white transition">
+                <i class="fas ${room.isPrivate ? 'fa-lock' : 'fa-hashtag'}"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="text-sm font-bold text-gray-200 truncate group-hover:text-white">${escapeHtml(room.name)}</div>
+                <div class="text-[10px] text-gray-500 uppercase">${room.isPrivate ? 'Private' : 'Public'}</div>
+            </div>
+        `;
+        els.displays.onlineList.appendChild(div);
+    }
+
+    // --- Typing Listener ---
+    let typingTimeout;
+    els.inputs.msg.addEventListener('input', () => {
+        if (!currentUser) return;
+        
+        // Update typing status in Firestore (debounced)
+        if (typingTimeout) clearTimeout(typingTimeout);
+        
+        // Set typing true immediately if not recently set
+        // But to avoid write spam, we just debounce the "stop" mostly, 
+        // or write once every few seconds.
+        // Simple approach: Write timestamp. Listener checks timestamp age.
+        
+        updateDoc(doc(db, "users", currentUser.uid), { typing: serverTimestamp() }).catch(()=>{});
+
+        typingTimeout = setTimeout(() => {
+            // Optional: Explicitly unset or just let timestamp expire in UI logic
+            // We'll let UI logic handle "stale" timestamps (>5s)
+        }, 1000);
+    });
 
     // --- Utils (unchanged) ---
     function toggleLoading(active) { if (active) { els.displays.loader.classList.remove('hidden'); els.displays.feedback.classList.add('hidden'); } else { els.displays.loader.classList.add('hidden'); } }
