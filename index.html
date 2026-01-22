@@ -863,11 +863,20 @@ showToast("Unfriended", "success");
 app.openProfile(targetUid);
 } catch(e) { console.error(e); }
 },
-openDM: (targetUid, targetUsername) => {
+openDM: async (targetUid, targetUsername) => {
     if(!currentUser) return;
     const uids = [currentUser.uid, targetUid].sort();
     const dmId = `dm_${uids[0]}_${uids[1]}`;
-    app.enterRoom(dmId, targetUsername, true); // Treat DM as private room for UI logic
+    
+    // Ensure DM document exists so subcollection listeners don't fail security rules
+    try {
+        await setDoc(doc(db, "dms", dmId), { 
+            participants: uids,
+            updatedAt: serverTimestamp() 
+        }, { merge: true });
+    } catch (e) { console.error("DM Init Error", e); }
+
+    app.enterRoom(dmId, targetUsername);
     app.closeProfile();
 },
 
