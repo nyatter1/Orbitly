@@ -658,6 +658,26 @@
             
             <div class="flex items-center gap-4">
                 
+                <!-- PM Inbox Button -->
+                <div class="relative">
+                    <button onclick="app.toggleInbox()" class="text-gray-400 hover:text-white transition relative">
+                        <i class="fas fa-envelope text-xl"></i>
+                        <!-- Red Dot -->
+                        <div id="inbox-red-dot" class="hidden absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#313338]"></div>
+                    </button>
+                    <!-- Inbox Dropdown -->
+                    <div id="inbox-dropdown" class="hidden absolute top-10 right-0 w-64 bg-[#2b2d31] border border-[#1e1f22] rounded-lg shadow-xl z-50 overflow-hidden">
+                        <div class="p-2 border-b border-[#1e1f22] bg-[#202225] flex justify-between items-center">
+                            <span class="text-white font-bold text-sm">Private Messages</span>
+                            <i class="fas fa-trash text-xs text-gray-500 hover:text-red-400 cursor-pointer" onclick="showToast('Clearing not implemented', 'info')"></i>
+                        </div>
+                        <div id="inbox-list" class="max-h-60 overflow-y-auto">
+                            <!-- Items injected here -->
+                            <div class="p-4 text-center text-gray-500 text-xs">No messages yet</div>
+                        </div>
+                    </div>
+                </div>
+
                  <!-- Customize Button -->
                  <button onclick="app.openCustomize()" class="text-gray-400 hover:text-pink-400 transition" title="Customize">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -747,6 +767,39 @@
             <form id="message-form" class="bg-[#383a40] rounded-lg px-4 py-3 flex items-center w-full shadow-sm z-20 relative">
                 <input type="text" id="message-input" autocomplete="off" placeholder="Message #general-chat (Type /cmds for help)" class="flex-1 bg-transparent border-none text-gray-100 placeholder-gray-500 focus:ring-0 focus:outline-none">
             </form>
+        </div>
+    </div>
+
+    <!-- DM Chat Window -->
+    <div id="dm-window" class="hidden fixed bottom-4 right-4 w-80 h-96 bg-[#31004a] border border-[#4a148c] rounded-lg shadow-2xl flex flex-col z-50 overflow-hidden font-sans">
+        <!-- Header -->
+        <div class="bg-[#31004a] p-3 flex justify-between items-center text-white border-b border-[#4a148c]">
+            <div class="flex items-center gap-2">
+                <img id="dm-header-pfp" src="" class="w-8 h-8 rounded-full border border-gray-500 object-cover">
+                <span id="dm-header-username" class="font-bold text-sm tracking-wide">User</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <i class="fas fa-expand text-xs text-gray-400 hover:text-white cursor-pointer"></i>
+                <i class="fas fa-window-minimize text-xs text-gray-400 hover:text-white cursor-pointer -mt-2"></i>
+                <i class="fas fa-cog text-xs text-gray-400 hover:text-white cursor-pointer"></i>
+                <i class="fas fa-times text-sm text-gray-400 hover:text-white cursor-pointer" onclick="app.closeDM()"></i>
+            </div>
+        </div>
+        
+        <!-- Messages Area -->
+        <div id="dm-messages-area" class="flex-1 overflow-y-auto p-3 bg-[#31004a] space-y-2 scrollbar-thin">
+            <!-- Bubbles injected here -->
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-3 bg-[#31004a] border-t border-[#4a148c] flex items-center gap-2">
+            <button class="text-gray-400 hover:text-white"><i class="fas fa-plus"></i></button>
+            <button class="text-gray-400 hover:text-white"><i class="far fa-smile"></i></button>
+            <div class="flex-1 bg-[#220033] rounded-full px-3 py-1.5 flex items-center">
+                <input id="dm-input" type="text" class="bg-transparent border-none outline-none text-white text-sm w-full placeholder-gray-500" placeholder="Type here..." autocomplete="off">
+            </div>
+            <button class="text-gray-400 hover:text-white"><i class="fas fa-microphone"></i></button>
+            <button onclick="app.sendDM()" class="text-white hover:text-purple-300 transform -rotate-45"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
 
@@ -893,11 +946,15 @@
                     <p id="profile-bio" class="text-sm text-gray-300 italic bg-[#1e1f22]/50 p-2 rounded border border-white/5"></p>
                 </div>
 
-                <!-- Likes & Stats Row -->
+                <!-- Likes & PM & Stats Row -->
                 <div class="flex items-center gap-2 mb-4">
                     <button id="btn-toggle-like" class="bg-[#1e1f22] hover:bg-[#2c2e33] border border-[#111214] rounded-lg p-2 flex items-center gap-2 transition group flex-1 justify-center">
                         <i id="profile-like-icon" class="far fa-heart text-gray-400 group-hover:text-red-500 transition"></i>
                         <span class="text-xs font-bold text-gray-300"><span id="profile-likes-count">0</span> Likes</span>
+                    </button>
+                    <!-- PM Button -->
+                    <button id="btn-send-pm" class="bg-[#1e1f22] hover:bg-[#2c2e33] border border-[#111214] rounded-lg p-2 flex items-center justify-center transition group">
+                        <i class="fas fa-envelope text-gray-400 group-hover:text-purple-400 transition"></i>
                     </button>
                 </div>
 
@@ -1211,6 +1268,12 @@
     let unsubscribeNews = null;
     let currentNewsIdForComments = null;
     
+    // PM State
+    let openDmUid = null;
+    let currentDmChannelId = null;
+    let unsubscribeDmInbox = null;
+    let unsubscribeActiveDm = null;
+
     // New State for Reply
     let replyingTo = null; // { id, text, username, pfpUrl }
 
@@ -1231,14 +1294,15 @@
         chatView: document.getElementById('chat-view'),
         forms: { login: document.getElementById('login-form'), signup: document.getElementById('signup-form') },
         tabs: { login: document.getElementById('tab-login'), signup: document.getElementById('tab-signup') },
-        inputs: { signupPfp: document.getElementById('signup-pfp'), msg: document.getElementById('message-input'), newsText: document.getElementById('news-text-input'), newsImg: document.getElementById('news-image-input'), newsComment: document.getElementById('news-comment-input') },
+        inputs: { signupPfp: document.getElementById('signup-pfp'), msg: document.getElementById('message-input'), newsText: document.getElementById('news-text-input'), newsImg: document.getElementById('news-image-input'), newsComment: document.getElementById('news-comment-input'), dmInput: document.getElementById('dm-input') },
         displays: {
             pfpPreview: document.getElementById('pfp-preview'), pfpPlaceholder: document.getElementById('pfp-placeholder'), error: document.getElementById('auth-error'), loader: document.getElementById('auth-loader'), feedback: document.getElementById('auth-feedback'), msgContainer: document.getElementById('messages-container'), onlineList: document.getElementById('online-list'),
             headerPfp: document.getElementById('current-user-pfp'), headerName: document.getElementById('current-username'), headerStatusText: document.getElementById('current-status-text'), headerStatusDot: document.getElementById('current-user-status-dot'), statusDropdown: document.getElementById('status-dropdown'), invisibleBtn: document.getElementById('btn-invisible'), walletModal: document.getElementById('wallet-modal'), walletCoins: document.getElementById('wallet-coins'), walletGems: document.getElementById('wallet-gems'), profileModal: document.getElementById('profile-modal'), toastContainer: document.getElementById('toast-container'),
             editModal: document.getElementById('edit-profile-modal'), editPfpInput: document.getElementById('edit-pfp-input'), editBannerInput: document.getElementById('edit-banner-input'), editPfpPreview: document.getElementById('edit-pfp-preview'), editBannerPreview: document.getElementById('edit-banner-preview'),
             custModal: document.getElementById('customize-modal'),
             replyBar: document.getElementById('reply-bar'), replyBarUser: document.getElementById('reply-bar-username'), replyBarText: document.getElementById('reply-bar-text'),
-            newsDrawer: document.getElementById('news-drawer'), newsContainer: document.getElementById('news-container'), newsEmpty: document.getElementById('news-empty'), addNewsModal: document.getElementById('add-news-modal'), newsImgPreview: document.getElementById('news-image-preview'), newsImgPlaceholder: document.getElementById('news-image-placeholder'), commentsModal: document.getElementById('news-comments-modal'), commentsList: document.getElementById('news-comments-list')
+            newsDrawer: document.getElementById('news-drawer'), newsContainer: document.getElementById('news-container'), newsEmpty: document.getElementById('news-empty'), addNewsModal: document.getElementById('add-news-modal'), newsImgPreview: document.getElementById('news-image-preview'), newsImgPlaceholder: document.getElementById('news-image-placeholder'), commentsModal: document.getElementById('news-comments-modal'), commentsList: document.getElementById('news-comments-list'),
+            dmWindow: document.getElementById('dm-window'), inboxDropdown: document.getElementById('inbox-dropdown'), inboxList: document.getElementById('inbox-list'), inboxRedDot: document.getElementById('inbox-red-dot')
         }
     };
 
@@ -1267,6 +1331,15 @@
                 icon.className = "far fa-heart text-gray-400 group-hover:text-red-500 transition";
             }
             document.getElementById('btn-toggle-like').onclick = () => app.toggleLike(uid);
+            
+            // PM Button Logic
+            const pmBtn = document.getElementById('btn-send-pm');
+            if (currentUser.uid !== uid) {
+                pmBtn.classList.remove('hidden');
+                pmBtn.onclick = () => { app.closeProfile(); app.openDM(uid); };
+            } else {
+                pmBtn.classList.add('hidden');
+            }
 
             els.displays.profileModal.classList.remove('hidden'); } } catch(e) { console.error(e); } },
         openMyProfile: () => { if(currentUser) app.openProfile(currentUser.uid); },
@@ -1298,6 +1371,74 @@
                 console.error(e);
                 showToast("Failed to update like", 'error');
             }
+        },
+
+        // --- DM System ---
+        toggleInbox: () => {
+            els.displays.inboxDropdown.classList.toggle('hidden');
+        },
+        openDM: async (targetUid) => {
+            if (!currentUser) return;
+            if (targetUid === currentUser.uid) return;
+            openDmUid = targetUid;
+            
+            // Get user info for header
+            const userSnap = await getDoc(doc(db, "users", targetUid));
+            if (!userSnap.exists()) return;
+            const userData = userSnap.data();
+            
+            document.getElementById('dm-header-username').textContent = userData.username;
+            document.getElementById('dm-header-pfp').src = userData.pfpUrl || 'https://ui-avatars.com/api/?name=?';
+            els.displays.dmWindow.classList.remove('hidden');
+            els.displays.inboxDropdown.classList.add('hidden'); // Close inbox if open
+
+            // Determine Channel ID (lexicographical sort)
+            const sorted = [currentUser.uid, targetUid].sort();
+            currentDmChannelId = `${sorted[0]}_${sorted[1]}`;
+
+            // Mark as read immediately when opening
+            try {
+                // We create the doc if it doesn't exist, just to be safe, or update read status
+                const channelRef = doc(db, "dm_channels", currentDmChannelId);
+                // Note: Updating read status requires the doc to exist. We'll handle creation on send.
+                // But we can try to update read status if it exists.
+                setDoc(channelRef, { [`read_${currentUser.uid}`]: true }, { merge: true }).catch(() => {});
+            } catch(e) {}
+
+            startActiveDmListener(currentDmChannelId);
+        },
+        closeDM: () => {
+            els.displays.dmWindow.classList.add('hidden');
+            if (unsubscribeActiveDm) unsubscribeActiveDm();
+            openDmUid = null;
+            currentDmChannelId = null;
+        },
+        sendDM: async () => {
+            if (!currentUser || !currentDmChannelId || !openDmUid) return;
+            const text = els.inputs.dmInput.value.trim();
+            if (!text) return;
+            els.inputs.dmInput.value = '';
+
+            try {
+                const channelRef = doc(db, "dm_channels", currentDmChannelId);
+                
+                // Ensure channel exists and update metadata
+                await setDoc(channelRef, {
+                    participants: [currentUser.uid, openDmUid],
+                    lastMessage: text,
+                    lastSenderId: currentUser.uid,
+                    lastMessageTime: serverTimestamp(),
+                    [`read_${currentUser.uid}`]: true,
+                    [`read_${openDmUid}`]: false // Mark as unread for recipient
+                }, { merge: true });
+
+                // Add message to subcollection
+                await addDoc(collection(channelRef, "messages"), {
+                    text: text,
+                    senderId: currentUser.uid,
+                    createdAt: serverTimestamp()
+                });
+            } catch(e) { console.error("DM Send Error", e); showToast("Failed to send", "error"); }
         },
 
         // --- News System ---
@@ -1531,6 +1672,15 @@
         if (!e.target.closest('#hamburger-menu') && !e.target.closest('button[onclick="app.toggleHamburger()"]')) {
             document.getElementById('hamburger-menu').classList.add('hidden');
         }
+        // Close Inbox if click outside
+        if (!e.target.closest('#inbox-dropdown') && !e.target.closest('button[onclick="app.toggleInbox()"]')) {
+            document.getElementById('inbox-dropdown').classList.add('hidden');
+        }
+    });
+
+    // Enter key for DM input
+    els.inputs.dmInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') app.sendDM();
     });
 
     // Expose for HTML onclicks
@@ -1541,6 +1691,94 @@
     window.initiateReply = app.initiateReply;
     window.deleteMessage = app.deleteMessage;
     window.toggleMsgMenu = app.toggleMsgMenu;
+
+    // --- DM Logic Implementation ---
+    function startInboxListener() {
+        if (!currentUser) return;
+        const q = query(collection(db, "dm_channels"), where("participants", "array-contains", currentUser.uid), orderBy("lastMessageTime", "desc"));
+        
+        unsubscribeDmInbox = onSnapshot(q, async (snapshot) => {
+            const listEl = els.displays.inboxList;
+            listEl.innerHTML = '';
+            
+            let hasUnread = false;
+
+            for (const docSnap of snapshot.docs) {
+                const data = docSnap.data();
+                const otherUid = data.participants.find(id => id !== currentUser.uid);
+                if (!otherUid) continue;
+
+                // Check read status
+                const isUnread = data[`read_${currentUser.uid}`] === false;
+                if (isUnread) hasUnread = true;
+
+                // We need the username/pfp of the other person. Ideally cached or fetched.
+                // Fetching for each list item in snapshot listener is expensive, but for prototype it's ok.
+                // Optimally we'd store participant info in the channel doc.
+                let username = "User";
+                let pfp = "https://ui-avatars.com/api/?name=?";
+                try {
+                    const uSnap = await getDoc(doc(db, "users", otherUid));
+                    if (uSnap.exists()) {
+                        username = uSnap.data().username;
+                        pfp = uSnap.data().pfpUrl || pfp;
+                    }
+                } catch(e) {}
+
+                const div = document.createElement('div');
+                div.className = "flex items-center gap-2 p-2 hover:bg-[#35373c] cursor-pointer border-b border-[#1e1f22] last:border-0 relative";
+                div.onclick = () => app.openDM(otherUid);
+                
+                div.innerHTML = `
+                    <div class="relative">
+                        <img src="${pfp}" class="w-8 h-8 rounded-full object-cover">
+                        ${isUnread ? '<div class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-[#2b2d31]"></div>' : ''}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-bold text-white text-xs truncate ${isUnread ? 'text-white' : 'text-gray-300'}">${escapeHtml(username)}</div>
+                        <div class="text-xs text-gray-500 truncate ${isUnread ? 'font-bold text-gray-300' : ''}">${escapeHtml(data.lastMessage)}</div>
+                    </div>
+                `;
+                listEl.appendChild(div);
+            }
+
+            if (hasUnread) els.displays.inboxRedDot.classList.remove('hidden');
+            else els.displays.inboxRedDot.classList.add('hidden');
+        });
+    }
+
+    function startActiveDmListener(channelId) {
+        if (unsubscribeActiveDm) unsubscribeActiveDm();
+        
+        const q = query(collection(db, `dm_channels/${channelId}/messages`), orderBy("createdAt", "asc"));
+        
+        unsubscribeActiveDm = onSnapshot(q, (snapshot) => {
+            const area = document.getElementById('dm-messages-area');
+            area.innerHTML = '';
+            
+            // Mark as read whenever new messages arrive and window is open
+            if (openDmUid) {
+                 const channelRef = doc(db, "dm_channels", channelId);
+                 setDoc(channelRef, { [`read_${currentUser.uid}`]: true }, { merge: true }).catch(()=>{});
+            }
+
+            snapshot.forEach(docSnap => {
+                const msg = docSnap.data();
+                const isMe = msg.senderId === currentUser.uid;
+                
+                const bubble = document.createElement('div');
+                bubble.className = `flex w-full ${isMe ? 'justify-end' : 'justify-start'}`;
+                
+                const inner = document.createElement('div');
+                inner.className = `max-w-[70%] rounded-lg px-3 py-1.5 text-sm break-words ${isMe ? 'bg-purple-600 text-white' : 'bg-[#4a148c] text-gray-200'}`;
+                inner.textContent = msg.text;
+                
+                bubble.appendChild(inner);
+                area.appendChild(bubble);
+            });
+            requestAnimationFrame(() => area.scrollTop = area.scrollHeight);
+        });
+    }
 
     // --- News Listeners ---
     function startNewsListener() {
@@ -1972,10 +2210,12 @@
             els.chatView.classList.add('flex'); 
             startChatListener(); 
             startUsersListener(); 
+            startInboxListener(); // Start PM inbox listener
         } else { 
             if (window.presenceInterval) clearInterval(window.presenceInterval);
             if (unsubscribeMessages) unsubscribeMessages(); 
             if (unsubscribeUsers) unsubscribeUsers(); 
+            if (unsubscribeDmInbox) unsubscribeDmInbox();
             currentUser = null; 
             currentUserProfile = null; 
             els.chatView.classList.add('hidden'); 
