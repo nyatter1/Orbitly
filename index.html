@@ -114,6 +114,16 @@
     /* Notification Badge Pulse */
     @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(242, 63, 67, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(242, 63, 67, 0); } 100% { box-shadow: 0 0 0 0 rgba(242, 63, 67, 0); } }
     .notif-pulse { animation: pulse-red 2s infinite; }
+    
+    /* Like Button Active State */
+    .btn-liked {
+        background-color: rgba(236, 72, 153, 0.1) !important;
+        color: #ec4899 !important;
+        border-color: #ec4899 !important;
+    }
+    .btn-liked svg {
+        fill: #ec4899;
+    }
 
     /* --- FONTS --- */
     .font-default { font-family: ui-sans-serif, system-ui, sans-serif; }
@@ -1177,6 +1187,9 @@
     let currentlyViewingProfileId = null;
     let typingTimeout = null;
     
+    // New Session-based set to avoid spamming "Stalked" notifications
+    const sessionViewedProfiles = new Set();
+    
     // New State for Reply
     let replyingTo = null; // { id, text, username, pfpUrl }
 
@@ -1237,7 +1250,6 @@
                     nameEl.textContent = data.username; 
                     applyUsernameStyle(nameEl, data.usernameStyle); 
                     
-                    // Custom Status (New Feature)
                     const statusMsgEl = document.getElementById('profile-custom-status');
                     if(data.customStatus) {
                         statusMsgEl.textContent = `"${data.customStatus}"`;
@@ -1246,9 +1258,23 @@
                         statusMsgEl.classList.add('hidden');
                     }
 
-                    // Like Count (New Feature)
                     document.getElementById('profile-likes-count').textContent = formatNumber(data.likes || 0);
                     
+                    // --- Fix: Check if currentUser liked this profile ---
+                    if (currentUser) {
+                        const likeDocRef = doc(db, "users", uid, "profile_likes", currentUser.uid);
+                        // Using a simple getDoc to check existance.
+                        // Optimization: You could use a listener here if you want real-time like updates while modal is open.
+                        getDoc(likeDocRef).then((likeSnap) => {
+                            const btn = document.getElementById('btn-like-profile');
+                            if (likeSnap.exists()) {
+                                btn.classList.add('btn-liked');
+                            } else {
+                                btn.classList.remove('btn-liked');
+                            }
+                        });
+                    }
+
                     const cardEl = document.getElementById('profile-card-content'); 
                     cardEl.className = "rounded-xl shadow-2xl w-full max-w-sm overflow-hidden relative transform transition-all scale-100"; 
                     cardEl.classList.add(data.usercardStyle || 'card-theme-default'); 
@@ -1269,9 +1295,10 @@
                     
                     els.displays.profileModal.classList.remove('hidden'); 
 
-                    // Trigger Stalk Notification (If not viewing self)
-                    if (currentUser && uid !== currentUser.uid) {
+                    // --- Trigger Stalk Notification (If not viewing self AND not viewed this session) ---
+                    if (currentUser && uid !== currentUser.uid && !sessionViewedProfiles.has(uid)) {
                         sendNotification(uid, 'stalk', currentUserProfile.username);
+                        sessionViewedProfiles.add(uid); // Prevent spamming notifications for this session
                     }
                 } 
             } catch(e) { console.error(e); } 
@@ -1279,43 +1306,66 @@
         openMyProfile: () => { if(currentUser) app.openProfile(currentUser.uid); },
         closeProfile: () => { els.displays.profileModal.classList.add('hidden'); currentlyViewingProfileId = null; },
         
-        // --- Like Profile Function ---
+        // --- Like Profile Function (Updated to use Sub-collection transaction) ---
         likeProfile: async () => {
             if(!currentUser || !currentlyViewingProfileId) return;
-            // Optimistic Update
+            // Optimistic Animation
             const btn = document.getElementById('btn-like-profile');
+            const heart = btn.querySelector('svg');
             const countEl = document.getElementById('profile-likes-count');
             
-            // Anim
-            const heart = btn.querySelector('svg');
             heart.classList.add('like-anim');
             setTimeout(() => heart.classList.remove('like-anim'), 300);
 
             try {
-                await runTransaction(db, async (transaction) => {
+                const result = await runTransaction(db, async (transaction) => {
                     const userRef = doc(db, "users", currentlyViewingProfileId);
-                    const sfDoc = await transaction.get(userRef);
-                    if (!sfDoc.exists()) throw "User does not exist!";
-                    const newLikes = (sfDoc.data().likes || 0) + 1;
-                    transaction.update(userRef, { likes: newLikes });
+                    const likeRef = doc(db, "users", currentlyViewingProfileId, "profile_likes", currentUser.uid);
+                    
+                    const userDoc = await transaction.get(userRef);
+                    if (!userDoc.exists()) throw "User does not exist";
+                    
+                    const likeDoc = await transaction.get(likeRef);
+                    
+                    let newLikes = userDoc.data().likes || 0;
+                    let action = '';
+
+                    if (likeDoc.exists()) {
+                        // Unlike: Delete Doc, Decrement Count
+                        transaction.delete(likeRef);
+                        newLikes = Math.max(0, newLikes - 1);
+                        transaction.update(userRef, { likes: newLikes });
+                        action = 'unliked';
+                    } else {
+                        // Like: Create Doc, Increment Count
+                        transaction.set(likeRef, { timestamp: serverTimestamp() });
+                        newLikes = newLikes + 1;
+                        transaction.update(userRef, { likes: newLikes });
+                        action = 'liked';
+                    }
+                    
+                    return { action, newLikes };
                 });
-                countEl.textContent = formatNumber(parseInt(countEl.textContent.replace(/,/g,'')) + 1);
                 
-                // Trigger Like Notification
-                if(currentlyViewingProfileId !== currentUser.uid) {
-                    sendNotification(currentlyViewingProfileId, 'like', currentUserProfile.username);
+                // Update UI based on Transaction Result
+                countEl.textContent = formatNumber(result.newLikes);
+                if (result.action === 'liked') {
+                    btn.classList.add('btn-liked');
+                    // Only send notification on Like, not Unlike
+                    if(currentlyViewingProfileId !== currentUser.uid) {
+                        sendNotification(currentlyViewingProfileId, 'like', currentUserProfile.username);
+                    }
+                } else {
+                    btn.classList.remove('btn-liked');
                 }
             } catch (e) {
-                console.error("Like failed", e);
+                console.error("Like transaction failed", e);
             }
         },
 
         // --- Notification Logic ---
         toggleNotifications: () => {
             els.displays.notifModal.classList.toggle('hidden');
-            if(!els.displays.notifModal.classList.contains('hidden')) {
-                // Clear unread logic could go here, for now simpler
-            }
         },
 
         openEditProfile: () => { if (!currentUserProfile) return; document.getElementById('edit-username').value = currentUserProfile.username; document.getElementById('edit-bio').value = currentUserProfile.bio || ""; document.getElementById('edit-age').value = currentUserProfile.age; document.getElementById('edit-gender').value = currentUserProfile.gender; document.getElementById('edit-custom-status').value = currentUserProfile.customStatus || ""; els.displays.editPfpPreview.src = currentUserProfile.pfpUrl || 'https://ui-avatars.com/api/?name=?'; els.displays.editBannerPreview.src = currentUserProfile.bannerUrl || ''; els.displays.profileModal.classList.add('hidden'); els.displays.editModal.classList.remove('hidden'); },
@@ -1458,7 +1508,7 @@
 
     // ... (Arrays for customizations same as before) ...
     const allFonts = [
-        {val: 'font-default', name: 'Default'}, {val: 'font-abril', name: 'Abril Fatface'}, {val: 'font-architects', name: 'Architects'}, {val: 'font-audiowide', name: 'Audiowide'}, {val: 'font-badscript', name: 'Bad Script'}, {val: 'font-bangers', name: 'Bangers'}, {val: 'font-barrio', name: 'Barrio'}, {val: 'font-berkshire', name: 'Berkshire'}, {val: 'font-bevan', name: 'Bevan'}, {val: 'font-bigshoulders', name: 'Big Shoulders'}, {val: 'font-blackops', name: 'Black Ops'}, {val: 'font-bonbon', name: 'Bonbon'}, {val: 'font-bungee', name: 'Bungee'}, {val: 'font-caveat', name: 'Caveat'}, {val: 'font-chakra', name: 'Chakra Petch'}, {val: 'font-cinzel', name: 'Cinzel'}, {val: 'font-codystar', name: 'Codystar'}, {val: 'font-comfortaa', name: 'Comfortaa'}, {val: 'font-comic', name: 'Comic Neue'}, {val: 'font-cookie', name: 'Cookie'}, {val: 'font-creepster', name: 'Creepster'}, {val: 'font-diplomata', name: 'Diplomata'}, {val: 'font-dotgothic', name: 'DotGothic'}, {val: 'font-eater', name: 'Eater'}, {val: 'font-elmessiri', name: 'El Messiri'}, {val: 'font-emilys', name: 'Emilys Candy'}, {val: 'font-ewert', name: 'Ewert'}, {val: 'font-fascinate', name: 'Fascinate'}, {val: 'font-faster', name: 'Faster One'}, {val: 'font-finger', name: 'Finger Paint'}, {val: 'font-flamenco', name: 'Flamenco'}, {val: 'font-fredoka', name: 'Fredoka One'}, {val: 'font-frijole', name: 'Frijole'}, {val: 'font-gloria', name: 'Gloria'}, {val: 'font-grandstander', name: 'Grandstander'}, {val: 'font-grenze', name: 'Grenze'}, {val: 'font-handjet', name: 'Handjet'}, {val: 'font-iceberg', name: 'Iceberg'}, {val: 'font-indie', name: 'Indie Flower'}, {val: 'font-jolly', name: 'Jolly Lodger'}, {val: 'font-kavoon', name: 'Kavoon'}, {val: 'font-kranky', name: 'Kranky'}, {val: 'font-kumar', name: 'Kumar One'}, {val: 'font-lobster', name: 'Lobster'}, {val: 'font-luckiest', name: 'Luckiest Guy'}, {val: 'font-majormono', name: 'Major Mono'}, {val: 'font-medieval', name: 'Medieval'}, {val: 'font-megrim', name: 'Megrim'}, {val: 'font-metal', name: 'Metal Mania'}, {val: 'font-monoton', name: 'Monoton'}, {val: 'font-mountains', name: 'Mountains'}, {val: 'font-mystery', name: 'Mystery Quest'}, {val: 'font-nanum', name: 'Nanum Pen'}, {val: 'font-newrocker', name: 'New Rocker'}, {val: 'font-niconne', name: 'Niconne'}, {val: 'font-nosifer', name: 'Nosifer'}, {val: 'font-novaoval', name: 'Nova Oval'}, {val: 'font-orbitron', name: 'Orbitron'}, {val: 'font-oswald', name: 'Oswald'}, {val: 'font-pacifico', name: 'Pacifico'}, {val: 'font-permanent', name: 'Permanent'}, {val: 'font-pirata', name: 'Pirata One'}, {val: 'font-playball', name: 'Playball'}, {val: 'font-pressstart', name: 'Press Start'}, {val: 'font-racing', name: 'Racing'}, {val: 'font-righteous', name: 'Righteous'}, {val: 'font-roboto', name: 'Roboto'}, {val: 'font-rocksalt', name: 'Rock Salt'}, {val: 'font-rubik', name: 'Rubik Glitch'}, {val: 'font-rye', name: 'Rye'}, {val: 'font-sacramento', name: 'Sacramento'}, {val: 'font-satisfy', name: 'Satisfy'}, {val: 'font-shadows', name: 'Shadows'}, {val: 'font-shojumaru', name: 'Shojumaru'}, {val: 'font-sigmar', name: 'Sigmar One'}, {val: 'font-slackey', name: 'Slackey'}, {val: 'font-smokum', name: 'Smokum'}, {val: 'font-elite', name: 'Special Elite'}, {val: 'font-stalinist', name: 'Stalinist'}, {val: 'font-syncopate', name: 'Syncopate'}, {val: 'font-tangerine', name: 'Tangerine'}, {val: 'font-titan', name: 'Titan One'}, {val: 'font-ultra', name: 'Ultra'}, {val: 'font-unifraktur', name: 'Unifraktur'}, {val: 'font-vampiro', name: 'Vampiro'}, {val: 'font-vast', name: 'Vast Shadow'}, {val: 'font-vt323', name: 'VT323'}, {val: 'font-wallpoet', name: 'Wallpoet'}, {val: 'font-walter', name: 'Walter Turncoat'}, {val: 'font-yellowtail', name: 'Yellowtail'}
+        {val: 'font-default', name: 'Default'}, {val: 'font-abril', name: 'Abril Fatface'}, {val: 'font-architects', name: 'Architects'}, {val: 'font-audiowide', name: 'Audiowide'}, {val: 'font-badscript', name: 'Bad Script'}, {val: 'font-bangers', name: 'Bangers'}, {val: 'font-barrio', name: 'Barrio'}, {val: 'font-berkshire', name: 'Berkshire'}, {val: 'font-bevan', name: 'Bevan'}, {val: 'font-bigshoulders', name: 'Big Shoulders'}, {val: 'font-blackops', name: 'Black Ops'}, {val: 'font-bonbon', name: 'Bonbon'}, {val: 'font-bungee', name: 'Bungee'}, {val: 'font-caveat', name: 'Caveat'}, {val: 'font-chakra', name: 'Chakra Petch'}, {val: 'font-cinzel', name: 'Cinzel'}, {val: 'font-codystar', name: 'Codystar'}, {val: 'font-comfortaa', name: 'Comfortaa'}, {val: 'font-comic', name: 'Comic Neue'}, {val: 'font-cookie', name: 'Cookie'}, {val: 'font-creepster', name: 'Creepster'}, {val: 'font-diplomata', name: 'Diplomata'}, {val: 'font-dotgothic', name: 'DotGothic'}, {val: 'font-eater', name: 'Eater'}, {val: 'font-elmessiri', name: 'El Messiri'}, {val: 'font-emilys', name: 'Emilys Candy'}, {val: 'font-ewert', name: 'Ewert'}, {val: 'font-fascinate', name: 'Fascinate'}, {val: 'font-faster', name: 'Faster One'}, {val: 'font-finger', name: 'Finger Paint'}, {val: 'font-flamenco', name: 'Flamenco'}, {val: 'font-fredoka', name: 'Fredoka One'}, {val: 'font-frijole', name: 'Frijole'}, {val: 'font-gloria', name: 'Gloria'}, {val: 'font-grandstander', name: 'Grandstander'}, {val: 'font-grenze', name: 'Grenze'}, {val: 'font-handjet', name: 'Handjet'}, {val: 'font-iceberg', name: 'Iceberg'}, {val: 'font-indie', name: 'Indie Flower'}, {val: 'font-jolly', name: 'Jolly Lodger'}, {val: 'font-kavoon', name: 'Kavoon'}, {val: 'font-kranky', name: 'Kranky'}, {val: 'font-krona', name: 'Krona One'}, {val: 'font-kumar', name: 'Kumar One'}, {val: 'font-lobster', name: 'Lobster'}, {val: 'font-luckiest', name: 'Luckiest Guy'}, {val: 'font-majormono', name: 'Major Mono'}, {val: 'font-medieval', name: 'Medieval'}, {val: 'font-megrim', name: 'Megrim'}, {val: 'font-merriweather', name: 'Merriweather'}, {val: 'font-metal', name: 'Metal Mania'}, {val: 'font-miltonian', name: 'Miltonian Tattoo'}, {val: 'font-modak', name: 'Modak'}, {val: 'font-monoton', name: 'Monoton'}, {val: 'font-montserrat', name: 'Montserrat'}, {val: 'font-mountains', name: 'Mountains'}, {val: 'font-mystery', name: 'Mystery Quest'}, {val: 'font-nanum', name: 'Nanum Pen'}, {val: 'font-newrocker', name: 'New Rocker'}, {val: 'font-niconne', name: 'Niconne'}, {val: 'font-nosifer', name: 'Nosifer'}, {val: 'font-novaoval', name: 'Nova Oval'}, {val: 'font-orbitron', name: 'Orbitron'}, {val: 'font-oswald', name: 'Oswald'}, {val: 'font-pacifico', name: 'Pacifico'}, {val: 'font-permanent', name: 'Permanent'}, {val: 'font-pirata', name: 'Pirata One'}, {val: 'font-playball', name: 'Playball'}, {val: 'font-pressstart', name: 'Press Start'}, {val: 'font-racing', name: 'Racing'}, {val: 'font-righteous', name: 'Righteous'}, {val: 'font-roboto', name: 'Roboto'}, {val: 'font-rocksalt', name: 'Rock Salt'}, {val: 'font-rubik', name: 'Rubik Glitch'}, {val: 'font-rye', name: 'Rye'}, {val: 'font-sacramento', name: 'Sacramento'}, {val: 'font-satisfy', name: 'Satisfy'}, {val: 'font-shadows', name: 'Shadows'}, {val: 'font-shojumaru', name: 'Shojumaru'}, {val: 'font-sigmar', name: 'Sigmar One'}, {val: 'font-slackey', name: 'Slackey'}, {val: 'font-smokum', name: 'Smokum'}, {val: 'font-elite', name: 'Special Elite'}, {val: 'font-stalinist', name: 'Stalinist'}, {val: 'font-syncopate', name: 'Syncopate'}, {val: 'font-tangerine', name: 'Tangerine'}, {val: 'font-titan', name: 'Titan One'}, {val: 'font-ultra', name: 'Ultra'}, {val: 'font-unifraktur', name: 'Unifraktur'}, {val: 'font-vampiro', name: 'Vampiro'}, {val: 'font-vast', name: 'Vast Shadow'}, {val: 'font-vt323', name: 'VT323'}, {val: 'font-wallpoet', name: 'Wallpoet'}, {val: 'font-walter', name: 'Walter Turncoat'}, {val: 'font-warnes', name: 'Warnes'}, {val: 'font-wire', name: 'Wire One'}, {val: 'font-yellowtail', name: 'Yellowtail'}
     ];
 
     const allEffects = [
@@ -1857,7 +1907,8 @@
 
     function listenForNotifications() {
         if(!currentUser) return;
-        const q = query(collection(db, "notifications"), where("recipientId", "==", currentUser.uid), orderBy("timestamp", "desc"), limit(20));
+        // Fix: Querying on recipientId ONLY, then sorting client-side to avoid index requirements
+        const q = query(collection(db, "notifications"), where("recipientId", "==", currentUser.uid), limit(50));
         
         unsubscribeNotifs = onSnapshot(q, (snapshot) => {
             const list = els.displays.notifList;
@@ -1869,9 +1920,18 @@
                 return;
             }
 
+            let notifs = [];
+            snapshot.forEach(doc => notifs.push({ ...doc.data(), id: doc.id }));
+            
+            // Client-side Sort
+            notifs.sort((a, b) => {
+                const ta = a.timestamp ? a.timestamp.seconds : 0;
+                const tb = b.timestamp ? b.timestamp.seconds : 0;
+                return tb - ta;
+            });
+
             let hasUnread = false;
-            snapshot.forEach(doc => {
-                const n = doc.data();
+            notifs.forEach(n => {
                 if (!n.read) hasUnread = true;
                 
                 const item = document.createElement('div');
