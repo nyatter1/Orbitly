@@ -478,12 +478,12 @@
                 <button id="tab-login" class="flex-1 py-1 text-sm font-medium rounded text-white bg-[#5865F2]" onclick="app.switchTab('login')">Login</button>
                 <button id="tab-signup" class="flex-1 py-1 text-sm font-medium rounded text-gray-400 hover:text-gray-200" onclick="app.switchTab('signup')">Sign Up</button>
             </div>
-            <form id="login-form" class="space-y-4">
+            <form id="login-form" class="space-y-4" onsubmit="event.preventDefault();">
                 <div><label class="uppercase text-xs font-bold text-gray-400 mb-1 block">Email</label><input type="email" id="login-email" required class="w-full px-3 py-2 bg-[#1e1f22] border-none rounded focus:ring-0 text-white transition-all"></div>
                 <div><label class="uppercase text-xs font-bold text-gray-400 mb-1 block">Password</label><input type="password" id="login-password" required class="w-full px-3 py-2 bg-[#1e1f22] border-none rounded focus:ring-0 text-white transition-all"></div>
                 <button type="submit" class="w-full bg-[#5865F2] hover:bg-[#4752c4] text-white font-medium py-2.5 rounded transition">Log In</button>
             </form>
-            <form id="signup-form" class="space-y-4 hidden">
+            <form id="signup-form" class="space-y-4 hidden" onsubmit="event.preventDefault();">
                 <div class="flex justify-center mb-4">
                     <div class="w-24 h-24 rounded-full bg-[#1e1f22] relative group cursor-pointer hover:opacity-80 transition" onclick="document.getElementById('signup-pfp').click()">
                         <img id="pfp-preview" src="" class="w-full h-full rounded-full object-cover hidden">
@@ -1302,10 +1302,8 @@ async function checkLatestNews() {
         const snap = await getDocs(q);
         if (!snap.empty) {
             const news = snap.docs[0].data();
-            const newsId = snap.docs[0].id;
             
-            // Avoid duplicates if already rendered? 
-            // Simplified: Just remove existing news-item first
+            // Avoid duplicates if already rendered
             const existing = document.getElementById('notif-news-item');
             if(existing) existing.remove();
 
@@ -1685,14 +1683,19 @@ currentUser = null; currentUserProfile = null; els.chatView.classList.add('hidde
 function startNotificationListener() {
     if (unsubscribeNotifications) unsubscribeNotifications();
     const q = query(collection(db, "users", currentUser.uid, "notifications"), orderBy("timestamp", "desc"), limit(20));
-    unsubscribeNotifications = onSnapshot(q, (snapshot) => {
+    unsubscribeNotifications = onSnapshot(q, async (snapshot) => {
         const list = els.displays.notificationList;
         // Keep potential news item if it exists and is top
         const newsItem = document.getElementById('notif-news-item');
         list.innerHTML = '';
-        if (newsItem) list.appendChild(newsItem);
+        
+        // Always try to fetch news when notifications update to ensure freshness
+        await checkLatestNews();
+        // Re-grab the news item if it was just created/exists
+        const freshNewsItem = document.getElementById('notif-news-item');
+        if (freshNewsItem) list.appendChild(freshNewsItem);
 
-        if (snapshot.empty && !newsItem) {
+        if (snapshot.empty && !freshNewsItem) {
             list.innerHTML = '<div class="text-center text-gray-500 text-xs p-4">No notifications</div>';
             els.displays.notifBadge.classList.add('hidden');
             return;
@@ -1751,12 +1754,26 @@ if (collectionPath.includes('/')) {
 unsubscribeMessages = onSnapshot(q, (snapshot) => { snapshot.docChanges().forEach((change) => { if (change.type === "added") { const data = change.doc.data(); data.id = change.doc.id; renderMessage(data); } if (change.type === "removed") { const el = document.getElementById(`msg-${change.doc.id}`); if (el) el.remove(); } }); requestAnimationFrame(() => els.displays.msgContainer.scrollTop = els.displays.msgContainer.scrollHeight); });
 }
 
+let lastNewsId = localStorage.getItem('lastNewsId');
+
 function startNewsListener() {
     if (unsubscribeNews) unsubscribeNews();
     const q = query(collection(db, "news"), orderBy("createdAt", "desc"));
     unsubscribeNews = onSnapshot(q, (snapshot) => {
         const container = els.displays.newsContainer;
         container.innerHTML = '';
+        
+        // Check for new news for notification
+        if (!snapshot.empty) {
+            const latest = snapshot.docs[0];
+            if (latest.id !== lastNewsId) {
+                // New news detected!
+                showToast(`📰 New News: ${latest.data().title || 'Update Posted'}`, 'success');
+                lastNewsId = latest.id;
+                localStorage.setItem('lastNewsId', lastNewsId);
+            }
+        }
+
         if (snapshot.empty) { els.displays.newsEmpty.classList.remove('hidden'); return; }
         els.displays.newsEmpty.classList.add('hidden');
         snapshot.forEach(doc => {
