@@ -779,7 +779,7 @@ const db = getFirestore(fbApp);
 // --- GLOBALS ---
 const SUFFIXES = { 'k': 1e3, 'm': 1e6, 'b': 1e9, 't': 1e12, 'qa': 1e15, 'qi': 1e18, 'sx': 1e21, 'sp': 1e24, 'oc': 1e27, 'no': 1e30, 'dc': 1e33, 'ud': 1e36, 'dd': 1e39, 'td': 1e42, 'qad': 1e45, 'qid': 1e48, 'sxd': 1e51, 'spd': 1e54, 'ocd': 1e57, 'nod': 1e60, 'vg': 1e63, 'uvg': 1e66, 'dvg': 1e69, 'tvg': 1e72, 'qavg': 1e75, 'qivg': 1e78, 'sxvg': 1e81, 'spvg': 1e84, 'ocvg': 1e87, 'novg': 1e90, 'tg': 1e93, 'utg': 1e96, 'dtg': 1e99, 'ttg': 1e102, 'qatg': 1e105, 'qitg': 1e108, 'sxtg': 1e111, 'sptg': 1e114, 'octg': 1e117, 'notg': 1e120, 'qg': 1e123, 'uqg': 1e126, 'dqg': 1e129, 'tqg': 1e132, 'qaqg': 1e135, 'qiqg': 1e138, 'sxqg': 1e141, 'spqg': 1e144, 'ocqg': 1e147, 'noqg': 1e150 };
 const SORTED_SUFFIXES = Object.entries(SUFFIXES).sort((a, b) => b[1] - a[1]);
-const bannedWords = ["nemo", "levi"];
+const bannedWords = ["nemo", "levi", ".com", ".co.uk", ".space", ".online"];
 function checkProfanity(text) { return bannedWords.some(w => text.toLowerCase().includes(w)); }
 function filterText(text) { return bannedWords.reduce((acc, w) => acc.replace(new RegExp(w, "gi"), "*".repeat(w.length)), text); }
 function parseAbbreviatedNumber(input) { if (!input) return NaN; input = input.toLowerCase().replace(/,/g, ''); if (input === 'all') return 'all'; for (const [suffix, value] of SORTED_SUFFIXES) { if (input.endsWith(suffix)) { const numPart = input.slice(0, -suffix.length); const val = parseFloat(numPart); if (isNaN(val)) return NaN; return Math.floor(val * value); } } return Math.floor(parseFloat(input)); }
