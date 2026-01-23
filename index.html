@@ -400,67 +400,6 @@
 @keyframes swing { 20% { transform: rotate3d(0, 0, 1, 15deg); } 40% { transform: rotate3d(0, 0, 1, -10deg); } 60% { transform: rotate3d(0, 0, 1, 5deg); } 80% { transform: rotate3d(0, 0, 1, -5deg); } 100% { transform: rotate3d(0, 0, 1, 0deg); } }
 @keyframes tada { 0% { transform: scale3d(1, 1, 1); } 10%, 20% { transform: scale3d(0.9, 0.9, 0.9) rotate3d(0, 0, 1, -3deg); } 30%, 50%, 70%, 90% { transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, 3deg); } 40%, 60%, 80% { transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, -3deg); } 100% { transform: scale3d(1, 1, 1); } }
 @keyframes blurIn { 0% { color: transparent; text-shadow: 0 0 10px #fff; } 50% { color: white; text-shadow: 0 0 0 transparent; } 100% { color: transparent; text-shadow: 0 0 10px #fff; } }
-
-/* --- LIST STYLES --- */
-.list-style-default { background: #2b2d31; border: 1px solid #1e1f22; }
-.list-style-glass { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(2px); }
-.list-style-neon { border: 1px solid #0ff; box-shadow: 0 0 5px #0ff2; background: rgba(0,255,255,0.05); }
-.list-style-gold { border-left: 3px solid #FFD700; background: linear-gradient(90deg, rgba(255,215,0,0.1), transparent); }
-.list-style-fire { border-bottom: 2px solid #ff4500; background: linear-gradient(0deg, rgba(255,69,0,0.1), transparent); }
-.list-style-royal { border: 1px solid #9b59b6; background: rgba(155, 89, 182, 0.1); }
-.list-style-outline { border: 1px dashed #555; }
-.list-style-compact { padding-top: 0 !important; padding-bottom: 0 !important; }
-.list-style-bubble { border-radius: 999px; background: #1e1f22; border: 1px solid #333; }
-.list-style-pill { border-radius: 50px; background: #333; }
-.list-style-sharp { border-radius: 0 !important; border: 1px solid #555; }
-.list-style-skew { transform: skewX(-10deg); border: 1px solid #444; margin-left: 10px; margin-right: 10px; }
-.list-style-leaf { border-radius: 10px 0 10px 0; background: #2a3b2a; border: 1px solid #4caf50; }
-.list-style-left-accent-red { border-left: 4px solid #f44336; background: linear-gradient(90deg, #f4433611, transparent); }
-.list-style-left-accent-blue { border-left: 4px solid #2196f3; background: linear-gradient(90deg, #2196f311, transparent); }
-.list-style-left-accent-green { border-left: 4px solid #4caf50; background: linear-gradient(90deg, #4caf5011, transparent); }
-.list-style-left-accent-purple { border-left: 4px solid #9c27b0; background: linear-gradient(90deg, #9c27b011, transparent); }
-.list-style-right-accent { border-right: 4px solid #fff; text-align: right; }
-.list-style-underline { border-bottom: 1px solid #555; border-radius: 0; }
-.list-style-spaced { margin-bottom: 8px; border: 1px solid #333; }
-.list-style-striped { background: repeating-linear-gradient(45deg, #222, #222 10px, #262626 10px, #262626 20px); }
-.list-style-terminal { font-family: 'VT323', monospace; border: 1px solid #0f0; color: #0f0; }
-.list-style-gameboy { background: #8bac0f; color: #0f380f; border: 2px solid #306230; font-family: 'Press Start 2P', cursive; font-size: 0.6em; }
-.list-style-minimal-white { background: #fff; color: #000; border: 1px solid #ccc; }
-.list-style-minimal-white * { color: #000 !important; }
-.list-style-minimal-dark { background: #000; border: 1px solid #333; }
-.list-style-gradient-blue { background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%); }
-.list-style-gradient-purple { background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%); }
-.list-style-gradient-red { background: linear-gradient(90deg, #ef473a 0%, #cb2d3e 100%); }
-.list-style-card { box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 1px solid #444; margin-bottom: 4px; }
-.list-style-floating { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-.list-style-cyberpunk { border-left: 5px solid #fce300; background: #000; clip-path: polygon(0 0, 100% 0, 100% 85%, 95% 100%, 0 100%); }
-.list-style-outline-dashed { border: 2px dashed #666; background: transparent; }
-.list-style-outline-dotted { border: 2px dotted #666; background: transparent; }
-.list-style-outline-double { border: 4px double #444; background: transparent; }
-.list-style-translucent { background: rgba(255,255,255,0.03); }
-.list-style-glow { box-shadow: 0 0 10px rgba(88, 101, 242, 0.3); border: 1px solid rgba(88, 101, 242, 0.5); }
-.list-style-inset { box-shadow: inset 0 0 10px rgba(0,0,0,0.8); background: #111; }
-.list-style-embossed { box-shadow: -2px -2px 5px rgba(255,255,255,0.05), 2px 2px 5px rgba(0,0,0,0.5); background: #2b2d31; }
-.list-style-grid { border: 1px solid #333; background-image: radial-gradient(#444 1px, transparent 1px); background-size: 10px 10px; }
-.list-style-diamond { border: 1px solid #5865F2; transform: rotate(1deg); }
-.list-style-ticket { mask-image: radial-gradient(circle at left center, transparent 10px, black 11px), radial-gradient(circle at right center, transparent 10px, black 11px); mask-composite: intersect; background: #333; padding: 0 15px; }
-.list-style-folder { border-radius: 0 10px 10px 10px; border-top: 2px solid #5865F2; background: #222; }
-.list-style-ribbon { border-left: 5px solid #e91e63; background: #222; }
-.list-style-tag { clip-path: polygon(10% 0, 100% 0, 100% 100%, 10% 100%, 0 50%); padding-left: 20px; background: #222; border: 1px solid #444; }
-.list-style-bubble-left { border-radius: 15px 15px 15px 0; background: #222; border: 1px solid #444; }
-.list-style-bubble-right { border-radius: 15px 15px 0 15px; background: #222; border: 1px solid #444; text-align: right; }
-.list-style-comic { border: 2px solid black; background: white; color: black; box-shadow: 4px 4px 0px rgba(0,0,0,1); }
-.list-style-comic * { color: black !important; }
-.list-style-blueprint { background-color: #0d47a1; color: white; border: 1px dashed white; }
-.list-style-sketch { border: 2px solid #fff; border-radius: 2px 255px 3px 25px / 255px 6px 5px 255px; }
-.list-style-stamped { border: 4px solid #555; mask-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/8399/grunge.png'); mask-size: 200px; mask-repeat: repeat; }
-.list-style-vintage { background-color: #f4e4bc; color: #5d4037; border: 1px solid #a1887f; }
-.list-style-vintage * { color: #5d4037 !important; }
-.list-style-wood { background: #5d4037; border: 2px solid #3e2723; }
-.list-style-metal { background: linear-gradient(#cfc7c8 0%, #7c7c7c 100%); color: #000; border: 1px solid #666; }
-.list-style-metal * { color: #000 !important; }
-.list-style-caution { background: repeating-linear-gradient(45deg, #ffeb3b, #ffeb3b 10px, #000 10px, #000 20px); color: #000; font-weight: bold; border: 2px solid black; }
-.list-style-caution * { color: #000 !important; }
 </style>
 </head>
 <body class="bg-[#313338] text-gray-100 font-sans antialiased h-screen flex flex-col overflow-hidden">
@@ -896,20 +835,31 @@ const RANK_ORDER = {
     'mod': 70,
     'trial-mod': 60,
     'site-helper': 60,
-    'vip': 50,
+    'mega-elite': 55,
+    'elite': 50,
+    'mega-vip': 45,
+    'premium': 40,
+    'vip': 30,
     'default': 0
 };
 
 const RANK_FILES = {
     'developer': 'ranks/developer.gif',
     'founder': 'ranks/founder.gif',
-    'ceo': 'ranks/ceo.gif',
-    'manager': 'ranks/manager.gif',
-    'site-helper': 'ranks/site-helper.png',
+    'ceo': 'ranks/CEO.gif',
     'head-owner': 'ranks/head-owner.gif',
     'owner': 'ranks/owner.gif',
+    'manager': 'ranks/manager.gif',
     'super-admin': 'ranks/super-admin.svg',
-    'trial-mod': 'ranks/trial-mod.png'
+    'admin': 'ranks/super-admin.svg', // Fallback for admin if no specific icon
+    'mod': 'ranks/mod.png',
+    'trial-mod': 'ranks/trial-mod.png',
+    'site-helper': 'ranks/site-helper.png',
+    'mega-elite': 'ranks/mega-elite.gif',
+    'elite': 'ranks/elite.png',
+    'mega-vip': 'ranks/mega-vip.gif',
+    'premium': 'ranks/premium.gif',
+    'vip': 'ranks/vip.gif'
 };
 
 function getRankValue(rank) {
@@ -936,7 +886,7 @@ function getRankHtml(rank, showText = false) {
     else if (['founder', 'ceo', 'head-owner', 'owner'].includes(r)) classes = 'bg-gradient-to-r from-yellow-500 to-yellow-800 border border-yellow-400 text-yellow-100 shadow-[0_0_8px_rgba(234,179,8,0.4)]';
     else if (['super-admin', 'admin', 'manager'].includes(r)) classes = 'bg-red-600 text-white';
     else if (['mod', 'trial-mod', 'site-helper'].includes(r)) classes = 'bg-green-600 text-white';
-    else if (['vip'].includes(r)) classes = 'bg-purple-600 text-purple-100';
+    else if (['vip', 'elite', 'mega-elite', 'premium', 'mega-vip'].includes(r)) classes = 'bg-purple-600 text-purple-100';
 
     const badgeHtml = `<span class="rank-badge ${classes}">${escapeHtml(rank)}</span>`;
     
