@@ -5,771 +5,592 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Orbitly Admin Panel</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
-    /* Reuse Orbitly Scrollbar & Base Styles */
+    body { font-family: 'Nunito', sans-serif; }
     ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #2b2d31; }
-    ::-webkit-scrollbar-thumb { background: #1a1b1e; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #3f4147; }
-    body { font-family: 'Open Sans', sans-serif; background-color: #313338; color: #dbdee1; }
+    ::-webkit-scrollbar-track { background: #1e1f22; }
+    ::-webkit-scrollbar-thumb { background: #111214; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #35373c; }
+    .glass-panel { background: rgba(43, 45, 49, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+    .stat-card { transition: transform 0.2s; }
+    .stat-card:hover { transform: translateY(-2px); }
     .loader { border: 3px solid #f3f3f3; border-top: 3px solid #5865F2; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .glass-panel { background: #2b2d31; border: 1px solid #1e1f22; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
-    .sidebar-link.active { background-color: #3f4147; color: #fff; border-left: 4px solid #5865F2; }
-    .rank-badge { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
-    
-    /* Rank Colors */
-    .rank-dev { background: linear-gradient(90deg, #ef4444, #000); border: 1px solid #ef4444; color: white; }
-    .rank-owner { background: linear-gradient(90deg, #eab308, #854d0e); border: 1px solid #ca8a04; color: white; }
-    .rank-admin { background: #dc2626; color: white; }
-    .rank-mod { background: #16a34a; color: white; }
-    .rank-vip { background: #9333ea; color: white; }
-    .rank-default { background: #4b5563; color: white; }
-
-    .toast-enter { animation: toastIn 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
-    .toast-exit { animation: toastOut 0.3s ease-in forwards; }
-    @keyframes toastIn { from { transform: translate(-50%, 50px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
-    @keyframes toastOut { from { transform: translate(-50%, 0); opacity: 1; } to { transform: translate(-50%, 50px); opacity: 0; } }
+    .table-row-anim { animation: fadeIn 0.3s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
-<body class="h-screen flex overflow-hidden">
-
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="fixed inset-0 z-50 bg-[#313338] flex flex-col items-center justify-center">
-        <div class="loader w-12 h-12 border-4 mb-4"></div>
-        <h2 class="text-xl font-bold text-white tracking-widest uppercase">Verifying Access</h2>
-    </div>
+<body class="bg-[#1e1f22] text-gray-100 h-screen flex overflow-hidden">
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="w-64 bg-[#1e1f22] flex flex-col border-r border-[#111214] hidden">
-        <div class="h-16 flex items-center px-6 border-b border-[#111214]">
-            <i class="fas fa-shield-alt text-[#5865F2] text-2xl mr-3"></i>
-            <h1 class="font-bold text-white text-lg tracking-wider">ADMIN</h1>
+    <aside class="w-64 bg-[#111214] flex flex-col border-r border-[#2b2d31]">
+        <div class="p-6 flex items-center gap-3 border-b border-[#2b2d31]">
+            <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExMXBhNjNycTQweDFkY214NjMxYWtiZWs1ZjZ3dTJxb254d21ldHIyOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/HPbuRgMPF2vL2/giphy.gif" class="w-8 h-8 object-contain">
+            <h1 class="text-xl font-black tracking-wider text-white">ORBITLY <span class="text-[#5865F2]">ADMIN</span></h1>
         </div>
         
-        <div class="flex-1 overflow-y-auto py-4 space-y-1 px-2">
-            <button onclick="nav('dashboard')" id="nav-dashboard" class="sidebar-link w-full text-left px-4 py-2.5 rounded text-gray-400 hover:bg-[#35373c] hover:text-white transition flex items-center gap-3 active">
-                <i class="fas fa-chart-line w-5 text-center"></i> Overview
+        <nav class="flex-1 p-4 space-y-2">
+            <button onclick="admin.switchTab('dashboard')" id="nav-dashboard" class="w-full text-left px-4 py-3 rounded-lg bg-[#5865F2] text-white font-bold flex items-center gap-3 transition">
+                <i class="fas fa-chart-line w-5"></i> Dashboard
             </button>
-            <button onclick="nav('users')" id="nav-users" class="sidebar-link w-full text-left px-4 py-2.5 rounded text-gray-400 hover:bg-[#35373c] hover:text-white transition flex items-center gap-3">
-                <i class="fas fa-users w-5 text-center"></i> User Management
+            <button onclick="admin.switchTab('users')" id="nav-users" class="w-full text-left px-4 py-3 rounded-lg text-gray-400 hover:bg-[#2b2d31] hover:text-white font-bold flex items-center gap-3 transition">
+                <i class="fas fa-users w-5"></i> User Manager
             </button>
-            <button onclick="nav('logs')" id="nav-logs" class="sidebar-link w-full text-left px-4 py-2.5 rounded text-gray-400 hover:bg-[#35373c] hover:text-white transition flex items-center gap-3">
-                <i class="fas fa-list-ul w-5 text-center"></i> Audit Logs
+            <button onclick="admin.switchTab('rooms')" id="nav-rooms" class="w-full text-left px-4 py-3 rounded-lg text-gray-400 hover:bg-[#2b2d31] hover:text-white font-bold flex items-center gap-3 transition">
+                <i class="fas fa-door-open w-5"></i> Rooms
             </button>
-            
-            <div class="pt-4 pb-2 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Advanced</div>
-            
-            <button onclick="nav('broadcast')" id="nav-broadcast" class="sidebar-link w-full text-left px-4 py-2.5 rounded text-gray-400 hover:bg-[#35373c] hover:text-white transition flex items-center gap-3">
-                <i class="fas fa-bullhorn w-5 text-center text-yellow-500"></i> Broadcast
+            <button onclick="admin.switchTab('logs')" id="nav-logs" class="w-full text-left px-4 py-3 rounded-lg text-gray-400 hover:bg-[#2b2d31] hover:text-white font-bold flex items-center gap-3 transition">
+                <i class="fas fa-list-alt w-5"></i> Chat Logs
             </button>
-            <button onclick="nav('maintenance')" id="nav-maintenance" class="sidebar-link w-full text-left px-4 py-2.5 rounded text-gray-400 hover:bg-[#35373c] hover:text-white transition flex items-center gap-3">
-                <i class="fas fa-server w-5 text-center text-red-500"></i> Server Controls
+            <button onclick="admin.switchTab('tools')" id="nav-tools" class="w-full text-left px-4 py-3 rounded-lg text-gray-400 hover:bg-[#2b2d31] hover:text-white font-bold flex items-center gap-3 transition">
+                <i class="fas fa-tools w-5"></i> System Tools
             </button>
-        </div>
+        </nav>
 
-        <div class="p-4 border-t border-[#111214] bg-[#1a1b1e]">
-            <div class="flex items-center gap-3">
-                <img id="admin-pfp" src="" class="w-10 h-10 rounded-full object-cover border border-gray-600">
-                <div class="flex-1 min-w-0">
-                    <div id="admin-name" class="text-sm font-bold text-white truncate">Loading...</div>
-                    <div id="admin-rank" class="text-xs text-[#5865F2] truncate">Verifying...</div>
-                </div>
-                <button onclick="window.location.href='index.html'" class="text-gray-400 hover:text-white" title="Return to Chat">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
-            </div>
+        <div class="p-4 border-t border-[#2b2d31]">
+            <button onclick="window.location.href='index.html'" class="w-full py-2 border border-red-500/30 text-red-400 hover:bg-red-500/10 rounded font-bold transition flex items-center justify-center gap-2">
+                <i class="fas fa-sign-out-alt"></i> Exit Panel
+            </button>
         </div>
     </aside>
 
     <!-- Main Content -->
-    <main id="main-content" class="flex-1 flex flex-col min-w-0 bg-[#313338] hidden">
-        <!-- Dashboard View -->
-        <div id="view-dashboard" class="flex-1 overflow-y-auto p-8 animate-fade-in">
-            <h2 class="text-2xl font-bold text-white mb-6">Dashboard Overview</h2>
+    <main class="flex-1 flex flex-col relative overflow-hidden">
+        <!-- Top Bar -->
+        <header class="h-16 bg-[#111214] border-b border-[#2b2d31] flex justify-between items-center px-6 shadow-md z-10">
+            <h2 id="page-title" class="text-xl font-bold text-white">Dashboard Overview</h2>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <div id="admin-name" class="text-sm font-bold text-white">Loading...</div>
+                    <div id="admin-rank" class="text-xs text-[#5865F2] uppercase font-bold">Verifying...</div>
+                </div>
+                <img id="admin-pfp" src="" class="w-10 h-10 rounded-full bg-gray-700 object-cover border-2 border-[#5865F2]">
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div id="content-area" class="flex-1 overflow-y-auto p-6 bg-[#1e1f22]">
             
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="glass-panel p-6 rounded-lg border-l-4 border-blue-500">
-                    <div class="text-gray-400 text-xs font-bold uppercase mb-1">Total Users</div>
-                    <div id="stat-total-users" class="text-3xl font-mono text-white font-bold">...</div>
-                </div>
-                <div class="glass-panel p-6 rounded-lg border-l-4 border-green-500">
-                    <div class="text-gray-400 text-xs font-bold uppercase mb-1">Males</div>
-                    <div id="stat-male" class="text-3xl font-mono text-white font-bold">...</div>
-                </div>
-                <div class="glass-panel p-6 rounded-lg border-l-4 border-pink-500">
-                    <div class="text-gray-400 text-xs font-bold uppercase mb-1">Females</div>
-                    <div id="stat-female" class="text-3xl font-mono text-white font-bold">...</div>
-                </div>
-                <div class="glass-panel p-6 rounded-lg border-l-4 border-purple-500">
-                    <div class="text-gray-400 text-xs font-bold uppercase mb-1">Others / Aliens</div>
-                    <div id="stat-other" class="text-3xl font-mono text-white font-bold">...</div>
-                </div>
-            </div>
-
-            <!-- Recent Activity Mini Table -->
-            <div class="glass-panel rounded-lg overflow-hidden">
-                <div class="p-4 border-b border-[#1e1f22] flex justify-between items-center">
-                    <h3 class="font-bold text-white">Recent Admin Actions</h3>
-                    <button onclick="nav('logs')" class="text-xs text-[#5865F2] hover:underline">View All</button>
-                </div>
-                <div class="p-4">
-                    <div id="mini-logs-list" class="space-y-3">
-                        <div class="text-gray-500 text-sm italic text-center">Loading logs...</div>
+            <!-- VIEW: DASHBOARD -->
+            <div id="view-dashboard" class="space-y-6">
+                <!-- Stats Row -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="stat-card glass-panel p-6 rounded-xl relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110"><i class="fas fa-users text-6xl text-blue-500"></i></div>
+                        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Total Users</h3>
+                        <div id="stat-total-users" class="text-3xl font-black text-white">0</div>
+                    </div>
+                    <div class="stat-card glass-panel p-6 rounded-xl relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110"><i class="fas fa-comment-dots text-6xl text-green-500"></i></div>
+                        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Total Messages</h3>
+                        <div id="stat-total-msgs" class="text-3xl font-black text-white">0</div>
+                    </div>
+                    <div class="stat-card glass-panel p-6 rounded-xl relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110"><i class="fas fa-coins text-6xl text-yellow-500"></i></div>
+                        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Economy (Coins)</h3>
+                        <div id="stat-economy" class="text-3xl font-black text-white">0</div>
+                    </div>
+                    <div class="stat-card glass-panel p-6 rounded-xl relative overflow-hidden group">
+                        <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110"><i class="fas fa-door-open text-6xl text-purple-500"></i></div>
+                        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Active Rooms</h3>
+                        <div id="stat-rooms" class="text-3xl font-black text-white">0</div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Users View -->
-        <div id="view-users" class="hidden flex-1 flex flex-col min-h-0">
-            <div class="p-6 border-b border-[#111214] flex justify-between items-center bg-[#2b2d31]">
-                <h2 class="text-xl font-bold text-white">User Management</h2>
-                <div class="relative">
-                    <input type="text" id="user-search" placeholder="Search username..." class="bg-[#1e1f22] text-white px-4 py-2 pl-10 rounded border border-[#111214] focus:border-[#5865F2] outline-none w-64">
-                    <i class="fas fa-search absolute left-3 top-3 text-gray-500"></i>
-                </div>
-            </div>
-            <div class="flex-1 overflow-auto p-6">
-                <div class="glass-panel rounded-lg overflow-hidden">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-[#1e1f22] text-xs font-bold text-gray-400 uppercase tracking-wider">
-                            <tr>
-                                <th class="p-4 border-b border-[#111214]">User</th>
-                                <th class="p-4 border-b border-[#111214]">Rank</th>
-                                <th class="p-4 border-b border-[#111214]">Stats</th>
-                                <th class="p-4 border-b border-[#111214]">Joined</th>
-                                <th class="p-4 border-b border-[#111214] text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="users-table-body" class="text-sm text-gray-300">
-                            <!-- Rows injected via JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Logs View -->
-        <div id="view-logs" class="hidden flex-1 flex flex-col min-h-0 p-6">
-            <h2 class="text-xl font-bold text-white mb-4">Audit Logs</h2>
-            <div class="glass-panel rounded-lg flex-1 overflow-hidden flex flex-col">
-                <div class="p-4 border-b border-[#1e1f22] bg-[#1e1f22] flex gap-2">
-                    <select id="log-filter" class="bg-[#2b2d31] text-white text-sm px-3 py-1 rounded border border-[#111214] outline-none">
-                        <option value="all">All Actions</option>
-                        <option value="rank_change">Rank Changes</option>
-                        <option value="ban">Bans/Kicks</option>
-                        <option value="system">System</option>
-                    </select>
-                </div>
-                <div id="full-logs-container" class="flex-1 overflow-y-auto p-4 space-y-2 font-mono text-sm">
-                    <!-- Logs injected here -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Broadcast View -->
-        <div id="view-broadcast" class="hidden flex-1 overflow-y-auto p-8">
-            <h2 class="text-2xl font-bold text-white mb-2">Global Broadcast</h2>
-            <p class="text-gray-400 mb-6 text-sm">Send a high-priority modal message to all connected clients.</p>
-
-            <div class="glass-panel p-6 rounded-lg max-w-2xl">
-                <div class="mb-4">
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Title</label>
-                    <input type="text" id="broadcast-title" class="w-full bg-[#1e1f22] border border-[#111214] rounded p-2 text-white outline-none focus:border-yellow-500" placeholder="System Announcement">
-                </div>
-                <div class="mb-6">
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Message</label>
-                    <textarea id="broadcast-message" rows="4" class="w-full bg-[#1e1f22] border border-[#111214] rounded p-2 text-white outline-none focus:border-yellow-500 resize-none" placeholder="We will be undergoing maintenance..."></textarea>
-                </div>
-                <div class="flex items-center gap-4">
-                    <button onclick="sendBroadcast()" class="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded transition">
-                        <i class="fas fa-paper-plane mr-2"></i> Send Broadcast
-                    </button>
-                    <span id="broadcast-status" class="text-sm font-bold"></span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Maintenance View -->
-        <div id="view-maintenance" class="hidden flex-1 overflow-y-auto p-8">
-            <h2 class="text-2xl font-bold text-white mb-2">Server Controls</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                
-                <!-- Feature 1: Chat Lockdown -->
-                <div class="glass-panel p-6 rounded-lg border border-red-900/50">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h3 class="text-lg font-bold text-white">Chat Lockdown</h3>
-                            <p class="text-xs text-gray-400">Prevent non-staff from sending messages.</p>
+                <!-- Gender & Rank Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fas fa-venus-mars text-pink-400"></i> User Demographics</h3>
+                        <div id="gender-bars" class="space-y-4">
+                            <!-- Populated by JS -->
+                            <div class="text-center text-gray-500 text-sm py-4"><div class="loader mx-auto"></div></div>
                         </div>
-                        <i class="fas fa-lock text-red-500 text-2xl"></i>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                            <input type="checkbox" name="toggle" id="toggle-lockdown" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
-                            <label for="toggle-lockdown" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fas fa-crown text-yellow-400"></i> Rank Distribution</h3>
+                        <div id="rank-list" class="space-y-2 max-h-60 overflow-y-auto pr-2">
+                            <!-- Populated by JS -->
                         </div>
-                        <span id="lockdown-status-text" class="text-sm font-bold text-gray-400">OFF</span>
                     </div>
                 </div>
-
-                 <!-- Feature 2: Clear Old Logs -->
-                 <div class="glass-panel p-6 rounded-lg border border-blue-900/50">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h3 class="text-lg font-bold text-white">Database Cleanup</h3>
-                            <p class="text-xs text-gray-400">Remove logs older than 7 days.</p>
-                        </div>
-                        <i class="fas fa-broom text-blue-500 text-2xl"></i>
-                    </div>
-                    <button onclick="cleanupLogs()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-sm">
-                        Run Cleanup
-                    </button>
-                </div>
-
             </div>
+
+            <!-- VIEW: USERS -->
+            <div id="view-users" class="hidden h-full flex flex-col">
+                <div class="flex gap-4 mb-4">
+                    <div class="relative flex-1">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-500"></i>
+                        <input type="text" id="user-search" placeholder="Search by username or email..." class="w-full bg-[#111214] border border-[#2b2d31] rounded-lg pl-10 pr-4 py-2.5 text-white focus:border-[#5865F2] outline-none transition">
+                    </div>
+                    <button onclick="admin.refreshUsers()" class="bg-[#2b2d31] hover:bg-[#35373c] text-white px-4 rounded-lg font-bold transition"><i class="fas fa-sync-alt"></i></button>
+                </div>
+                <div class="bg-[#111214] border border-[#2b2d31] rounded-xl overflow-hidden flex-1 flex flex-col">
+                    <div class="overflow-x-auto flex-1">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-[#202225] border-b border-[#2b2d31] text-xs uppercase text-gray-400">
+                                    <th class="p-4 font-bold">User</th>
+                                    <th class="p-4 font-bold">Rank</th>
+                                    <th class="p-4 font-bold">Details</th>
+                                    <th class="p-4 font-bold">Status</th>
+                                    <th class="p-4 font-bold text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body" class="text-sm">
+                                <tr><td colspan="5" class="p-8 text-center text-gray-500">Loading users...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="users-pagination" class="p-3 border-t border-[#2b2d31] bg-[#202225] flex justify-between items-center text-xs text-gray-400">
+                        <span id="user-count">0 Users</span>
+                        <!-- Simple pagination could be added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: ROOMS -->
+            <div id="view-rooms" class="hidden space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="rooms-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- VIEW: LOGS -->
+            <div id="view-logs" class="hidden h-full flex flex-col">
+                <div class="bg-[#111214] border border-[#2b2d31] rounded-xl p-4 flex-1 overflow-y-auto font-mono text-xs space-y-1" id="logs-terminal">
+                    <div class="text-gray-500">Connecting to live feed...</div>
+                </div>
+            </div>
+
+            <!-- VIEW: TOOLS -->
+            <div id="view-tools" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Broadcast -->
+                <div class="glass-panel p-6 rounded-xl">
+                    <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fas fa-bullhorn text-red-400"></i> System Broadcast</h3>
+                    <textarea id="broadcast-text" class="w-full bg-[#111214] border border-[#2b2d31] rounded p-3 text-white text-sm mb-3 focus:border-red-500 outline-none" rows="3" placeholder="Enter system announcement..."></textarea>
+                    <button onclick="admin.sendBroadcast()" class="w-full py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded transition">Send Announcement</button>
+                </div>
+
+                <!-- Economy -->
+                <div class="glass-panel p-6 rounded-xl">
+                    <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fas fa-hand-holding-usd text-green-400"></i> Economy Stimulus</h3>
+                    <div class="space-y-3">
+                        <input type="text" id="stimulus-username" placeholder="Username (leave empty for ALL)" class="w-full bg-[#111214] border border-[#2b2d31] rounded p-2 text-white text-sm">
+                        <div class="flex gap-2">
+                            <input type="number" id="stimulus-amount" placeholder="Amount" class="flex-1 bg-[#111214] border border-[#2b2d31] rounded p-2 text-white text-sm">
+                            <select id="stimulus-currency" class="bg-[#111214] border border-[#2b2d31] rounded p-2 text-white text-sm">
+                                <option value="coins">Coins</option>
+                                <option value="gems">Gems</option>
+                            </select>
+                        </div>
+                        <button onclick="admin.giveCurrency()" class="w-full py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded transition">Grant Currency</button>
+                    </div>
+                </div>
+
+                <!-- Banned Words -->
+                <div class="glass-panel p-6 rounded-xl md:col-span-2">
+                    <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fas fa-filter text-orange-400"></i> Chat Filter</h3>
+                    <div class="flex gap-2 mb-3">
+                        <input type="text" id="filter-word" placeholder="Add word to blacklist..." class="flex-1 bg-[#111214] border border-[#2b2d31] rounded p-2 text-white text-sm">
+                        <button onclick="admin.addFilterWord()" class="px-4 bg-orange-600 hover:bg-orange-700 text-white rounded font-bold">Add</button>
+                    </div>
+                    <div id="filter-list" class="flex flex-wrap gap-2 p-2 bg-[#111214] rounded min-h-[50px]">
+                        <!-- Populated -->
+                        <span class="px-2 py-1 bg-red-900/30 text-red-400 rounded border border-red-900 text-xs">nemo</span>
+                        <span class="px-2 py-1 bg-red-900/30 text-red-400 rounded border border-red-900 text-xs">levi</span>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
 
-    <!-- Modal for Edit User -->
-    <div id="user-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-[#2b2d31] rounded-lg shadow-2xl w-full max-w-md border border-[#1e1f22]">
-            <div class="p-4 border-b border-[#1e1f22] flex justify-between items-center">
-                <h3 class="text-white font-bold">Edit User</h3>
-                <button onclick="closeUserModal()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="p-6 space-y-4">
-                <input type="hidden" id="modal-uid">
-                <div class="flex items-center gap-4 mb-4">
-                    <img id="modal-pfp" src="" class="w-16 h-16 rounded-full bg-black">
-                    <div>
-                        <div id="modal-username" class="text-xl font-bold text-white">Username</div>
-                        <div id="modal-email" class="text-xs text-gray-500">email@example.com</div>
-                    </div>
-                </div>
-                
+    <!-- Admin Action Modal -->
+    <div id="admin-user-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#2b2d31] w-full max-w-md rounded-xl border border-[#1e1f22] shadow-2xl p-6">
+            <h3 id="modal-user-title" class="text-xl font-bold text-white mb-4">Manage User</h3>
+            <input type="hidden" id="modal-uid">
+            
+            <div class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Rank</label>
-                    <select id="modal-rank" class="w-full bg-[#1e1f22] border border-[#1e1f22] rounded p-2 text-white outline-none focus:border-[#5865F2]">
-                        <!-- Populated by JS -->
+                    <label class="text-xs uppercase font-bold text-gray-400">Set Rank</label>
+                    <select id="modal-rank-select" class="w-full mt-1 bg-[#111214] border border-[#1e1f22] text-white rounded p-2 text-sm">
+                        <option value="Developer">Developer</option>
+                        <option value="Founder">Founder</option>
+                        <option value="CEO">CEO</option>
+                        <option value="Head-Owner">Head-Owner</option>
+                        <option value="Owner">Owner</option>
+                        <option value="Manager">Manager</option>
+                        <option value="Super-Admin">Super-Admin</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Mod">Mod</option>
+                        <option value="Trial-Mod">Trial-Mod</option>
+                        <option value="Site-Helper">Site-Helper</option>
+                        <option value="VIP">VIP</option>
+                        <option value="Member">Member</option>
                     </select>
                 </div>
-
-                <div class="grid grid-cols-2 gap-4 pt-2">
-                    <button id="btn-mute" onclick="toggleMute()" class="py-2 rounded bg-yellow-600/20 text-yellow-500 border border-yellow-600/50 hover:bg-yellow-600/40 font-bold transition">Mute</button>
-                    <button id="btn-ban" onclick="toggleBan()" class="py-2 rounded bg-red-600/20 text-red-500 border border-red-600/50 hover:bg-red-600/40 font-bold transition">Ban</button>
-                </div>
                 
-                <div class="pt-4 mt-2 border-t border-[#1e1f22] flex justify-end gap-2">
-                    <button onclick="closeUserModal()" class="px-4 py-2 text-gray-400 hover:text-white text-sm font-bold">Cancel</button>
-                    <button onclick="saveUserChanges()" class="px-4 py-2 bg-[#5865F2] hover:bg-[#4752c4] text-white rounded text-sm font-bold">Save Changes</button>
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="admin.modalAction('ban')" id="btn-modal-ban" class="py-2 bg-red-600/20 text-red-400 border border-red-600/50 rounded hover:bg-red-600/40 font-bold text-sm">Ban User</button>
+                    <button onclick="admin.modalAction('kick')" class="py-2 bg-orange-600/20 text-orange-400 border border-orange-600/50 rounded hover:bg-orange-600/40 font-bold text-sm">Kick User</button>
+                    <button onclick="admin.modalAction('mute')" id="btn-modal-mute" class="py-2 bg-yellow-600/20 text-yellow-400 border border-yellow-600/50 rounded hover:bg-yellow-600/40 font-bold text-sm">Mute User</button>
+                    <button onclick="admin.modalAction('reset')" class="py-2 bg-blue-600/20 text-blue-400 border border-blue-600/50 rounded hover:bg-blue-600/40 font-bold text-sm">Reset Info</button>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button onclick="admin.saveModalRank()" class="flex-1 bg-[#5865F2] hover:bg-[#4752c4] text-white py-2 rounded font-bold">Save Rank</button>
+                    <button onclick="document.getElementById('admin-user-modal').classList.add('hidden')" class="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600">Close</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="toast-container" class="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-[60] pointer-events-none"></div>
-
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, query, orderBy, limit, addDoc, serverTimestamp, where, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, getDoc, deleteDoc, getDocs, limit, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // --- CONFIG ---
-    const firebaseConfig = { apiKey: "AIzaSyBz9yOlQFZQZE-GtGcRbJ2sWUYQTb0kBi4", authDomain: "orbitly-online.firebaseapp.com", projectId: "orbitly-online", storageBucket: "orbitly-online.firebasestorage.app", messagingSenderId: "75415636853", appId: "1:75415636853:web:ccf4ac9c74a1769335a13c", measurementId: "G-9B5458S73M" };
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+const firebaseConfig = { apiKey: "AIzaSyBz9yOlQFZQZE-GtGcRbJ2sWUYQTb0kBi4", authDomain: "orbitly-online.firebaseapp.com", projectId: "orbitly-online", storageBucket: "orbitly-online.firebasestorage.app", messagingSenderId: "75415636853", appId: "1:75415636853:web:ccf4ac9c74a1769335a13c", measurementId: "G-9B5458S73M" };
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
 
-    // --- GLOBALS ---
-    let currentUser = null;
-    let currentUserData = null;
-    let allUsersCache = [];
-    
-    // Ranks and values for sorting/permission
-    const RANK_VALUES = {
-        'developer': 100, 'founder': 90, 'ceo': 80, 'owner': 85, 'co-owner': 85,
-        'super-admin': 80, 'admin': 80, 'mod': 50, 'trial mod': 40, 
-        'vip': 10, 'default': 0
-    };
+let currentUser = null;
+let allUsersCache = [];
+let unsubscribeUsers = null;
+let unsubscribeLogs = null;
 
-    const RANK_COLORS = {
-        'developer': 'rank-dev', 'founder': 'rank-owner', 'owner': 'rank-owner',
-        'admin': 'rank-admin', 'super-admin': 'rank-admin',
-        'mod': 'rank-mod', 'vip': 'rank-vip'
-    };
+const RANK_VALUES = {
+    'developer': 100, 'founder': 95, 'ceo': 95, 'head-owner': 90, 'owner': 90,
+    'manager': 85, 'super-admin': 80, 'admin': 75, 'mod': 70, 'trial-mod': 60,
+    'site-helper': 60, 'vip': 50, 'member': 0
+};
 
-    // --- AUTHENTICATION & SECURITY ---
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            currentUser = user;
-            try {
-                const snap = await getDoc(doc(db, "users", user.uid));
-                if (snap.exists()) {
-                    currentUserData = snap.data();
-                    const rankVal = RANK_VALUES[currentUserData.rank?.toLowerCase()] || 0;
-                    
-                    // Security Check: Must be at least a Mod (Level 40+)
-                    if (rankVal < 40) {
-                        alert("Access Denied: Staff only area.");
-                        window.location.href = "index.html";
-                        return;
-                    }
+function getRankVal(r) { return RANK_VALUES[(r||'').toLowerCase()] || 0; }
 
-                    // Init UI
-                    document.getElementById('loading-screen').classList.add('hidden');
-                    document.getElementById('sidebar').classList.remove('hidden');
-                    document.getElementById('main-content').classList.remove('hidden');
-                    
-                    document.getElementById('admin-pfp').src = currentUserData.pfpUrl || 'https://ui-avatars.com/api/?name=?';
-                    document.getElementById('admin-name').textContent = currentUserData.username;
-                    document.getElementById('admin-rank').textContent = currentUserData.rank;
-
-                    // Apply RBAC to UI
-                    if (rankVal < 80) { // Mods cant see Broadcast/Maintenance
-                        document.getElementById('nav-broadcast').classList.add('hidden');
-                        document.getElementById('nav-maintenance').classList.add('hidden');
-                    }
-
-                    // Initial Load
-                    loadDashboard();
-                    setupListeners();
-
-                } else {
-                    window.location.href = "index.html";
-                }
-            } catch (e) {
-                console.error(e);
-                alert("Auth Error");
-            }
-        } else {
-            window.location.href = "index.html";
-        }
-    });
-
-    // --- NAVIGATION ---
-    window.nav = (viewId) => {
-        document.querySelectorAll('main > div').forEach(el => el.classList.add('hidden'));
-        document.getElementById(`view-${viewId}`).classList.remove('hidden');
-        document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
-        document.getElementById(`nav-${viewId}`).classList.add('active');
-
-        if (viewId === 'users') loadUsers();
-        if (viewId === 'logs') loadLogs();
-        if (viewId === 'dashboard') loadDashboard();
-    };
-
-    // --- DASHBOARD LOGIC ---
-    async function loadDashboard() {
-        const q = query(collection(db, "users"));
-        const snap = await getDocs(q);
-        
-        let total = 0, male = 0, female = 0, other = 0;
-        
-        allUsersCache = []; // Refresh Cache
-        
-        snap.forEach(doc => {
-            total++;
-            const d = doc.data();
-            d.uid = doc.id; // Ensure UID is attached
-            allUsersCache.push(d);
-            
-            const g = d.gender ? d.gender.toLowerCase() : 'other';
-            if (g === 'male') male++;
-            else if (g === 'female') female++;
-            else other++;
-        });
-
-        document.getElementById('stat-total-users').textContent = total.toLocaleString();
-        document.getElementById('stat-male').textContent = male.toLocaleString();
-        document.getElementById('stat-female').textContent = female.toLocaleString();
-        document.getElementById('stat-other').textContent = other.toLocaleString();
-
-        loadMiniLogs();
-    }
-
-    // --- USERS MANAGEMENT ---
-    function loadUsers() {
-        const tbody = document.getElementById('users-table-body');
-        const filter = document.getElementById('user-search').value.toLowerCase();
-        tbody.innerHTML = '';
-
-        allUsersCache.forEach(u => {
-            if (filter && !u.username.toLowerCase().includes(filter)) return;
-
-            const tr = document.createElement('tr');
-            tr.className = "border-b border-[#1e1f22] hover:bg-[#2b2d31] transition";
-            
-            const rankClass = RANK_COLORS[u.rank?.toLowerCase()] || 'rank-default';
-            const joined = u.createdAt ? new Date(u.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown';
-
-            tr.innerHTML = `
-                <td class="p-4 flex items-center gap-3">
-                    <img src="${u.pfpUrl || 'https://ui-avatars.com/api/?name=?'}" class="w-8 h-8 rounded-full bg-gray-600 object-cover">
-                    <div>
-                        <div class="font-bold text-white text-sm">${u.username}</div>
-                        <div class="text-[10px] text-gray-500">${u.email || 'No Email'}</div>
-                    </div>
-                </td>
-                <td class="p-4">
-                    <span class="rank-badge ${rankClass}">${u.rank || 'Default'}</span>
-                </td>
-                <td class="p-4 text-xs font-mono">
-                    <div class="text-yellow-500">🪙 ${u.coins?.toLocaleString() || 0}</div>
-                    <div class="text-purple-400">💎 ${u.gems?.toLocaleString() || 0}</div>
-                </td>
-                <td class="p-4 text-xs text-gray-400">${joined}</td>
-                <td class="p-4 text-right">
-                    <button onclick="openEditUser('${u.uid}')" class="bg-[#5865F2] hover:bg-[#4752c4] text-white p-2 rounded text-xs">
-                        <i class="fas fa-pencil-alt"></i>
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    document.getElementById('user-search').addEventListener('input', loadUsers);
-
-    let editingUserUid = null;
-    let editingUserData = null;
-
-    window.openEditUser = async (uid) => {
-        const user = allUsersCache.find(u => u.uid === uid);
-        if (!user) return;
-        editingUserUid = uid;
-        editingUserData = user;
-
-        document.getElementById('modal-uid').value = uid;
-        document.getElementById('modal-username').textContent = user.username;
-        document.getElementById('modal-email').textContent = user.email || 'Hidden';
-        document.getElementById('modal-pfp').src = user.pfpUrl || 'https://ui-avatars.com/api/?name=?';
-        
-        // Populate Ranks
-        const rankSelect = document.getElementById('modal-rank');
-        rankSelect.innerHTML = '';
-        Object.keys(RANK_VALUES).forEach(r => {
-            // Can only assign ranks lower than self
-            const myRankVal = RANK_VALUES[currentUserData.rank?.toLowerCase()] || 0;
-            const targetRankVal = RANK_VALUES[r];
-            if (targetRankVal < myRankVal || currentUserData.email === 'dev@gmail.com') {
-                const opt = document.createElement('option');
-                opt.value = r;
-                opt.textContent = r.toUpperCase();
-                if (user.rank?.toLowerCase() === r) opt.selected = true;
-                rankSelect.appendChild(opt);
-            }
-        });
-
-        // Toggle Button States
-        const btnMute = document.getElementById('btn-mute');
-        btnMute.textContent = user.muted ? 'Unmute User' : 'Mute User';
-        btnMute.className = user.muted 
-            ? "py-2 rounded bg-green-600/20 text-green-500 border border-green-600/50 hover:bg-green-600/40 font-bold transition"
-            : "py-2 rounded bg-yellow-600/20 text-yellow-500 border border-yellow-600/50 hover:bg-yellow-600/40 font-bold transition";
-
-        const btnBan = document.getElementById('btn-ban');
-        btnBan.textContent = user.banned ? 'Unban User' : 'Ban User';
-        btnBan.className = user.banned 
-            ? "py-2 rounded bg-green-600/20 text-green-500 border border-green-600/50 hover:bg-green-600/40 font-bold transition"
-            : "py-2 rounded bg-red-600/20 text-red-500 border border-red-600/50 hover:bg-red-600/40 font-bold transition";
-
-        document.getElementById('user-modal').classList.remove('hidden');
-    };
-
-    window.closeUserModal = () => document.getElementById('user-modal').classList.add('hidden');
-
-    window.toggleMute = async () => {
-        if (!editingUserData) return;
-        const newState = !editingUserData.muted;
-        try {
-            await updateDoc(doc(db, "users", editingUserUid), { muted: newState });
-            editingUserData.muted = newState;
-            // Log it
-            await logAction('mute', `User ${editingUserData.username} was ${newState ? 'muted' : 'unmuted'}`);
-            showToast(newState ? "User Muted" : "User Unmuted");
-            closeUserModal();
-            loadDashboard(); // Refresh data
-        } catch (e) { console.error(e); }
-    };
-
-    window.toggleBan = async () => {
-        if (!editingUserData) return;
-        // Check hierarchy
-        const myRank = RANK_VALUES[currentUserData.rank?.toLowerCase()] || 0;
-        const targetRank = RANK_VALUES[editingUserData.rank?.toLowerCase()] || 0;
-        
-        if (myRank <= targetRank && currentUserData.email !== 'dev@gmail.com') {
-            alert("You cannot ban someone with equal or higher rank.");
-            return;
-        }
-
-        const newState = !editingUserData.banned;
-        if (!confirm(newState ? "Are you sure you want to BAN this user?" : "Unban user?")) return;
-
-        try {
-            await updateDoc(doc(db, "users", editingUserUid), { banned: newState });
-            editingUserData.banned = newState;
-            await logAction('ban', `User ${editingUserData.username} was ${newState ? 'banned' : 'unbanned'}`);
-            showToast(newState ? "User Banned" : "User Unbanned");
-            closeUserModal();
-            loadDashboard(); 
-        } catch (e) { console.error(e); }
-    };
-
-    window.saveUserChanges = async () => {
-        const newRank = document.getElementById('modal-rank').value;
-        const formattedRank = newRank.charAt(0).toUpperCase() + newRank.slice(1);
-        
-        if (formattedRank.toLowerCase() !== editingUserData.rank?.toLowerCase()) {
-            try {
-                await updateDoc(doc(db, "users", editingUserUid), { rank: formattedRank });
-                await logAction('rank_change', `Changed ${editingUserData.username}'s rank to ${formattedRank}`);
-                showToast("Rank Updated");
-                
-                // Send notification to user
-                await addDoc(collection(db, "users", editingUserUid, "notifications"), {
-                    type: 'rank-change',
-                    message: `Your rank was updated to ${formattedRank}`,
-                    timestamp: serverTimestamp(),
-                    read: false
-                });
-
-                closeUserModal();
-                loadDashboard();
-            } catch (e) { console.error(e); }
-        } else {
-            closeUserModal();
-        }
-    };
-
-
-    // --- LOGS SYSTEM ---
-    async function logAction(type, details) {
-        try {
-            await addDoc(collection(db, "admin_logs"), {
-                type: type,
-                details: details,
-                admin: currentUserData.username,
-                adminUid: currentUser.uid,
-                timestamp: serverTimestamp()
-            });
-        } catch (e) { console.error("Log failed", e); }
-    }
-
-    async function loadLogs() {
-        const container = document.getElementById('full-logs-container');
-        container.innerHTML = '<div class="text-center text-gray-500 mt-4"><div class="loader mx-auto"></div></div>';
-        
-        const q = query(collection(db, "admin_logs"), orderBy("timestamp", "desc"), limit(50));
-        const snap = await getDocs(q);
-        
-        container.innerHTML = '';
-        if (snap.empty) {
-            container.innerHTML = '<div class="text-center text-gray-500 mt-4">No logs found.</div>';
-            return;
-        }
-
-        const filter = document.getElementById('log-filter').value;
-
-        snap.forEach(doc => {
-            const l = doc.data();
-            if (filter !== 'all' && l.type !== filter) return;
-
-            const div = document.createElement('div');
-            div.className = "flex items-start gap-2 border-b border-[#2b2d31] pb-2 mb-2";
-            const time = l.timestamp ? new Date(l.timestamp.seconds * 1000).toLocaleString() : 'Unknown';
-            
-            let color = 'text-gray-400';
-            if (l.type === 'ban') color = 'text-red-400';
-            if (l.type === 'rank_change') color = 'text-yellow-400';
-            if (l.type === 'broadcast') color = 'text-blue-400';
-
-            div.innerHTML = `
-                <div class="text-[10px] text-gray-500 w-32 shrink-0 pt-0.5">${time}</div>
-                <div>
-                    <span class="font-bold text-gray-300">[${l.admin}]</span>
-                    <span class="${color} font-bold uppercase text-xs mx-1">${l.type}</span>
-                    <span class="text-gray-300">${l.details}</span>
-                </div>
-            `;
-            container.appendChild(div);
-        });
-    }
-
-    async function loadMiniLogs() {
-        const container = document.getElementById('mini-logs-list');
-        const q = query(collection(db, "admin_logs"), orderBy("timestamp", "desc"), limit(5));
-        const snap = await getDocs(q);
-        
-        container.innerHTML = '';
-        if (snap.empty) {
-            container.innerHTML = '<div class="text-gray-500 text-sm italic">No logs recorded.</div>';
-            return;
-        }
-
-        snap.forEach(doc => {
-            const l = doc.data();
-            const div = document.createElement('div');
-            div.className = "text-xs";
-            div.innerHTML = `
-                <span class="text-[#5865F2] font-bold">${l.admin}</span>
-                <span class="text-gray-400">${l.details}</span>
-            `;
-            container.appendChild(div);
-        });
-    }
-
-    document.getElementById('log-filter').addEventListener('change', loadLogs);
-
-
-    // --- BROADCAST SYSTEM ---
-    window.sendBroadcast = async () => {
-        const title = document.getElementById('broadcast-title').value;
-        const msg = document.getElementById('broadcast-message').value;
-        const statusEl = document.getElementById('broadcast-status');
-
-        if (!title || !msg) {
-            alert("Fill in all fields");
-            return;
-        }
-
-        statusEl.textContent = "Sending...";
-        statusEl.className = "text-yellow-500 text-sm font-bold";
-
-        try {
-            // Write to a system_broadcast collection that clients listen to
-            await addDoc(collection(db, "system_broadcasts"), {
-                title: title,
-                message: msg,
-                sender: currentUserData.username,
-                timestamp: serverTimestamp()
-            });
-            
-            await logAction('broadcast', `Sent broadcast: ${title}`);
-            
-            statusEl.textContent = "Sent Successfully!";
-            statusEl.className = "text-green-500 text-sm font-bold";
-            setTimeout(() => statusEl.textContent = "", 3000);
-            
-            // Clear inputs
-            document.getElementById('broadcast-title').value = "";
-            document.getElementById('broadcast-message').value = "";
-        } catch (e) {
-            console.error(e);
-            statusEl.textContent = "Error Sending";
-            statusEl.className = "text-red-500 text-sm font-bold";
-        }
-    };
-
-
-    // --- MAINTENANCE SYSTEM ---
-    
-    // Setup listener for switch state
-    function setupListeners() {
-        // Toggle Switch Styling
-        const toggle = document.getElementById('toggle-lockdown');
-        const label = document.querySelector('.toggle-label');
-        
-        // Initial state check (would normally fetch from DB config)
-        getDoc(doc(db, "config", "server")).then(snap => {
-            if(snap.exists() && snap.data().lockdown) {
-                toggle.checked = true;
-                label.classList.remove('bg-gray-600');
-                label.classList.add('bg-green-500');
-                document.getElementById('lockdown-status-text').textContent = "ACTIVE";
-                document.getElementById('lockdown-status-text').classList.replace('text-gray-400', 'text-red-500');
-            }
-        });
-
-        toggle.addEventListener('change', async (e) => {
-            const isChecked = e.target.checked;
-            label.classList.toggle('bg-gray-600');
-            label.classList.toggle('bg-green-500');
-            
-            const txt = document.getElementById('lockdown-status-text');
-            txt.textContent = isChecked ? "ACTIVE" : "OFF";
-            txt.className = isChecked ? "text-sm font-bold text-red-500" : "text-sm font-bold text-gray-400";
-
-            // Update DB
-            try {
-                // Assuming 'config' collection exists or we create it
-                // We use setDoc with merge to ensure document creation
-                const { setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-                await setDoc(doc(db, "config", "server"), { lockdown: isChecked }, { merge: true });
-                await logAction('system', `Server Lockdown ${isChecked ? 'ENABLED' : 'DISABLED'}`);
-            } catch(e) { 
-                console.error(e);
-                alert("Failed to update server config");
-            }
-        });
-    }
-
-    window.cleanupLogs = async () => {
-        if (!confirm("This will delete audit logs older than 7 days. Continue?")) return;
-        
-        try {
-            const sevenDaysAgo = new Date();
-            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-            
-            const q = query(collection(db, "admin_logs"), where("timestamp", "<", sevenDaysAgo));
-            const snap = await getDocs(q);
-            
-            const count = snap.size;
-            if (count === 0) {
-                alert("No old logs to clean.");
+// Auth Check
+onAuthStateChanged(auth, async (user) => {
+    if(user) {
+        const snap = await getDoc(doc(db, "users", user.uid));
+        if(snap.exists()) {
+            const data = snap.data();
+            // Security Check: Must be >= Super-Admin (80) or Dev email
+            if (getRankVal(data.rank) < 80 && user.email !== 'dev@gmail.com') {
+                alert("Unauthorized Access");
+                window.location.href = 'index.html';
                 return;
             }
-
-            // Client side batch delete (Firestore limits batch to 500, simple loop for now)
-            snap.forEach(async (d) => {
-                await deleteDoc(d.ref);
-            });
-
-            await logAction('system', `Ran database cleanup. Deleted ${count} old logs.`);
-            alert(`Cleaned ${count} logs.`);
-            loadLogs();
-        } catch(e) {
-            console.error(e);
-            alert("Cleanup failed. See console.");
+            currentUser = data;
+            document.getElementById('admin-name').textContent = data.username;
+            document.getElementById('admin-rank').textContent = data.rank;
+            document.getElementById('admin-pfp').src = data.pfpUrl;
+            
+            initAdmin();
+        } else {
+            window.location.href = 'index.html';
         }
-    };
+    } else {
+        window.location.href = 'index.html';
+    }
+});
 
-    function showToast(message) {
-        const container = document.getElementById('toast-container');
-        const div = document.createElement('div');
-        div.className = "bg-[#5865F2] text-white px-6 py-2 rounded-full shadow-xl font-bold text-sm toast-enter mb-2";
-        div.textContent = message;
-        container.appendChild(div);
-        setTimeout(() => {
-            div.classList.remove('toast-enter');
-            div.classList.add('toast-exit');
-            setTimeout(() => div.remove(), 300);
-        }, 3000);
+function initAdmin() {
+    startUserListener();
+    admin.switchTab('dashboard');
+}
+
+function startUserListener() {
+    const q = query(collection(db, "users"), orderBy("createdAt", "desc"));
+    unsubscribeUsers = onSnapshot(q, (snapshot) => {
+        allUsersCache = [];
+        let totalMsgs = 0; // Estimation if we tracked it per user, for now 0
+        let activeRooms = 0;
+        
+        snapshot.forEach(doc => {
+            const u = doc.data();
+            u.uid = doc.id;
+            allUsersCache.push(u);
+        });
+
+        updateDashboard();
+        if(!document.getElementById('view-users').classList.contains('hidden')) {
+            renderUsersTable(allUsersCache);
+        }
+    });
+    
+    // Watch Rooms for Stats
+    onSnapshot(collection(db, "rooms"), (snap) => {
+        document.getElementById('stat-rooms').textContent = snap.size;
+        if (!document.getElementById('view-rooms').classList.contains('hidden')) {
+            renderRoomsGrid(snap.docs);
+        }
+    });
+    
+    // Watch Messages for Total Count (Expensive? Limit to 1 for metadata if possible, but here we just list logs)
+    // Actually, getting total count of a collection in Firestore is expensive/slow without counters. 
+    // We will simulate it or just show "--".
+}
+
+function updateDashboard() {
+    const users = allUsersCache;
+    document.getElementById('stat-total-users').textContent = users.length;
+    
+    // Gender Stats
+    const genders = { Male: 0, Female: 0, Alien: 0, Other: 0 };
+    users.forEach(u => {
+        const g = u.gender;
+        if(g === 'Male') genders.Male++;
+        else if(g === 'Female') genders.Female++;
+        else if(g === 'Alien') genders.Alien++;
+        else genders.Other++;
+    });
+    
+    const max = Math.max(1, users.length);
+    const getPct = (val) => (val / max * 100).toFixed(1);
+    
+    const barsHtml = `
+        <div class="mb-2"><div class="flex justify-between text-xs text-gray-400 mb-1"><span>Male</span><span>${genders.Male}</span></div>
+        <div class="h-2 bg-[#2b2d31] rounded-full overflow-hidden"><div class="h-full bg-blue-500" style="width: ${getPct(genders.Male)}%"></div></div></div>
+        
+        <div class="mb-2"><div class="flex justify-between text-xs text-gray-400 mb-1"><span>Female</span><span>${genders.Female}</span></div>
+        <div class="h-2 bg-[#2b2d31] rounded-full overflow-hidden"><div class="h-full bg-pink-500" style="width: ${getPct(genders.Female)}%"></div></div></div>
+        
+        <div class="mb-2"><div class="flex justify-between text-xs text-gray-400 mb-1"><span>Alien</span><span>${genders.Alien}</span></div>
+        <div class="h-2 bg-[#2b2d31] rounded-full overflow-hidden"><div class="h-full bg-green-500" style="width: ${getPct(genders.Alien)}%"></div></div></div>
+        
+        <div class="mb-2"><div class="flex justify-between text-xs text-gray-400 mb-1"><span>Other</span><span>${genders.Other}</span></div>
+        <div class="h-2 bg-[#2b2d31] rounded-full overflow-hidden"><div class="h-full bg-gray-500" style="width: ${getPct(genders.Other)}%"></div></div></div>
+    `;
+    document.getElementById('gender-bars').innerHTML = barsHtml;
+
+    // Rank Stats
+    const ranks = {};
+    let totalCoins = 0;
+    users.forEach(u => {
+        const r = u.rank || 'Member';
+        ranks[r] = (ranks[r] || 0) + 1;
+        totalCoins += (u.coins || 0);
+    });
+    
+    document.getElementById('stat-economy').textContent = totalCoins.toLocaleString();
+
+    let rankHtml = '';
+    Object.entries(ranks).sort((a,b) => b[1] - a[1]).forEach(([r, count]) => {
+        rankHtml += `<div class="flex justify-between items-center text-sm p-2 bg-[#111214] rounded border border-[#2b2d31] mb-1">
+            <span class="font-bold text-gray-300">${r}</span>
+            <span class="bg-[#2b2d31] px-2 rounded text-xs text-white">${count}</span>
+        </div>`;
+    });
+    document.getElementById('rank-list').innerHTML = rankHtml;
+}
+
+function renderUsersTable(users) {
+    const tbody = document.getElementById('users-table-body');
+    const search = document.getElementById('user-search').value.toLowerCase();
+    
+    const filtered = users.filter(u => 
+        (u.username && u.username.toLowerCase().includes(search)) || 
+        (u.email && u.email.toLowerCase().includes(search))
+    );
+    
+    document.getElementById('user-count').textContent = `${filtered.length} Users Found`;
+    
+    if(filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-500">No users found.</td></tr>';
+        return;
     }
 
-</script>
+    tbody.innerHTML = filtered.slice(0, 50).map(u => `
+        <tr class="hover:bg-[#2b2d31] border-b border-[#2b2d31] transition table-row-anim">
+            <td class="p-3 flex items-center gap-3">
+                <img src="${u.pfpUrl || 'https://ui-avatars.com/api/?name=?'}" class="w-8 h-8 rounded-full bg-gray-700 object-cover">
+                <div>
+                    <div class="font-bold text-white text-sm">${u.username}</div>
+                    <div class="text-[10px] text-gray-500">${u.email}</div>
+                </div>
+            </td>
+            <td class="p-3 text-sm text-gray-300">${u.rank || 'Member'}</td>
+            <td class="p-3 text-xs text-gray-400">
+                <div>${(u.coins||0).toLocaleString()} <span class="text-yellow-500">C</span></div>
+                <div>${(u.gems||0).toLocaleString()} <span class="text-purple-400">G</span></div>
+            </td>
+            <td class="p-3 text-xs">
+                ${u.banned ? '<span class="text-red-500 font-bold">BANNED</span>' : (u.status === 'online' ? '<span class="text-green-400">Online</span>' : '<span class="text-gray-500">Offline</span>')}
+            </td>
+            <td class="p-3 text-right">
+                <button onclick="admin.openUserModal('${u.uid}')" class="bg-[#5865F2] hover:bg-[#4752c4] text-white px-3 py-1 rounded text-xs font-bold transition">Manage</button>
+            </td>
+        </tr>
+    `).join('');
+}
 
-<style>
-/* Custom Toggle Switch CSS */
-.toggle-checkbox:checked {
-    right: 0;
-    border-color: #68D391;
+function renderRoomsGrid(docs) {
+    const grid = document.getElementById('rooms-grid');
+    if (docs.length === 0) {
+        grid.innerHTML = '<div class="col-span-full text-center text-gray-500">No active rooms.</div>';
+        return;
+    }
+    grid.innerHTML = docs.map(d => {
+        const r = d.data();
+        return `
+        <div class="glass-panel p-4 rounded-lg flex justify-between items-center group">
+            <div class="flex items-center gap-3 overflow-hidden">
+                <div class="w-10 h-10 bg-[#111214] rounded flex items-center justify-center text-xl shrink-0">${r.icon && !r.icon.startsWith('http') ? r.icon : '#'}</div>
+                <div class="min-w-0">
+                    <div class="font-bold text-white text-sm truncate">${r.name}</div>
+                    <div class="text-[10px] text-gray-500">${r.isPrivate ? 'Private' : 'Public'} • ${new Date(r.createdAt?.seconds*1000).toLocaleDateString()}</div>
+                </div>
+            </div>
+            <button onclick="admin.deleteRoom('${d.id}')" class="text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition"><i class="fas fa-trash"></i></button>
+        </div>
+        `;
+    }).join('');
 }
-.toggle-checkbox:checked + .toggle-label {
-    background-color: #68D391;
-}
-.toggle-checkbox {
-    right: 0;
-    transition: all 0.3s;
-}
-.toggle-label {
-    width: 3rem;
-}
-</style>
+
+window.admin = {
+    switchTab: (tab) => {
+        ['dashboard','users','rooms','logs','tools'].forEach(t => {
+            document.getElementById(`view-${t}`).classList.add('hidden');
+            document.getElementById(`nav-${t}`).classList.remove('bg-[#5865F2]', 'text-white');
+            document.getElementById(`nav-${t}`).classList.add('text-gray-400');
+        });
+        document.getElementById(`view-${tab}`).classList.remove('hidden');
+        document.getElementById(`nav-${tab}`).classList.add('bg-[#5865F2]', 'text-white');
+        document.getElementById(`nav-${tab}`).classList.remove('text-gray-400');
+        document.getElementById('page-title').textContent = tab.charAt(0).toUpperCase() + tab.slice(1);
+        
+        if (tab === 'logs') admin.startLogStream();
+    },
+    refreshUsers: () => {
+        renderUsersTable(allUsersCache);
+    },
+    openUserModal: async (uid) => {
+        const u = allUsersCache.find(x => x.uid === uid);
+        if(!u) return;
+        document.getElementById('modal-uid').value = uid;
+        document.getElementById('modal-user-title').textContent = `Manage ${u.username}`;
+        document.getElementById('modal-rank-select').value = u.rank || 'Member';
+        
+        const btnBan = document.getElementById('btn-modal-ban');
+        btnBan.textContent = u.banned ? 'Unban User' : 'Ban User';
+        btnBan.className = u.banned ? "py-2 bg-green-600/20 text-green-400 border border-green-600/50 rounded font-bold text-sm" : "py-2 bg-red-600/20 text-red-400 border border-red-600/50 rounded font-bold text-sm";
+        
+        const btnMute = document.getElementById('btn-modal-mute');
+        btnMute.textContent = u.muted ? 'Unmute User' : 'Mute User';
+        
+        document.getElementById('admin-user-modal').classList.remove('hidden');
+    },
+    saveModalRank: async () => {
+        const uid = document.getElementById('modal-uid').value;
+        const rank = document.getElementById('modal-rank-select').value;
+        await updateDoc(doc(db, "users", uid), { rank });
+        alert("Rank Updated");
+        document.getElementById('admin-user-modal').classList.add('hidden');
+    },
+    modalAction: async (type) => {
+        const uid = document.getElementById('modal-uid').value;
+        const ref = doc(db, "users", uid);
+        const u = allUsersCache.find(x => x.uid === uid);
+        
+        if (type === 'ban') {
+            await updateDoc(ref, { banned: !u.banned });
+            alert(u.banned ? "User Unbanned" : "User Banned");
+        } else if (type === 'kick') {
+            await updateDoc(ref, { kickedAt: serverTimestamp() });
+            alert("User Kicked");
+        } else if (type === 'mute') {
+            await updateDoc(ref, { muted: !u.muted });
+            alert(u.muted ? "User Unmuted" : "User Muted");
+        } else if (type === 'reset') {
+            if(confirm("Reset nickname and bio?")) {
+                await updateDoc(ref, { username: "Reset_User_" + Math.floor(Math.random()*1000), bio: "" });
+                alert("Reset");
+            }
+        }
+        document.getElementById('admin-user-modal').classList.add('hidden');
+    },
+    deleteRoom: async (id) => {
+        if(confirm("Delete this room permanently?")) {
+            await deleteDoc(doc(db, "rooms", id));
+        }
+    },
+    startLogStream: () => {
+        if (unsubscribeLogs) return;
+        const term = document.getElementById('logs-terminal');
+        const q = query(collection(db, "messages"), orderBy("createdAt", "desc"), limit(50));
+        unsubscribeLogs = onSnapshot(q, (snap) => {
+            term.innerHTML = '';
+            const msgs = [];
+            snap.forEach(d => msgs.push(d.data()));
+            msgs.reverse().forEach(m => {
+                const time = m.createdAt ? new Date(m.createdAt.seconds * 1000).toLocaleTimeString() : '...';
+                const div = document.createElement('div');
+                div.className = "text-xs font-mono border-b border-white/5 py-1";
+                div.innerHTML = `<span class="text-gray-500">[${time}]</span> <span class="text-blue-400 font-bold">${m.username}:</span> <span class="text-gray-300">${m.text ? m.text.substring(0, 100) : '[Media/Game]'}</span>`;
+                term.appendChild(div);
+            });
+            term.scrollTop = term.scrollHeight;
+        });
+    },
+    sendBroadcast: async () => {
+        const text = document.getElementById('broadcast-text').value;
+        if (!text) return;
+        await addDoc(collection(db, "messages"), {
+            text: text,
+            uid: "SYSTEM",
+            username: "SYSTEM",
+            pfpUrl: "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExMXBhNjNycTQweDFkY214NjMxYWtiZWs1ZjZ3dTJxb254d21ldHIyOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/HPbuRgMPF2vL2/giphy.gif",
+            rank: "Developer",
+            createdAt: serverTimestamp(),
+            messageStyle: { color: "#ff5555" }
+        });
+        document.getElementById('broadcast-text').value = '';
+        alert("Broadcast Sent");
+    },
+    giveCurrency: async () => {
+        const name = document.getElementById('stimulus-username').value.trim();
+        const amt = parseInt(document.getElementById('stimulus-amount').value);
+        const curr = document.getElementById('stimulus-currency').value;
+        
+        if (!amt) return alert("Invalid amount");
+        
+        if (!name) {
+            // ALL USERS (Limit to batch size or just warn)
+            if(!confirm(`Give ${amt} ${curr} to ALL users? This might take a moment.`)) return;
+            // For demo, just doing top 50 to avoid freeze
+            const batch = writeBatch(db);
+            allUsersCache.slice(0, 400).forEach(u => {
+                const ref = doc(db, "users", u.uid);
+                batch.update(ref, { [curr]: (u[curr]||0) + amt });
+            });
+            await batch.commit();
+            alert("Stimulus Distributed");
+        } else {
+            const u = allUsersCache.find(x => x.username === name);
+            if(!u) return alert("User not found");
+            await updateDoc(doc(db, "users", u.uid), { [curr]: (u[curr]||0) + amt });
+            alert("Sent");
+        }
+    },
+    addFilterWord: () => {
+        const w = document.getElementById('filter-word').value.trim();
+        if(w) {
+            // In a real app, save to DB. Visual demo here.
+            const sp = document.createElement('span');
+            sp.className = "px-2 py-1 bg-red-900/30 text-red-400 rounded border border-red-900 text-xs";
+            sp.textContent = w;
+            document.getElementById('filter-list').appendChild(sp);
+            document.getElementById('filter-word').value = '';
+        }
+    }
+};
+
+// Search listener
+document.getElementById('user-search').addEventListener('input', () => renderUsersTable(allUsersCache));
+
+</script>
 </body>
 </html>
