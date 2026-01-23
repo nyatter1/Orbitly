@@ -719,6 +719,78 @@ leaderboardDrawer: document.getElementById('leaderboard-drawer'), leaderboardLis
 function processImage(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = (event) => { const img = new Image(); img.src = event.target.result; img.onload = () => { const canvas = document.createElement('canvas'); const MAX_SIZE = 300; let width = img.width; let height = img.height; if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); resolve(canvas.toDataURL('image/jpeg', 0.85)); }; img.onerror = (err) => reject(err); }; img.onerror = (err) => reject(err); }); }
 async function processUpload(file) { const limit = 500 * 1024; if (file.type === 'image/gif' && file.size < limit) { const reader = new FileReader(); return new Promise((resolve) => { reader.onload = (ev) => resolve(ev.target.result); reader.readAsDataURL(file); }); } return await processImage(file); }
 
+// --- RANK SYSTEM ---
+const RANK_ORDER = {
+    'developer': 100,
+    'founder': 90, 'ceo': 90, 'head-owner': 90,
+    'owner': 85, 'co-owner': 85,
+    'super-admin': 80, 'admin': 80,
+    'mod': 75, 'trial mod': 75, 'site-helper': 75,
+    'mega-elite': 70,
+    'mega-vip': 65, 'super-vip': 65, 'ultra-vip': 65,
+    'elite': 60,
+    'premium': 50,
+    'vip': 40,
+    'knight': 30, 'queen': 30, 'princess': 30,
+    'default': 0
+};
+
+const RANK_FILES = {
+    'developer': 'ranks/developer.gif',
+    'ceo': 'ranks/CEO.gif',
+    'founder': 'ranks/CEO.gif',
+    'head-owner': 'ranks/CEO.gif',
+    'owner': 'ranks/owner.png',
+    'co-owner': 'ranks/owner.png',
+    'mod': 'ranks/mod.png',
+    'trial mod': 'ranks/mod.png',
+    'site-helper': 'ranks/mod.png',
+    'mega-elite': 'ranks/mega-elite.gif',
+    'mega-vip': 'ranks/mega-vip.gif',
+    'elite': 'ranks/elite.png',
+    'premium': 'ranks/premium.gif',
+    'vip': 'ranks/vip.gif'
+};
+
+function getRankValue(rank) {
+    if (!rank) return 0;
+    return RANK_ORDER[rank.toLowerCase()] || 0;
+}
+
+function getRankHtml(rank, showText = false) {
+    if (!rank) return '';
+    const r = rank.toLowerCase();
+    const iconUrl = RANK_FILES[r];
+    
+    // Fallback Badge styles
+    let classes = 'bg-gray-600 text-gray-200';
+    if (r === 'developer') classes = 'bg-gradient-to-r from-red-600 to-black border border-red-500 text-red-100 shadow-[0_0_10px_rgba(220,38,38,0.5)]';
+    else if (['founder', 'ceo', 'head-owner', 'owner', 'co-owner'].includes(r)) classes = 'bg-gradient-to-r from-yellow-500 to-yellow-800 border border-yellow-400 text-yellow-100 shadow-[0_0_8px_rgba(234,179,8,0.4)]';
+    else if (['super-admin', 'admin'].includes(r)) classes = 'bg-red-600 text-white';
+    else if (['mod', 'trial mod', 'site-helper'].includes(r)) classes = 'bg-green-600 text-white';
+    else if (['super-vip', 'mega-vip', 'ultra-vip'].includes(r)) classes = 'bg-gradient-to-r from-purple-500 to-pink-500 text-white';
+    else if (['vip', 'elite', 'mega-elite', 'premium'].includes(r)) classes = 'bg-purple-600 text-purple-100';
+    else if (['knight', 'queen', 'princess'].includes(r)) classes = 'bg-pink-500 text-white';
+
+    const badgeHtml = `<span class="rank-badge ${classes}">${escapeHtml(rank)}</span>`;
+    
+    if (iconUrl) {
+        // Icon logic
+        const imgHtml = `<img src="${iconUrl}" class="h-4 w-auto inline-block mr-1 align-middle" title="${escapeHtml(rank)}">`;
+        
+        if (showText) {
+            // Profile: Icon + Text
+            return `<div class="inline-flex items-center justify-center gap-1">${imgHtml} ${badgeHtml}</div>`;
+        } else {
+            // Chat/List: Icon Only
+            return imgHtml;
+        }
+    }
+    
+    // No icon available, fallback to text badge
+    return badgeHtml;
+}
+
 // --- RENDER HELPERS ---
 function applyUsernameStyle(el, style) {
 if (!style) { el.className = "font-bold text-white text-lg font-default"; el.style.color = ""; el.style.textShadow = ""; el.style.webkitTextStroke = ""; return; }
@@ -730,22 +802,6 @@ else if (fx.startsWith('effect-gradient') || fx.startsWith('effect-anim') || fx 
 else if (fx === 'effect-glitch') { el.setAttribute('data-text', el.textContent); el.style.color = style.color; }
 else if (fx.startsWith('effect-neon') || fx === 'effect-ice' || fx === 'effect-water' || fx === 'effect-lightning' || fx === 'effect-earth') { }
 else { el.style.color = style.color; }
-}
-
-function getRankBadge(rank) {
-    if (!rank) return '';
-    const r = rank.toLowerCase();
-    let classes = 'bg-gray-600 text-gray-200'; // Default
-    
-    if (r === 'developer') classes = 'bg-gradient-to-r from-red-600 to-black border border-red-500 text-red-100 shadow-[0_0_10px_rgba(220,38,38,0.5)]';
-    else if (['founder', 'ceo', 'head-owner', 'owner', 'co-owner'].includes(r)) classes = 'bg-gradient-to-r from-yellow-500 to-yellow-800 border border-yellow-400 text-yellow-100 shadow-[0_0_8px_rgba(234,179,8,0.4)]';
-    else if (['super-admin', 'admin'].includes(r)) classes = 'bg-red-600 text-white';
-    else if (['mod', 'trial mod', 'site-helper'].includes(r)) classes = 'bg-green-600 text-white';
-    else if (['super-vip', 'mega-vip', 'ultra-vip'].includes(r)) classes = 'bg-gradient-to-r from-purple-500 to-pink-500 text-white';
-    else if (['vip', 'elite', 'mega-elite', 'premium'].includes(r)) classes = 'bg-purple-600 text-purple-100';
-    else if (['knight', 'queen', 'princess'].includes(r)) classes = 'bg-pink-500 text-white';
-    
-    return `<span class="rank-badge ${classes}">${escapeHtml(rank)}</span>`;
 }
 
 // --- APP METHODS ---
@@ -779,8 +835,8 @@ openProfile: async (uid) => {
             nameEl.textContent = data.username;
             applyUsernameStyle(nameEl, data.usernameStyle); // Function exists in global scope
             
-            // Rank
-            document.getElementById('profile-rank-container').innerHTML = getRankBadge(data.rank || 'VIP'); // Function exists in global scope
+            // Rank - Show Icon AND Text
+            document.getElementById('profile-rank-container').innerHTML = getRankHtml(data.rank || 'VIP', true);
 
             // Theme
             const cardEl = document.getElementById('profile-card-content');
@@ -1280,7 +1336,7 @@ else { const isWin = msg.result === 'WON'; const colorClass = isWin ? 'text-gree
 div.className = "group animate-fade-in relative mb-1"; const time = msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now'; const nameSpan = document.createElement('span'); nameSpan.className = "font-medium text-white hover:underline cursor-pointer text-sm"; nameSpan.textContent = msg.username; nameSpan.onclick = () => app.openProfile(msg.uid); if (msg.usernameStyle) applyUsernameStyle(nameSpan, msg.usernameStyle); let msgStyle = ""; if (msg.messageStyle && msg.messageStyle.color) { msgStyle = `style="color: ${msg.messageStyle.color}"`; } let replyHtml = ''; if (msg.replyTo) { replyHtml = ` <div class="flex items-center gap-2 opacity-75 hover:opacity-100 transition cursor-pointer mb-1" onclick="document.getElementById('msg-${msg.replyTo.id}')?.scrollIntoView({behavior: 'smooth', block: 'center'})"> <div class="reply-spine"></div> <div class="flex items-center gap-1.5 overflow-hidden"> <img src="${msg.replyTo.pfpUrl || 'https://ui-avatars.com/api/?name=?'}" class="w-4 h-4 rounded-full object-cover shrink-0"> <span class="text-xs font-bold text-gray-400 whitespace-nowrap hover:underline">@${msg.replyTo.username}</span> <span class="text-xs text-gray-500 truncate text-ellipsis overflow-hidden whitespace-nowrap cursor-pointer hover:text-gray-300 transition">${escapeHtml(msg.replyTo.text)}</span> </div> </div> `; } const isMe = currentUser && currentUser.uid === msg.uid; let deleteAction = isMe ? `<button onclick="deleteMessage('${msg.id}')" class="text-red-400 hover:bg-red-500/10 w-full text-left px-2 py-1 rounded text-xs flex items-center gap-2"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> Delete Message</button>` : ''; const safeText = escapeHtml(msg.text).replace(/'/g, "\\'"); const safeUser = escapeHtml(msg.username).replace(/'/g, "\\'"); const safePfp = (msg.pfpUrl || '').replace(/'/g, "\\'"); div.setAttribute("ondblclick", `initiateReply('${msg.id}', '${safeUser}', '${safeText}', '${safePfp}')`); div.innerHTML = ` ${replyHtml} <div class="flex gap-4 w-full pl-2 pr-4 py-1 hover:bg-[#2e3035] -mx-2 rounded relative"> <div class="flex-shrink-0 cursor-pointer mt-0.5" onclick="app.openProfile('${msg.uid}')"> <img src="${msg.pfpUrl || 'https://ui-avatars.com/api/?name=?'}" class="w-10 h-10 rounded-full hover:opacity-80 transition object-cover"> </div> <div class="flex-1 min-w-0 relative"> <div class="absolute right-0 -top-4 msg-actions z-10"> <div class="relative"> <button onclick="toggleMsgMenu('${msg.id}')" class="bg-[#313338] text-gray-400 hover:text-white p-1 rounded border border-[#26272d] shadow-sm"> <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg> </button> <div id="msg-menu-${msg.id}" class="hidden absolute right-0 top-full mt-1 w-32 bg-[#111214] border border-[#1e1f22] rounded shadow-xl p-1 z-20"> <button onclick="initiateReply('${msg.id}', '${safeUser}', '${safeText}', '${safePfp}')" class="text-gray-300 hover:bg-[#5865F2] hover:text-white w-full text-left px-2 py-1 rounded text-xs flex items-center gap-2 mb-1"> <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg> Reply </button> ${deleteAction} </div> </div> </div> <div class="flex items-baseline gap-2" id="msg-header-${msg.id}"> <span class="text-[10px] text-gray-400">${time}</span> </div> <p class="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap break-words" ${msgStyle}>${formatTextWithMentions(msg.text)}</p> </div> </div> `; 
 const header = div.querySelector(`div[id^="msg-header-"]`);
 header.prepend(nameSpan);
-if (msg.rank) header.insertAdjacentHTML('afterbegin', getRankBadge(msg.rank));
+if (msg.rank) header.insertAdjacentHTML('afterbegin', getRankHtml(msg.rank, false));
 }
 els.displays.msgContainer.appendChild(div);
 }
@@ -1343,6 +1399,7 @@ startUsersListenerInternal();
 }
 
 function startUsersListenerInternal() {
+// We still fetch order by username to get base list, but we will sort locally by rank
 const q = query(collection(db, "users"), orderBy("username", "asc"));
 window.unsubscribeUsersInternal = onSnapshot(q, (snapshot) => {
 els.displays.onlineList.innerHTML = '';
@@ -1350,32 +1407,44 @@ const onlineUsers = [], offlineUsers = [], typers = [], requests = [];
 const myFriends = (currentUserProfile && currentUserProfile.friends) ? currentUserProfile.friends : [];
 const myRequests = (currentUserProfile && currentUserProfile.friendRequests) ? currentUserProfile.friendRequests : [];
 
+// 1. Process Snapshot into Array
+let allUsers = [];
 snapshot.forEach((doc) => {
-const user = doc.data();
+    allUsers.push(doc.data());
+});
 
-// Sidebar Logic
-if (window.sidebarMode === 'friends') {
-    // Show incoming requests at top
-    if (myRequests.includes(user.uid)) {
-        requests.push(user);
-        return;
+// 2. Sort Array by Rank (Desc) then Name (Asc)
+allUsers.sort((a, b) => {
+    const rA = getRankValue(a.rank);
+    const rB = getRankValue(b.rank);
+    if (rA !== rB) return rB - rA; // Higher rank first
+    return a.username.localeCompare(b.username); // A-Z
+});
+
+// 3. Process Sorted Users
+allUsers.forEach((user) => {
+    // Sidebar Logic
+    if (window.sidebarMode === 'friends') {
+        // Show incoming requests at top
+        if (myRequests.includes(user.uid)) {
+            requests.push(user);
+            return;
+        }
+        // Show only confirmed friends
+        if (!myFriends.includes(user.uid)) return;
+    } else if (window.sidebarMode === 'users') {
+        // ROOM FILTER LOGIC:
+        const userRoom = user.currentRoom || 'general'; // default legacy users to general
+        if (userRoom !== window.currentRoomId) return;
     }
-    // Show only confirmed friends
-    if (!myFriends.includes(user.uid)) return;
-} else if (window.sidebarMode === 'users') {
-    // ROOM FILTER LOGIC:
-    // If we are in 'users' (Online Players) mode, only show users who are currently in the same room.
-    const userRoom = user.currentRoom || 'general'; // default legacy users to general
-    if (userRoom !== window.currentRoomId) return;
-}
 
-let status = user.status || 'offline';
-if (status !== 'offline' && status !== 'invisible') { const now = Date.now()/1000; const lastSeen = user.lastSeen ? user.lastSeen.seconds : 0; if (now - lastSeen > 120) status = 'offline'; }
-if (user.typing) { const now = Date.now(); const typeTime = user.typing.seconds*1000; if (now - typeTime < 5000 && user.uid !== currentUser.uid) typers.push(user.username); }
-if (status === 'invisible' && user.uid !== (currentUser?currentUser.uid:null)) return;
+    let status = user.status || 'offline';
+    if (status !== 'offline' && status !== 'invisible') { const now = Date.now()/1000; const lastSeen = user.lastSeen ? user.lastSeen.seconds : 0; if (now - lastSeen > 120) status = 'offline'; }
+    if (user.typing) { const now = Date.now(); const typeTime = user.typing.seconds*1000; if (now - typeTime < 5000 && user.uid !== currentUser.uid) typers.push(user.username); }
+    if (status === 'invisible' && user.uid !== (currentUser?currentUser.uid:null)) return;
 
-let displayStatus = status === 'invisible' ? 'offline' : status;
-if (displayStatus === 'offline') offlineUsers.push({ ...user, displayStatus: 'offline' }); else onlineUsers.push({ ...user, displayStatus });
+    let displayStatus = status === 'invisible' ? 'offline' : status;
+    if (displayStatus === 'offline') offlineUsers.push({ ...user, displayStatus: 'offline' }); else onlineUsers.push({ ...user, displayStatus });
 });
 
 // Typing
@@ -1423,7 +1492,7 @@ div.ondblclick = (e) => { e.stopPropagation(); window.app.sendFriendRequest(user
 div.innerHTML = ` <div class="relative"> <img src="${user.pfpUrl || 'https://ui-avatars.com/api/?name=?'}" class="w-8 h-8 rounded-full object-cover"> ${status !== 'offline' ? `<div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 border-[3px] border-[#2b2d31] rounded-full ${statusColor}"></div>` : ''} </div> <div class="flex-1 min-w-0"> <div id="u-list-name-${user.uid}" class="w-full flex items-center gap-1.5"></div> <div class="text-[10px] text-gray-400 uppercase font-bold">${status}</div> </div> `; 
 const nameContainer = div.querySelector(`#u-list-name-${user.uid}`);
 if (user.rank) {
-    nameContainer.insertAdjacentHTML('afterbegin', getRankBadge(user.rank));
+    nameContainer.insertAdjacentHTML('afterbegin', getRankHtml(user.rank, false));
 }
 nameContainer.appendChild(nameSpan);
 els.displays.onlineList.appendChild(div);
