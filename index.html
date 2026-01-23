@@ -632,33 +632,99 @@
             </div>
         </div>
     </div>
-    <div id="profile-modal" class="absolute inset-0 z-50 hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-        <div id="profile-card-content" class="card-theme-default rounded-xl shadow-2xl w-full max-w-sm overflow-hidden relative transform transition-all scale-100">
-            <div class="h-32 bg-gray-700 relative overflow-hidden group">
+    <div id="profile-modal" class="absolute inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div id="profile-card-content" class="card-theme-default rounded-xl shadow-2xl w-full max-w-sm overflow-hidden relative transform transition-all scale-100 flex flex-col max-h-[85vh]">
+            <!-- Banner Section -->
+            <div class="h-40 bg-gray-700 relative shrink-0">
                 <img id="profile-banner" src="" class="w-full h-full object-cover">
                 <div id="profile-banner-placeholder" class="absolute inset-0 profile-header-gradient hidden"></div>
-                <button onclick="app.closeProfile()" class="absolute top-2 right-2 text-white/80 hover:text-white bg-black/30 hover:bg-black/50 rounded-full p-1 transition backdrop-blur-sm z-10"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                
+                <!-- Top Left: Like Button -->
+                <div class="absolute top-3 left-3 z-10">
+                    <button id="btn-toggle-like" class="bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/10 rounded-lg px-3 py-1.5 flex items-center gap-2 transition group">
+                        <i id="profile-like-icon" class="far fa-heart text-white group-hover:text-red-500 transition"></i>
+                        <span id="profile-likes-count" class="text-xs font-bold text-white">0</span>
+                    </button>
+                </div>
+
+                <!-- Top Right: Actions & Close -->
+                <div class="absolute top-3 right-3 z-10 flex items-center gap-2">
+                    <!-- User Actions (Edit or Friend/Msg) -->
+                    <div id="profile-actions-container" class="flex gap-2">
+                        <button id="profile-edit-btn" onclick="app.openEditProfile()" class="hidden w-8 h-8 flex items-center justify-center bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/10 rounded-lg text-white transition">
+                            <i class="fas fa-pencil-alt text-xs"></i>
+                        </button>
+                        <button id="profile-msg-btn" class="hidden w-8 h-8 flex items-center justify-center bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/10 rounded-lg text-white transition" title="Message">
+                            <i class="fas fa-envelope text-xs"></i>
+                        </button>
+                        <button id="profile-friend-btn" class="hidden w-8 h-8 flex items-center justify-center bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/10 rounded-lg text-white transition" title="Add Friend">
+                            <i class="fas fa-user-plus text-xs"></i>
+                        </button>
+                    </div>
+                    <!-- Close Button -->
+                    <button onclick="app.closeProfile()" class="w-8 h-8 flex items-center justify-center bg-black/40 hover:bg-red-500/80 backdrop-blur-md border border-white/10 rounded-lg text-white transition">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
             </div>
-            <div class="px-6 pb-6 relative">
-                <div class="relative -mt-16 mb-4 flex justify-between items-end">
-                    <div class="relative"><img id="profile-pfp" src="" class="w-28 h-28 rounded-full border-4 border-[#2b2d31] bg-[#2b2d31] object-cover shadow-lg"><div class="bg-[#1e1f22] px-2 py-0.5 rounded text-[10px] font-bold text-gray-400 border border-[#111214] absolute bottom-1 right-0 shadow-md" id="profile-status-badge">ONLINE</div></div>
-                    <div class="flex gap-2 mb-2 items-center">
-                        <button id="profile-edit-btn" onclick="app.openEditProfile()" class="hidden bg-[#5865F2] hover:bg-[#4752c4] text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-lg flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg> Edit</button>
-                        <button id="profile-msg-btn" class="hidden bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-lg flex items-center gap-1"><i class="fas fa-envelope"></i> Message</button>
-                        <button id="profile-friend-btn" class="hidden bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-lg flex items-center gap-1">Add Friend</button>
+
+            <!-- Main Content -->
+            <div class="px-6 pb-6 pt-14 relative flex-1 flex flex-col min-h-0 bg-inherit">
+                <!-- PFP (Absolute positioned to overlap banner) -->
+                <div class="absolute -top-12 left-1/2 transform -translate-x-1/2">
+                    <div class="relative group">
+                        <img id="profile-pfp" src="" class="w-24 h-24 rounded-2xl border-4 border-[#2b2d31] bg-[#2b2d31] object-cover shadow-lg">
+                        <div id="profile-status-indicator" class="absolute -bottom-1 -right-1 w-5 h-5 bg-[#2b2d31] rounded-full flex items-center justify-center">
+                            <div id="profile-status-dot" class="w-3 h-3 rounded-full status-online"></div>
+                        </div>
                     </div>
                 </div>
-                <div class="mb-4">
-                    <div class="flex items-center gap-2 mb-1">
-                        <div id="profile-rank-badge"></div>
-                        <h3 id="profile-username" class="text-2xl font-bold text-white leading-tight break-words"></h3>
-                    </div>
-                    <p id="profile-joined" class="text-xs text-gray-400 mt-1">Joined Dec 2023</p>
+
+                <!-- Identity -->
+                <div class="text-center mb-4">
+                    <div id="profile-rank-container" class="flex justify-center mb-1"></div>
+                    <h3 id="profile-username" class="text-xl font-black text-white leading-tight break-words tracking-wide"></h3>
                 </div>
-                <div id="profile-bio-container" class="mb-4 hidden"><p id="profile-bio" class="text-sm text-gray-300 italic bg-[#1e1f22]/50 p-2 rounded border border-white/5"></p></div>
-                <div class="flex items-center gap-2 mb-4"><button id="btn-toggle-like" class="bg-[#1e1f22] hover:bg-[#2c2e33] border border-[#111214] rounded-lg p-2 flex items-center gap-2 transition group flex-1 justify-center"><i id="profile-like-icon" class="far fa-heart text-gray-400 group-hover:text-red-500 transition"></i><span class="text-xs font-bold text-gray-300"><span id="profile-likes-count">0</span> Likes</span></button></div>
-                <div class="bg-[#111214] rounded-lg p-3 border border-[#1e1f22] mb-4 grid grid-cols-2 gap-2"><div class="flex flex-col"><span class="text-[10px] uppercase text-gray-500 font-bold">Age</span><span id="profile-age" class="text-sm text-gray-200"></span></div><div class="flex flex-col"><span class="text-[10px] uppercase text-gray-500 font-bold">Gender</span><span id="profile-gender" class="text-sm text-gray-200"></span></div></div>
-                <div class="grid grid-cols-2 gap-3"><div class="bg-[#1e1f22] p-3 rounded-lg border border-[#111214] flex flex-col items-center"><span class="text-yellow-500 font-bold text-lg" id="profile-coins">0</span><span class="text-[10px] text-gray-500 uppercase tracking-wide">Coins</span></div><div class="bg-[#1e1f22] p-3 rounded-lg border border-[#111214] flex flex-col items-center"><span class="text-purple-400 font-bold text-lg" id="profile-gems">0</span><span class="text-[10px] text-gray-500 uppercase tracking-wide">Gems</span></div></div>
+
+                <!-- Tabs -->
+                <div class="flex p-1 bg-[#111214]/50 rounded-lg mb-4 shrink-0">
+                    <button id="tab-profile-info" onclick="app.switchProfileTab('info')" class="flex-1 py-1.5 text-xs font-bold rounded-md bg-[#5865F2] text-white shadow-sm transition">Info</button>
+                    <button id="tab-profile-about" onclick="app.switchProfileTab('about')" class="flex-1 py-1.5 text-xs font-bold rounded-md text-gray-400 hover:text-white transition">About me</button>
+                </div>
+
+                <!-- Tab Content -->
+                <div id="content-profile-info" class="flex-1 overflow-y-auto space-y-3">
+                    <div class="bg-[#111214]/50 rounded-xl p-3 border border-white/5 grid grid-cols-2 gap-4">
+                        <div class="flex flex-col gap-1">
+                            <span class="text-[10px] uppercase font-bold text-gray-500 tracking-wider"><i class="fas fa-birthday-cake mr-1"></i> Age</span>
+                            <span id="profile-age" class="text-sm font-bold text-white"></span>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <span class="text-[10px] uppercase font-bold text-gray-500 tracking-wider"><i class="fas fa-venus-mars mr-1"></i> Gender</span>
+                            <span id="profile-gender" class="text-sm font-bold text-white"></span>
+                        </div>
+                    </div>
+                    <div class="bg-[#111214]/50 rounded-xl p-3 border border-white/5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] uppercase font-bold text-gray-500 tracking-wider flex items-center gap-2"><i class="fas fa-coins text-yellow-500"></i> Coins</span>
+                            <span id="profile-coins" class="text-sm font-mono font-bold text-white"></span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] uppercase font-bold text-gray-500 tracking-wider flex items-center gap-2"><i class="fas fa-gem text-purple-400"></i> Gems</span>
+                            <span id="profile-gems" class="text-sm font-mono font-bold text-white"></span>
+                        </div>
+                    </div>
+                    <div class="text-center pt-2">
+                        <span id="profile-joined" class="text-[10px] font-bold text-gray-600 uppercase tracking-widest"></span>
+                    </div>
+                </div>
+
+                <div id="content-profile-about" class="hidden flex-1 overflow-y-auto min-h-0">
+                    <div class="bg-[#111214]/30 rounded-xl p-4 border border-white/5 min-h-full">
+                        <p id="profile-bio" class="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap font-medium"></p>
+                        <div id="profile-bio-empty" class="hidden text-center text-gray-500 text-xs italic py-4">No bio yet.</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -794,49 +860,150 @@ logout: () => { if (currentUser && currentUserProfile && currentUserProfile.stat
 setStatus: async (status) => { if (!currentUser) return; try { await updateDoc(doc(db, "users", currentUser.uid), { status: status }); els.displays.statusDropdown.classList.add('hidden'); } catch (e) { console.error("Status update failed", e); } },
 openWallet: () => { if (currentUserProfile) { els.displays.walletCoins.textContent = formatNumber(currentUserProfile.coins || 0); els.displays.walletGems.textContent = formatNumber(currentUserProfile.gems || 0); } els.displays.walletModal.classList.remove('hidden'); },
 closeWallet: () => { els.displays.walletModal.classList.add('hidden'); },
-openProfile: async (uid) => { try { const snap = await getDoc(doc(db, "users", uid)); if(snap.exists()) { const data = snap.data(); document.getElementById('profile-pfp').src = data.pfpUrl || 'https://ui-avatars.com/api/?name=?'; const bannerEl = document.getElementById('profile-banner'); const bannerPlace = document.getElementById('profile-banner-placeholder'); if (data.bannerUrl) { bannerEl.src = data.bannerUrl; bannerEl.classList.remove('hidden'); bannerPlace.classList.add('hidden'); } else { bannerEl.classList.add('hidden'); bannerPlace.classList.remove('hidden'); } const nameEl = document.getElementById('profile-username'); nameEl.textContent = data.username; applyUsernameStyle(nameEl, data.usernameStyle); const cardEl = document.getElementById('profile-card-content'); cardEl.className = "rounded-xl shadow-2xl w-full max-w-sm overflow-hidden relative transform transition-all scale-100"; cardEl.classList.add(data.usercardStyle || 'card-theme-default'); const bioEl = document.getElementById('profile-bio'); const bioCont = document.getElementById('profile-bio-container'); if (data.bio) { bioEl.textContent = data.bio; bioCont.classList.remove('hidden'); } else { bioCont.classList.add('hidden'); } document.getElementById('profile-age').textContent = data.age || 'N/A'; document.getElementById('profile-gender').textContent = data.gender || 'N/A'; document.getElementById('profile-coins').textContent = formatNumber(data.coins || 0); document.getElementById('profile-gems').textContent = formatNumber(data.gems || 0); const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown'; document.getElementById('profile-joined').textContent = `Joined ${date}`; const status = (data.status || 'offline').toUpperCase(); const badge = document.getElementById('profile-status-badge'); badge.textContent = status;
+openProfile: async (uid) => {
+    try {
+        const snap = await getDoc(doc(db, "users", uid));
+        if(snap.exists()) {
+            const data = snap.data();
+            
+            // Populate Images
+            document.getElementById('profile-pfp').src = data.pfpUrl || 'https://ui-avatars.com/api/?name=?';
+            const bannerEl = document.getElementById('profile-banner');
+            const bannerPlace = document.getElementById('profile-banner-placeholder');
+            if (data.bannerUrl) {
+                bannerEl.src = data.bannerUrl;
+                bannerEl.classList.remove('hidden');
+                bannerPlace.classList.add('hidden');
+            } else {
+                bannerEl.classList.add('hidden');
+                bannerPlace.classList.remove('hidden');
+            }
 
-// Add rank to profile
-document.getElementById('profile-rank-badge').innerHTML = getRankBadge(data.rank || 'VIP');
+            // Identity
+            const nameEl = document.getElementById('profile-username');
+            nameEl.textContent = data.username;
+            applyUsernameStyle(nameEl, data.usernameStyle); // Function exists in global scope
+            
+            // Rank
+            document.getElementById('profile-rank-container').innerHTML = getRankBadge(data.rank || 'VIP'); // Function exists in global scope
 
-const editBtn = document.getElementById('profile-edit-btn');
-const friendBtn = document.getElementById('profile-friend-btn');
-const msgBtn = document.getElementById('profile-msg-btn');
+            // Theme
+            const cardEl = document.getElementById('profile-card-content');
+            // Reset base classes
+            cardEl.className = "rounded-xl shadow-2xl w-full max-w-sm overflow-hidden relative transform transition-all scale-100 flex flex-col max-h-[85vh]";
+            cardEl.classList.add(data.usercardStyle || 'card-theme-default');
 
-if (currentUser && currentUser.uid === uid) {
-editBtn.classList.remove('hidden');
-friendBtn.classList.add('hidden');
-msgBtn.classList.add('hidden');
-} else {
-editBtn.classList.add('hidden');
-friendBtn.classList.remove('hidden');
-msgBtn.classList.remove('hidden');
-msgBtn.onclick = () => app.openDM(uid, data.username);
+            // Stats
+            document.getElementById('profile-age').textContent = data.age || 'N/A';
+            document.getElementById('profile-gender').textContent = data.gender || 'N/A';
+            document.getElementById('profile-coins').textContent = formatNumber(data.coins || 0);
+            document.getElementById('profile-gems').textContent = formatNumber(data.gems || 0);
+            const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown';
+            document.getElementById('profile-joined').textContent = `MEMBER SINCE ${date}`;
 
-const myFriends = (currentUserProfile && currentUserProfile.friends) ? currentUserProfile.friends : [];
-const mySent = (currentUserProfile && currentUserProfile.sentFriendRequests) ? currentUserProfile.sentFriendRequests : [];
-const myIncoming = (currentUserProfile && currentUserProfile.friendRequests) ? currentUserProfile.friendRequests : [];
+            // Status Dot
+            const status = (data.status || 'offline');
+            const dot = document.getElementById('profile-status-dot');
+            dot.className = "w-3 h-3 rounded-full";
+            if (status === 'online') dot.classList.add('status-online');
+            else if (status === 'busy') dot.classList.add('status-busy');
+            else if (status === 'dnd') dot.classList.add('status-dnd');
+            else dot.classList.add('status-offline');
 
-if (myFriends.includes(uid)) {
-friendBtn.textContent = "Unfriend";
-friendBtn.className = "bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-lg flex items-center gap-1";
-friendBtn.onclick = () => app.removeFriend(uid);
-} else if (mySent.includes(uid)) {
-friendBtn.textContent = "Request Sent";
-friendBtn.className = "bg-gray-600 cursor-default text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-lg flex items-center gap-1";
-friendBtn.onclick = null;
-} else if (myIncoming.includes(uid)) {
-friendBtn.textContent = "Accept Request";
-friendBtn.className = "bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-lg flex items-center gap-1";
-friendBtn.onclick = () => app.acceptFriend(uid);
-} else {
-friendBtn.textContent = "Add Friend";
-friendBtn.className = "bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-lg flex items-center gap-1";
-friendBtn.onclick = () => app.sendFriendRequest(uid);
-}
-}
+            // Bio
+            const bioEl = document.getElementById('profile-bio');
+            const bioEmpty = document.getElementById('profile-bio-empty');
+            if (data.bio) {
+                bioEl.textContent = data.bio;
+                bioEl.classList.remove('hidden');
+                bioEmpty.classList.add('hidden');
+            } else {
+                bioEl.classList.add('hidden');
+                bioEmpty.classList.remove('hidden');
+            }
 
-const likes = (data.likes && Array.isArray(data.likes)) ? data.likes : []; const isLiked = likes.includes(currentUser.uid); document.getElementById('profile-likes-count').textContent = formatNumber(likes.length); const icon = document.getElementById('profile-like-icon'); if (isLiked) { icon.className = "fas fa-heart text-red-500 transition"; } else { icon.className = "far fa-heart text-gray-400 group-hover:text-red-500 transition"; } document.getElementById('btn-toggle-like').onclick = () => app.toggleLike(uid); els.displays.profileModal.classList.remove('hidden'); } } catch(e) { console.error(e); } },
+            // Controls (Edit vs Actions)
+            const editBtn = document.getElementById('profile-edit-btn');
+            const msgBtn = document.getElementById('profile-msg-btn');
+            const friendBtn = document.getElementById('profile-friend-btn');
+
+            if (currentUser && currentUser.uid === uid) {
+                editBtn.classList.remove('hidden');
+                msgBtn.classList.add('hidden');
+                friendBtn.classList.add('hidden');
+            } else {
+                editBtn.classList.add('hidden');
+                msgBtn.classList.remove('hidden');
+                friendBtn.classList.remove('hidden');
+                
+                // Logic for friend/msg buttons
+                msgBtn.onclick = () => app.openDM(uid, data.username);
+                
+                const myFriends = (currentUserProfile && currentUserProfile.friends) ? currentUserProfile.friends : [];
+                const mySent = (currentUserProfile && currentUserProfile.sentFriendRequests) ? currentUserProfile.sentFriendRequests : [];
+                const myIncoming = (currentUserProfile && currentUserProfile.friendRequests) ? currentUserProfile.friendRequests : [];
+
+                // Reset classes first
+                friendBtn.className = "w-8 h-8 flex items-center justify-center bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/10 rounded-lg text-white transition";
+                friendBtn.onclick = null;
+
+                if (myFriends.includes(uid)) {
+                    friendBtn.innerHTML = '<i class="fas fa-user-minus text-red-400 text-xs"></i>';
+                    friendBtn.title = "Unfriend";
+                    friendBtn.onclick = () => app.removeFriend(uid);
+                } else if (mySent.includes(uid)) {
+                    friendBtn.innerHTML = '<i class="fas fa-clock text-gray-400 text-xs"></i>';
+                    friendBtn.className += " cursor-default opacity-50";
+                    friendBtn.title = "Request Sent";
+                } else if (myIncoming.includes(uid)) {
+                    friendBtn.innerHTML = '<i class="fas fa-check text-green-400 text-xs"></i>';
+                    friendBtn.title = "Accept Request";
+                    friendBtn.onclick = () => app.acceptFriend(uid);
+                } else {
+                    friendBtn.innerHTML = '<i class="fas fa-user-plus text-xs"></i>';
+                    friendBtn.title = "Add Friend";
+                    friendBtn.onclick = () => app.sendFriendRequest(uid);
+                }
+            }
+
+            // Like Button
+            const likes = (data.likes && Array.isArray(data.likes)) ? data.likes : [];
+            const isLiked = likes.includes(currentUser.uid);
+            document.getElementById('profile-likes-count').textContent = formatNumber(likes.length);
+            const likeIcon = document.getElementById('profile-like-icon');
+            if (isLiked) {
+                likeIcon.className = "fas fa-heart text-red-500 transition";
+            } else {
+                likeIcon.className = "far fa-heart text-white group-hover:text-red-500 transition";
+            }
+            document.getElementById('btn-toggle-like').onclick = () => app.toggleLike(uid);
+
+            // Reset Tab
+            app.switchProfileTab('info');
+
+            els.displays.profileModal.classList.remove('hidden');
+        }
+    } catch(e) { console.error(e); }
+},
+
+switchProfileTab: (tabName) => {
+    const btnInfo = document.getElementById('tab-profile-info');
+    const btnAbout = document.getElementById('tab-profile-about');
+    const contentInfo = document.getElementById('content-profile-info');
+    const contentAbout = document.getElementById('content-profile-about');
+
+    if (tabName === 'info') {
+        btnInfo.className = "flex-1 py-1.5 text-xs font-bold rounded-md bg-[#5865F2] text-white shadow-sm transition";
+        btnAbout.className = "flex-1 py-1.5 text-xs font-bold rounded-md text-gray-400 hover:text-white transition";
+        contentInfo.classList.remove('hidden');
+        contentAbout.classList.add('hidden');
+    } else {
+        btnInfo.className = "flex-1 py-1.5 text-xs font-bold rounded-md text-gray-400 hover:text-white transition";
+        btnAbout.className = "flex-1 py-1.5 text-xs font-bold rounded-md bg-[#5865F2] text-white shadow-sm transition";
+        contentInfo.classList.add('hidden');
+        contentAbout.classList.remove('hidden');
+    }
+},
 openMyProfile: () => { if(currentUser) app.openProfile(currentUser.uid); },
 closeProfile: () => { els.displays.profileModal.classList.add('hidden'); },
 openEditProfile: () => { if (!currentUserProfile) return; document.getElementById('edit-username').value = currentUserProfile.username; document.getElementById('edit-bio').value = currentUserProfile.bio || ""; document.getElementById('edit-age').value = currentUserProfile.age; document.getElementById('edit-gender').value = currentUserProfile.gender; els.displays.editPfpPreview.src = currentUserProfile.pfpUrl || 'https://ui-avatars.com/api/?name=?'; els.displays.editBannerPreview.src = currentUserProfile.bannerUrl || ''; els.displays.profileModal.classList.add('hidden'); els.displays.editModal.classList.remove('hidden'); },
