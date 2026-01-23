@@ -781,7 +781,7 @@ async function processUpload(file) { const limit = 500 * 1024; if (file.type ===
 // --- RANK SYSTEM ---
 const RANK_ORDER = {
     'developer': 100,
-    'founder': 90, 'ceo': 90, 'head-owner': 90,
+    'founder': 90, 'ceo': 80, 'head-owner': 70,
     'owner': 85, 'co-owner': 85,
     'super-admin': 80, 'admin': 80,
     'mod': 75, 'trial mod': 75, 'site-helper': 75,
@@ -797,13 +797,13 @@ const RANK_ORDER = {
 const RANK_FILES = {
     'developer': 'ranks/developer.gif',
     'ceo': 'ranks/CEO.gif',
-    'founder': 'ranks/CEO.gif',
+    'founder': 'ranks/founder.gif',
     'head-owner': 'ranks/CEO.gif',
-    'owner': 'ranks/owner.png',
+    'owner': 'ranks/owner.gif',
     'co-owner': 'ranks/owner.png',
     'mod': 'ranks/mod.png',
     'trial mod': 'ranks/mod.png',
-    'site-helper': 'ranks/mod.png',
+    'site-helper': 'ranks/site-helper.png',
     'mega-elite': 'ranks/mega-elite.gif',
     'mega-vip': 'ranks/mega-vip.gif',
     'elite': 'ranks/elite.png',
